@@ -338,7 +338,7 @@ input:focus,textarea:focus{outline-offset:2px}
 
 <script>
 (function(){
-  var VERSION='23', BUILT='30 Sep 2026';
+  var VERSION='24', BUILT='30 Sep 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -622,7 +622,7 @@ input:focus,textarea:focus{outline-offset:2px}
             var l=loadCommon(); l.splice(idx,1); saveCommon(l); renderCommon();
           }},
           {label:'Cancel'}
-        ]);
+        ],document.getElementById('common'));
       });
       row.appendChild(pick); row.appendChild(del);
       menu.appendChild(row);
@@ -1114,13 +1114,15 @@ input:focus,textarea:focus{outline-offset:2px}
   var panel=document.getElementById('panel'), panelMsg=document.getElementById('panelMsg'),
       panelRow=document.getElementById('panelRow'), fileInput=document.getElementById('fileInput');
 
+  var panelHome=panel.parentNode;
   function closePanel(){
     panel.className='panel';
     panelRow.innerHTML='';
     var bd=document.getElementById('backdrop');
     if(bd)bd.className='backdrop';
+    if(panel.parentNode!==panelHome)panelHome.appendChild(panel);
   }
-  function ask(msg,choices){
+  function ask(msg,choices,anchor){
     panelMsg.textContent=msg;
     panelRow.innerHTML='';
     choices.forEach(function(c){
@@ -1130,8 +1132,13 @@ input:focus,textarea:focus{outline-offset:2px}
       b.addEventListener('click',function(){closePanel();if(c.run)c.run()});
       panelRow.appendChild(b);
     });
+    if(anchor&&anchor.parentNode){
+      anchor.parentNode.insertBefore(panel,anchor.nextSibling);
+    } else if(panel.parentNode!==panelHome){
+      panelHome.appendChild(panel);
+    }
     panel.className='panel on';
-    setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'nearest'})},40);
+    setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'center'})},40);
   }
   function bkText(){
     var last=read('meta:lastBackup');
