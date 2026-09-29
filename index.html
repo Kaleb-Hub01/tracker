@@ -55,13 +55,15 @@ body{background:var(--bg);color:var(--ink);font-family:"Inter","Helvetica Neue",
 .bar{width:100%;height:50px;background:var(--surface);border:1px solid var(--line);border-radius:7px;position:relative;overflow:hidden}
 .fill{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--c1);border-radius:6px 6px 0 0}
 .day.sel .bar{border-width:2px}
-.day b{font-size:11px;font-weight:600;color:var(--muted)}
-.dot{width:4px;height:4px;border-radius:50%;background:var(--c3);margin-top:-2px}
-.dot.hide{background:transparent}
+.day b{font-size:11px;font-weight:600;color:var(--muted);line-height:1.1}
+.dnum{font-size:11px;font-style:normal;color:var(--muted);padding:1px 6px;border-radius:9px;line-height:1.4}
+.day.tdy .dnum{background:var(--c3soft);color:var(--c3);font-weight:600}
 
-.jump{display:flex;justify-content:flex-end;margin-bottom:22px;min-height:26px}
-.jump button{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:4px 11px;border-radius:20px;cursor:pointer}
-.jump.off{visibility:hidden}
+
+.jump{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:22px;min-height:28px}
+.jump input[type=date]{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;padding:4px 10px;border-radius:20px;min-width:0}
+.jump button{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:4px 11px;border-radius:20px;cursor:pointer;flex:none}
+.jump button.off{visibility:hidden}
 
 .weekly{background:var(--c3soft);border-left:3px solid var(--c3);border-radius:0 10px 10px 0;padding:11px 14px;margin-bottom:26px;display:flex;gap:12px;align-items:center}
 .weekly .wg{flex:1;min-width:0}
@@ -176,7 +178,10 @@ input:focus,textarea:focus{outline-offset:2px}
     <div class="week" id="week"></div>
     <button class="arrow" id="nextWk" type="button" aria-label="Next week">&#8250;</button>
   </div>
-  <div class="jump off" id="jump"><button type="button" id="todayBtn">Back to today</button></div>
+  <div class="jump" id="jump">
+    <input type="date" id="dateJump" aria-label="Jump to a date">
+    <button type="button" id="todayBtn">Back to today</button>
+  </div>
 
   <div class="weekly" id="weeklyBox">
     <div class="wg">
@@ -435,15 +440,15 @@ input:focus,textarea:focus{outline-offset:2px}
       var d=shift(start,i), k=dayKey(d);
       var rec=(k===selKey)?data:load(k);
       var r=req(rec), pct=(rec.rest?100:(r>0?Math.round(score(rec)/r*100):0));
-      var c=rec.rest?'var(--line)':hue(i), isSel=(k===selKey);
+      var c=rec.rest?'var(--c3)':hue(i), isSel=(k===selKey);
       var btn=document.createElement('button');
       btn.type='button';
-      btn.className='day'+(isSel?' sel':'');
+      btn.className='day'+(isSel?' sel':'')+(k===tKey?' tdy':'');
       btn.setAttribute('aria-label',DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()]);
-      btn.innerHTML='<div class="bar" style="'+(isSel?'border-color:'+hue(i):'')+'">'+
+      btn.innerHTML='<div class="bar" style="'+(isSel?'border-color:'+(rec.rest?'var(--c3)':hue(i)):'')+'">'+
           '<div class="fill" style="height:'+pct+'%;background:'+c+'"></div></div>'+
-        '<b style="'+(isSel?'color:'+hue(i):'')+'">'+labels[i]+'</b>'+
-        '<div class="dot'+(k===tKey?'':' hide')+'"></div>';
+        '<b style="'+(isSel?'color:'+(rec.rest?'var(--c3)':hue(i)):'')+'">'+labels[i]+'</b>'+
+        '<i class="dnum">'+d.getDate()+'</i>';
       (function(dd){btn.addEventListener('click',function(){select(dd)})})(d);
       box.appendChild(btn);
     }
@@ -480,7 +485,8 @@ input:focus,textarea:focus{outline-offset:2px}
     document.getElementById('dateLine').childNodes[0].nodeValue=DAYS[sel.getDay()];
     document.getElementById('subLine').textContent=sel.getDate()+' '+MONTHS[sel.getMonth()];
     heroHead.textContent=isToday?'The one thing today':'The one thing on '+DAYS[sel.getDay()];
-    jump.className='jump'+(isToday?' off':'');
+    document.getElementById('todayBtn').className=isToday?'off':'';
+    document.getElementById('dateJump').value=selKey;
 
     var thisWk=(wkKey===weekKey(today));
     document.getElementById('weeklyLabel').textContent=thisWk?'This week':'Week of '+weekStart(sel).getDate()+' '+MONTHS[weekStart(sel).getMonth()];
@@ -611,6 +617,12 @@ input:focus,textarea:focus{outline-offset:2px}
   document.getElementById('prevWk').addEventListener('click',function(){select(shift(sel,-7))});
   document.getElementById('nextWk').addEventListener('click',function(){select(shift(sel,7))});
   document.getElementById('todayBtn').addEventListener('click',function(){select(new Date())});
+  document.getElementById('dateJump').addEventListener('change',function(){
+    var v=this.value;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(v))return;
+    var p=v.split('-');
+    select(new Date(+p[0],+p[1]-1,+p[2]));
+  });
 
   document.getElementById('exportBtn').addEventListener('click',function(){
     persist(); persistWk();
