@@ -246,7 +246,7 @@ input:focus,textarea:focus{outline-offset:2px}
   </div>
 
   <div class="foot">
-    <span id="footNote">Saved in this browser only</span>
+    <span id="footNote">No backup yet</span>
     <div class="fbtns">
       <button id="exportBtn" type="button">Export</button>
       <button id="backupBtn" type="button">Backup</button>
@@ -684,7 +684,7 @@ input:focus,textarea:focus{outline-offset:2px}
         navigator.clipboard.writeText(out).then(function(){note.textContent='Copied to clipboard'});
       } else { note.textContent='Export not supported here' }
     }
-    setTimeout(function(){note.textContent='Saved in this browser only'},4000);
+    setTimeout(resetNote,4000);
   });
 
   var panel=document.getElementById('panel'), panelMsg=document.getElementById('panelMsg'),
@@ -704,10 +704,21 @@ input:focus,textarea:focus{outline-offset:2px}
     panel.className='panel on';
     setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'nearest'})},40);
   }
+  function bkText(){
+    var last=read('meta:lastBackup');
+    if(!last)return 'No backup yet';
+    var d=new Date(last);
+    if(isNaN(d.getTime()))return 'No backup yet';
+    var diff=Math.round((midnight(today)-midnight(d))/86400000);
+    var when = diff<=0?'today' : (diff===1?'yesterday' : diff+' days ago');
+    return 'Last backup '+when+', '+d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3);
+  }
+  function resetNote(){document.getElementById('footNote').textContent=bkText()}
+
   function note(t){
     var n=document.getElementById('footNote');
     n.textContent=t;
-    setTimeout(function(){n.textContent='Saved in this browser only'},4000);
+    setTimeout(resetNote,4000);
   }
 
   function allKeys(prefix){
@@ -819,6 +830,7 @@ input:focus,textarea:focus{outline-offset:2px}
   fillFields();
   render();
   renderBkBanner();
+  resetNote();
   window.addEventListener('resize',autogrow);
 })();
 </script>
