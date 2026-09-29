@@ -1,8 +1,9 @@
 // One Thing offline cache.
-// Network first: always tries for the newest version, falls back to the
-// cached copy only when there is no connection. Bump CACHE when you
-// upload a new index.html and want old caches cleared.
-var CACHE='onething-v21';
+// Network first, and deliberately bypasses the browser's own HTTP cache so a
+// freshly uploaded index.html is picked up straight away instead of up to ten
+// minutes later. The cached copy is only ever used when the network fails.
+// Bump CACHE whenever index.html changes.
+var CACHE='onething-v22';
 
 self.addEventListener('install',function(e){
   self.skipWaiting();
@@ -23,13 +24,17 @@ self.addEventListener('activate',function(e){
   );
 });
 
+self.addEventListener('message',function(e){
+  if(e.data==='skipWaiting')self.skipWaiting();
+});
+
 self.addEventListener('fetch',function(e){
   var req=e.request;
   if(req.method!=='GET')return;
   if(new URL(req.url).origin!==self.location.origin)return;
 
   e.respondWith(
-    fetch(req).then(function(res){
+    fetch(req.url,{cache:'no-store'}).then(function(res){
       if(res&&res.status===200){
         var copy=res.clone();
         caches.open(CACHE).then(function(c){c.put(req,copy)});
