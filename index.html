@@ -134,6 +134,27 @@ body{background:var(--bg);color:var(--ink);font-family:"Inter","Helvetica Neue",
 .mstrip .mf{position:absolute;left:0;right:0;bottom:0;background:var(--c1)}
 .mlabels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px}
 
+.routines{display:none;flex-wrap:wrap;gap:7px;margin-top:11px}
+.routines.on{display:flex}
+.routines button{background:var(--c1soft);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:12px;padding:6px 11px;border-radius:20px;cursor:pointer}
+.routines button.ghost{background:transparent;color:var(--muted)}
+
+.search{margin-top:30px}
+.search input{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:inherit;font-size:15px;border-radius:20px;padding:10px 15px}
+.results{margin-top:8px}
+.results button{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer;line-height:1.4}
+.results button b{color:var(--c2);font-weight:600;display:block;font-size:11px;margin-bottom:1px}
+.results .none{font-size:13px;color:var(--muted);padding:6px 2px}
+
+.msum{display:none;margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:13px;color:var(--muted);line-height:1.45}
+.msum.on{display:block}
+.msum b{color:var(--ink);font-weight:600}
+.msum .g{display:block;color:var(--ink);margin-top:5px}
+.msum .n{display:block;margin-top:3px;font-style:italic}
+.msum button{margin-top:9px;background:transparent;border:1px solid var(--line);color:var(--c2);font-family:inherit;font-size:12px;padding:5px 11px;border-radius:20px;cursor:pointer}
+
+.sharewk{margin-top:16px;width:100%;background:var(--c2soft);border:1px solid var(--c2);color:var(--c2);font-family:inherit;font-size:13px;font-weight:500;padding:10px;border-radius:10px;cursor:pointer}
+
 .status{margin-top:18px;font-size:14px;color:var(--muted);min-height:24px;display:flex;align-items:center;gap:8px}
 .status.clear{color:var(--c1);font-weight:500}
 .status .pip{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
@@ -173,6 +194,7 @@ input:focus,textarea:focus{outline-offset:2px}
 .panel .prow{display:flex;gap:8px;flex-wrap:wrap}
 .panel button{font-family:inherit;font-size:13px;font-weight:500;padding:8px 13px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
 .panel button.danger{border-color:var(--c3);color:var(--c3)}
+.panel .ptext{width:100%;margin-bottom:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:15px;border-radius:9px;padding:9px 11px}
 .warn{margin-top:14px;font-size:13px;color:var(--muted);border-left:3px solid var(--c3);padding-left:10px;display:none}
 @media (prefers-reduced-motion: no-preference){
   .fill{transition:height .3s cubic-bezier(.3,.8,.3,1)}
@@ -227,8 +249,7 @@ input:focus,textarea:focus{outline-offset:2px}
   <div class="todos-head">Three small steps</div>
   <div class="steps" id="todos"></div>
   <div class="carry" id="carry"></div>
-
-  <div class="tags" id="tags"></div>
+  <div class="routines" id="routines"></div>
 
   <div class="rate" id="dayRate">
     <span class="rate-label" id="dayRateLabel">How did today go?</span>
@@ -242,10 +263,16 @@ input:focus,textarea:focus{outline-offset:2px}
   <div class="restrow"><button id="restBtn" type="button">Rest day</button></div>
   <div class="warn" id="warn">This browser is blocking saved data, so nothing will stick. Try a normal window instead of private browsing.</div>
 
+  <div class="search">
+    <input type="search" id="searchBox" placeholder="Search goals, steps and notes" autocomplete="off">
+    <div class="results" id="results"></div>
+  </div>
+
   <div class="month" id="month">
     <h3>Last 30 days</h3>
     <div class="mstrip" id="mstrip"></div>
     <div class="mlabels"><span id="mStart"></span><span id="mEnd"></span></div>
+    <div class="msum" id="mSummary"></div>
   </div>
 
   <div class="review" id="review">
@@ -277,6 +304,7 @@ input:focus,textarea:focus{outline-offset:2px}
       <input id="qNext" type="text" placeholder="What next week is for" autocomplete="off">
       <small>This becomes your weekly goal when the new week starts.</small>
     </div>
+    <button class="sharewk" id="shareWk" type="button">Share this week as an image</button>
   </div>
 
   <div class="foot">
@@ -323,7 +351,6 @@ input:focus,textarea:focus{outline-offset:2px}
   }
   function hhmm(s){return (typeof s==='string'&&s.length>=16)?s.slice(11,16):''}
 
-  var TAGS=['Admin','Client','Build','Learn','Life'];
   function blank(){return {goal:'',goalDone:false,rate:0,rest:false,note:'',tag:'',times:{},todos:[{t:'',d:false},{t:'',d:false},{t:'',d:false}]}}
   function load(k){
     var raw=read('day:'+k), d=blank();
@@ -469,14 +496,16 @@ input:focus,textarea:focus{outline-offset:2px}
 
   function renderYnote(){
     var el=document.getElementById('ynote');
-    var prev=load(dayKey(shift(sel,-1)));
-    var n=prev.note&&prev.note.trim();
-    if(!n){el.className='ynote';return}
-    if(n.length>140)n=n.slice(0,140)+'...';
-    var lbl=(selKey===tKey)?'Yesterday':DAYS[shift(sel,-1).getDay()];
-    el.innerHTML='<b>'+lbl+':</b> '+n.replace(/</g,'&lt;');
+    var wk=weekStart(sel), txt='', jump=null;
+    for(var b=0;b<8;b++){
+      var ws=shift(wk,-7*b), w=loadWk(weekKey(ws));
+      if(w.change&&w.change.trim()){txt=w.change.trim();jump=shift(ws,6);break}
+    }
+    if(!txt){el.className='ynote';el.onclick=null;return}
+    if(txt.length>140)txt=txt.slice(0,140)+'...';
+    el.innerHTML='<b>Changing this week:</b> '+txt.replace(/</g,'&lt;');
     el.className='ynote on';
-    el.onclick=function(){select(shift(sel,-1))};
+    el.onclick=function(){if(jump)select(jump)};
   }
 
   function renderCarry(){
@@ -517,23 +546,74 @@ input:focus,textarea:focus{outline-offset:2px}
     el.className='carry on';
   }
 
-  function renderTags(){
-    var el=document.getElementById('tags');
-    if(data.rest){el.className='tags off';return}
-    el.className='tags';
-    el.innerHTML='<span class="tlabel">What kind of day was it?</span>';
-    TAGS.forEach(function(t){
+  function loadRoutines(){
+    var r=read('meta:routines');
+    return Array.isArray(r)?r:[];
+  }
+  function saveRoutines(list){write('meta:routines',list)}
+
+  function renderRoutines(){
+    var el=document.getElementById('routines');
+    el.innerHTML='';
+    if(data.rest||sel<today){el.className='routines';return}
+    var list=loadRoutines();
+    var hasText=false;
+    for(var i=0;i<3;i++){if(data.todos[i].t.trim())hasText=true}
+    if(!list.length&&!hasText){el.className='routines';return}
+
+    if(list.length){
+      var lab=document.createElement('span');
+      lab.className='clabel'; lab.textContent='Routines';
+      el.appendChild(lab);
+    }
+    list.forEach(function(r,idx){
       var b=document.createElement('button');
-      b.type='button'; b.textContent=t;
-      if(data.tag===t)b.className='on';
+      b.type='button'; b.textContent=r.name;
       b.addEventListener('click',function(){
-        data.tag=(data.tag===t)?'':t;
-        persist(); render();
+        var slot=0;
+        r.steps.forEach(function(t){
+          while(slot<3&&data.todos[slot].t.trim())slot++;
+          if(slot<3&&t){data.todos[slot].t=t;slot++}
+        });
+        persist(); fillFields(); render();
       });
       el.appendChild(b);
     });
+    if(hasText){
+      var sv=document.createElement('button');
+      sv.type='button'; sv.className='ghost'; sv.textContent='Save as routine';
+      sv.addEventListener('click',function(){
+        var steps=[];
+        for(var i=0;i<3;i++){if(data.todos[i].t.trim())steps.push(data.todos[i].t.trim())}
+        askText('Name this routine so you can drop these '+steps.length+' steps in with one tap.','e.g. Outreach day',function(name){
+          if(!name.trim())return;
+          var list=loadRoutines();
+          list.push({name:name.trim().slice(0,24),steps:steps});
+          saveRoutines(list.slice(0,8));
+          render();
+        });
+      });
+      el.appendChild(sv);
+    }
+    if(list.length){
+      var mg=document.createElement('button');
+      mg.type='button'; mg.className='ghost'; mg.textContent='Edit';
+      mg.addEventListener('click',function(){
+        var list=loadRoutines();
+        var choices=list.map(function(r,i){
+          return {label:'Delete '+r.name,danger:true,run:function(){
+            var l=loadRoutines(); l.splice(i,1); saveRoutines(l); render();
+          }};
+        });
+        choices.push({label:'Cancel'});
+        ask('Remove a routine?',choices);
+      });
+      el.appendChild(mg);
+    }
+    el.className='routines on';
   }
 
+  var mPick=null;
   function renderMonth(){
     var box=document.getElementById('mstrip');
     box.innerHTML='';
@@ -548,15 +628,186 @@ input:focus,textarea:focus{outline-offset:2px}
       }
       var b=document.createElement('button');
       b.type='button';
-      b.className=(k===selKey)?'sel':'';
+      b.className=(k===mPick?'pick':'')+(k===selKey?' sel':'');
       b.setAttribute('aria-label',d.getDate()+' '+MONTHS[d.getMonth()]);
       b.innerHTML='<div class="mf" style="height:'+pct+'%;background:'+col+'"></div>';
-      (function(dd){b.addEventListener('click',function(){select(dd)})})(d);
+      (function(dd,kk){b.addEventListener('click',function(){mPick=(mPick===kk)?null:kk;renderMonth()})})(d,k);
       box.appendChild(b);
     }
     document.getElementById('mStart').textContent=start.getDate()+' '+MONTHS[start.getMonth()].slice(0,3);
     document.getElementById('mEnd').textContent=today.getDate()+' '+MONTHS[today.getMonth()].slice(0,3);
+
+    var sum=document.getElementById('mSummary');
+    if(!mPick){sum.className='msum';sum.innerHTML='';return}
+    var p=mPick.split('-'), pd=new Date(+p[0],+p[1]-1,+p[2]), rec2=load(mPick);
+    var head=DAYS[pd.getDay()]+' '+pd.getDate()+' '+MONTHS[pd.getMonth()];
+    var bits=[];
+    if(rec2.rest){bits.push('Rest day')}
+    else {
+      var rq=req(rec2);
+      bits.push(rq>0?(score(rec2)+' of '+rq+' done'):'nothing set');
+      if(rec2.rate)bits.push('rated '+rec2.rate+'/5');
+    }
+    var body='<b>'+head+'</b> '+bits.join(' &middot; ');
+    if(rec2.goal&&rec2.goal.trim())body+='<span class="g">'+rec2.goal.replace(/</g,'&lt;')+'</span>';
+    if(rec2.note&&rec2.note.trim())body+='<span class="n">'+rec2.note.replace(/</g,'&lt;')+'</span>';
+    sum.innerHTML=body;
+    var op=document.createElement('button');
+    op.type='button'; op.textContent='Open this day';
+    op.addEventListener('click',function(){var t=mPick;mPick=null;var q=t.split('-');select(new Date(+q[0],+q[1]-1,+q[2]));window.scrollTo({top:0,behavior:'smooth'})});
+    sum.appendChild(op);
+    sum.className='msum on';
   }
+
+  function askText(msg,placeholder,cb){
+    panelMsg.textContent=msg;
+    panelRow.innerHTML='';
+    var inp=document.createElement('input');
+    inp.type='text'; inp.placeholder=placeholder||''; inp.className='ptext';
+    panelRow.appendChild(inp);
+    var ok=document.createElement('button');
+    ok.type='button'; ok.textContent='Save';
+    ok.addEventListener('click',function(){var v=inp.value;closePanel();cb(v)});
+    var no=document.createElement('button');
+    no.type='button'; no.textContent='Cancel';
+    no.addEventListener('click',closePanel);
+    panelRow.appendChild(ok); panelRow.appendChild(no);
+    panel.className='panel on';
+    setTimeout(function(){inp.focus()},50);
+  }
+
+  function runSearch(q){
+    var box=document.getElementById('results');
+    box.innerHTML='';
+    q=q.trim().toLowerCase();
+    if(q.length<2)return;
+    var hits=[];
+    allKeys('day:').forEach(function(k){
+      var rec=load(k);
+      if(empty(rec))return;
+      var where=[];
+      if(rec.goal.toLowerCase().indexOf(q)>-1)where.push({t:'Goal',x:rec.goal});
+      for(var i=0;i<3;i++){
+        if(rec.todos[i].t.toLowerCase().indexOf(q)>-1)where.push({t:'Step '+(i+1),x:rec.todos[i].t});
+      }
+      if(rec.note.toLowerCase().indexOf(q)>-1)where.push({t:'Note',x:rec.note});
+      if(where.length)hits.push({k:k,w:where});
+    });
+    allKeys('week:').forEach(function(k){
+      var w=loadWk(k), where=[];
+      [['Weekly goal',w.goal],['What worked',w.worked],['Got in the way',w.blocked],['One change',w.change],['Next week',w.next]].forEach(function(p){
+        if(p[1]&&p[1].toLowerCase().indexOf(q)>-1)where.push({t:p[0],x:p[1]});
+      });
+      if(where.length)hits.push({k:k,week:true,w:where});
+    });
+    hits.sort(function(a,b){return a.k<b.k?1:-1});
+    if(!hits.length){box.innerHTML='<div class="none">Nothing found.</div>';return}
+    hits.slice(0,25).forEach(function(h){
+      var b=document.createElement('button');
+      b.type='button';
+      var head, target;
+      if(h.week){
+        head='Week '+h.k;
+        target=null;
+      } else {
+        var p=h.k.split('-'), d=new Date(+p[0],+p[1]-1,+p[2]);
+        head=DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear();
+        target=d;
+      }
+      var body=h.w.map(function(w){
+        var x=w.x.length>90?w.x.slice(0,90)+'...':w.x;
+        return w.t+': '+x.replace(/</g,'&lt;');
+      }).join('<br>');
+      b.innerHTML='<b>'+head+'</b>'+body;
+      if(target)b.addEventListener('click',function(){select(target);window.scrollTo({top:0,behavior:'smooth'})});
+      box.appendChild(b);
+    });
+  }
+  var dbSearch=mkDebounce();
+  document.getElementById('searchBox').addEventListener('input',function(){
+    var v=this.value;
+    dbSearch(function(){runSearch(v)});
+  });
+
+  function shareWeek(){
+    var st=weekStats(sel), endD=shift(st.start,6);
+    var W=1080,H=1080;
+    var cv=document.createElement('canvas');
+    cv.width=W; cv.height=H;
+    var g=cv.getContext('2d');
+    var grad=g.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#0E8C74'); grad.addColorStop(0.55,'#3E7CC8'); grad.addColorStop(1,'#6A5AE0');
+    g.fillStyle=grad; g.fillRect(0,0,W,H);
+
+    g.fillStyle='rgba(255,255,255,0.92)';
+    g.font='500 34px Inter, Helvetica, Arial, sans-serif';
+    g.fillText('Week of '+st.start.getDate()+' '+MONTHS[st.start.getMonth()]+' to '+endD.getDate()+' '+MONTHS[endD.getMonth()],80,140);
+
+    g.fillStyle='#fff';
+    g.font='700 132px Inter, Helvetica, Arial, sans-serif';
+    g.fillText(st.cleared+' of '+st.active,80,300);
+    g.fillStyle='rgba(255,255,255,0.85)';
+    g.font='500 38px Inter, Helvetica, Arial, sans-serif';
+    g.fillText('days cleared',80,356);
+
+    // week bars
+    var bx=80, by=440, bw=110, gap=24, bh=210;
+    for(var i=0;i<7;i++){
+      var d=shift(st.start,i), rec=load(dayKey(d));
+      var r=req(rec), pct=rec.rest?1:(r>0?score(rec)/r:0);
+      g.fillStyle='rgba(255,255,255,0.18)';
+      g.fillRect(bx+i*(bw+gap),by,bw,bh);
+      g.fillStyle=rec.rest?'rgba(255,214,140,0.9)':'rgba(255,255,255,0.95)';
+      var hh=Math.round(bh*pct);
+      g.fillRect(bx+i*(bw+gap),by+bh-hh,bw,hh);
+      g.fillStyle='rgba(255,255,255,0.8)';
+      g.font='600 26px Inter, Helvetica, Arial, sans-serif';
+      g.fillText(['M','T','W','T','F','S','S'][i],bx+i*(bw+gap)+bw/2-9,by+bh+44);
+    }
+
+    var y=800;
+    g.fillStyle='rgba(255,255,255,0.9)';
+    g.font='500 34px Inter, Helvetica, Arial, sans-serif';
+    g.fillText('Steps ticked: '+st.done+' of '+st.req,80,y); y+=54;
+    if(wdata.goal.trim()){
+      var gl=wdata.goal.length>46?wdata.goal.slice(0,46)+'...':wdata.goal;
+      g.fillText('Weekly goal: '+(wdata.goalDone?'hit':'missed'),80,y); y+=48;
+      g.font='400 30px Inter, Helvetica, Arial, sans-serif';
+      g.fillStyle='rgba(255,255,255,0.72)';
+      g.fillText(gl,80,y); y+=52;
+    }
+    if(wdata.score){
+      g.fillStyle='rgba(255,255,255,0.9)';
+      g.font='500 34px Inter, Helvetica, Arial, sans-serif';
+      g.fillText('Week felt: '+wdata.score+' out of 5',80,y);
+    }
+    g.fillStyle='rgba(255,255,255,0.45)';
+    g.font='500 26px Inter, Helvetica, Arial, sans-serif';
+    g.fillText('One Thing',80,1010);
+
+    cv.toBlob(function(blob){
+      if(!blob){note('Could not make the image');return}
+      var name='week-'+dayKey(st.start)+'.png';
+      var file=null;
+      try{ file=new File([blob],name,{type:'image/png'}); }catch(e){ file=null; }
+      if(file&&navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){
+        navigator.share({files:[file]}).catch(function(err){
+          if(err&&err.name==='AbortError')return;
+          dlBlob(blob,name);
+        });
+      } else { dlBlob(blob,name); }
+    },'image/png');
+  }
+  function dlBlob(blob,name){
+    try{
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url; a.download=name;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){URL.revokeObjectURL(url)},1000);
+    }catch(e){note('Could not save the image')}
+  }
+  document.getElementById('shareWk').addEventListener('click',shareWeek);
 
   function renderWeek(){
     var box=document.getElementById('week');
@@ -659,7 +910,7 @@ input:focus,textarea:focus{outline-offset:2px}
     renderWeek();
     renderYnote();
     renderCarry();
-    renderTags();
+    renderRoutines();
     renderMonth();
     renderReview(thisWk);
     renderBanner();
@@ -976,6 +1227,11 @@ input:focus,textarea:focus{outline-offset:2px}
   document.getElementById('bkBanner').addEventListener('click',doBackup);
 
   if(!storageOK){document.getElementById('warn').style.display='block'}
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
+    });
+  }
   carryForward();
   fillFields();
   function restoreUI(){
