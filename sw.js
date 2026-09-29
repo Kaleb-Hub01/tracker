@@ -3,7 +3,7 @@
 // freshly uploaded index.html is picked up straight away instead of up to ten
 // minutes later. The cached copy is only ever used when the network fails.
 // Bump CACHE whenever index.html changes.
-var CACHE='onething-v29';
+var CACHE='onething-v33';
 
 self.addEventListener('install',function(e){
   self.skipWaiting();
