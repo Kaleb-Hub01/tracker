@@ -846,6 +846,17 @@ input:focus,textarea:focus{outline-offset:2px}
   if(!storageOK){document.getElementById('warn').style.display='block'}
   carryForward();
   fillFields();
+  function restoreUI(){
+    var live=load(selKey);
+    if(empty(data)&&!empty(live)){data=live}
+    wdata=loadWk(wkKey);
+    fillFields();
+    render();
+  }
+  window.addEventListener('pageshow',function(e){if(e&&e.persisted)restoreUI()});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)restoreUI()});
+  window.addEventListener('focus',restoreUI);
+
   render();
   renderBkBanner();
   resetNote();
