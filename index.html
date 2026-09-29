@@ -341,7 +341,7 @@ input:focus,textarea:focus{outline-offset:2px}
 
 <script>
 (function(){
-  var VERSION='26', BUILT='30 Sep 2026';
+  var VERSION='27', BUILT='30 Sep 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -774,59 +774,159 @@ input:focus,textarea:focus{outline-offset:2px}
 
   function shareWeek(){
     var st=weekStats(sel), endD=shift(st.start,6);
-    var W=1080,H=1080;
+    var W=1080,H=1350;
     var cv=document.createElement('canvas');
     cv.width=W; cv.height=H;
     var g=cv.getContext('2d');
+
+    function rr(x,y,w,h,r){
+      g.beginPath();
+      g.moveTo(x+r,y);
+      g.arcTo(x+w,y,x+w,y+h,r);
+      g.arcTo(x+w,y+h,x,y+h,r);
+      g.arcTo(x,y+h,x,y,r);
+      g.arcTo(x,y,x+w,y,r);
+      g.closePath();
+    }
+    function star(cx,cy,R,fill){
+      g.beginPath();
+      for(var i=0;i<10;i++){
+        var rad=(i%2===0)?R:R*0.46;
+        var a=Math.PI/5*i-Math.PI/2;
+        var px=cx+Math.cos(a)*rad, py=cy+Math.sin(a)*rad;
+        if(i===0)g.moveTo(px,py); else g.lineTo(px,py);
+      }
+      g.closePath();
+      g.fillStyle=fill; g.fill();
+    }
+    function wrap(text,x,y,maxW,lh,max){
+      var words=String(text).split(' '), line='', n=0;
+      for(var i=0;i<words.length;i++){
+        var test=line?line+' '+words[i]:words[i];
+        if(g.measureText(test).width>maxW&&line){
+          g.fillText(line,x,y+n*lh); n++; line=words[i];
+          if(n>=max){g.fillText(line.slice(0,24)+'...',x,y+n*lh);return y+(n+1)*lh}
+        } else { line=test; }
+      }
+      g.fillText(line,x,y+n*lh);
+      return y+(n+1)*lh;
+    }
+
+    // mood decides the palette and the headline
+    var ratio = st.active>0 ? st.cleared/st.active : 0;
+    var pal, head;
+    if(st.cleared>0&&st.cleared===st.active){pal=['#0E8C74','#2FA8A0','#6A5AE0'];head='Perfect week';}
+    else if(ratio>=0.6){pal=['#0E8C74','#3E7CC8','#6A5AE0'];head='Strong week';}
+    else if(ratio>=0.35){pal=['#2B6FB0','#5A5FD0','#8A4FC8'];head='Solid week';}
+    else if(st.done>0){pal=['#3B5A9B','#6A5AE0','#9B4FA8'];head='Getting going';}
+    else {pal=['#2E3F63','#4A4E8C','#6A5AE0'];head='Reset week';}
+
     var grad=g.createLinearGradient(0,0,W,H);
-    grad.addColorStop(0,'#0E8C74'); grad.addColorStop(0.55,'#3E7CC8'); grad.addColorStop(1,'#6A5AE0');
+    grad.addColorStop(0,pal[0]); grad.addColorStop(0.5,pal[1]); grad.addColorStop(1,pal[2]);
     g.fillStyle=grad; g.fillRect(0,0,W,H);
 
-    g.fillStyle='rgba(255,255,255,0.92)';
-    g.font='500 34px Inter, Helvetica, Arial, sans-serif';
-    g.fillText('Week of '+st.start.getDate()+' '+MONTHS[st.start.getMonth()]+' to '+endD.getDate()+' '+MONTHS[endD.getMonth()],80,140);
+    var rg=g.createRadialGradient(880,180,20,880,180,620);
+    rg.addColorStop(0,'rgba(255,210,130,0.45)'); rg.addColorStop(1,'rgba(255,210,130,0)');
+    g.fillStyle=rg; g.fillRect(0,0,W,H);
+    var rg2=g.createRadialGradient(120,1180,20,120,1180,560);
+    rg2.addColorStop(0,'rgba(255,255,255,0.22)'); rg2.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle=rg2; g.fillRect(0,0,W,H);
+
+    var M=86;
+
+    g.fillStyle='rgba(255,255,255,0.6)';
+    g.font='600 26px Inter, Helvetica, Arial, sans-serif';
+    g.fillText('ONE THING',M,118);
+    g.textAlign='right';
+    g.fillText((st.start.getDate()+' '+MONTHS[st.start.getMonth()].slice(0,3)+' - '+endD.getDate()+' '+MONTHS[endD.getMonth()].slice(0,3)).toUpperCase(),W-M,118);
+    g.textAlign='left';
 
     g.fillStyle='#fff';
-    g.font='700 132px Inter, Helvetica, Arial, sans-serif';
-    g.fillText(st.cleared+' of '+st.active,80,300);
-    g.fillStyle='rgba(255,255,255,0.85)';
-    g.font='500 38px Inter, Helvetica, Arial, sans-serif';
-    g.fillText('days cleared',80,356);
+    g.font='700 96px Inter, Helvetica, Arial, sans-serif';
+    g.fillText(head,M,246);
 
-    // week bars
-    var bx=80, by=440, bw=110, gap=24, bh=210;
+    g.font='700 200px Inter, Helvetica, Arial, sans-serif';
+    g.fillText(st.cleared+'/'+st.active,M,430);
+    g.fillStyle='rgba(255,255,255,0.75)';
+    g.font='500 36px Inter, Helvetica, Arial, sans-serif';
+    g.fillText('days cleared',M+6,486);
+
+    // streak badge
+    var sn=streak();
+    if(sn>0){
+      var bw2=330,bh2=92, bx2=W-M-bw2, by2=352;
+      g.fillStyle='rgba(255,255,255,0.16)';
+      rr(bx2,by2,bw2,bh2,46); g.fill();
+      g.fillStyle='#fff';
+      g.textAlign='center';
+      g.font='700 46px Inter, Helvetica, Arial, sans-serif';
+      g.fillText(sn+' day streak',bx2+bw2/2,by2+60);
+      g.textAlign='left';
+    }
+
+    // bars
+    var by=556, bh=230, gap=22, bw=(W-M*2-gap*6)/7;
     for(var i=0;i<7;i++){
       var d=shift(st.start,i), rec=load(dayKey(d));
       var r=req(rec), pct=rec.rest?1:(r>0?score(rec)/r:0);
-      g.fillStyle='rgba(255,255,255,0.18)';
-      g.fillRect(bx+i*(bw+gap),by,bw,bh);
-      g.fillStyle=rec.rest?'rgba(255,214,140,0.9)':'rgba(255,255,255,0.95)';
+      var x=M+i*(bw+gap);
+      g.fillStyle='rgba(255,255,255,0.16)';
+      rr(x,by,bw,bh,14); g.fill();
       var hh=Math.round(bh*pct);
-      g.fillRect(bx+i*(bw+gap),by+bh-hh,bw,hh);
-      g.fillStyle='rgba(255,255,255,0.8)';
-      g.font='600 26px Inter, Helvetica, Arial, sans-serif';
-      g.fillText(['M','T','W','T','F','S','S'][i],bx+i*(bw+gap)+bw/2-9,by+bh+44);
+      if(hh>0){
+        g.fillStyle=rec.rest?'rgba(255,205,120,0.95)':(full(rec)?'#fff':'rgba(255,255,255,0.55)');
+        rr(x,by+bh-hh,bw,hh,14); g.fill();
+      }
+      if(full(rec))star(x+bw/2,by+bh+48,17,'rgba(255,255,255,0.95)');
+      g.fillStyle='rgba(255,255,255,0.7)';
+      g.font='600 28px Inter, Helvetica, Arial, sans-serif';
+      g.textAlign='center';
+      g.fillText(['M','T','W','T','F','S','S'][i],x+bw/2,by+bh+104);
+      g.textAlign='left';
     }
 
-    var y=800;
+    var y=968;
     g.fillStyle='rgba(255,255,255,0.9)';
-    g.font='500 34px Inter, Helvetica, Arial, sans-serif';
-    g.fillText('Steps ticked: '+st.done+' of '+st.req,80,y); y+=54;
+    g.font='500 38px Inter, Helvetica, Arial, sans-serif';
+    g.fillText('Steps ticked  '+st.done+' of '+st.req,M,y);
+
+    if(st.avg){
+      var sy=y+64;
+      for(var k=0;k<5;k++){
+        var lit=(k+0.5)<=st.avg;
+        star(M+22+k*62,sy,24,lit?'rgba(255,255,255,0.95)':'rgba(255,255,255,0.25)');
+      }
+      g.fillStyle='rgba(255,255,255,0.75)';
+      g.font='500 32px Inter, Helvetica, Arial, sans-serif';
+      g.fillText(st.avg.toFixed(1)+' average day',M+350,sy+12);
+      y=sy+36;
+    }
+
     if(wdata.goal.trim()){
-      var gl=wdata.goal.length>46?wdata.goal.slice(0,46)+'...':wdata.goal;
-      g.fillText('Weekly goal: '+(wdata.goalDone?'hit':'missed'),80,y); y+=48;
-      g.font='400 30px Inter, Helvetica, Arial, sans-serif';
-      g.fillStyle='rgba(255,255,255,0.72)';
-      g.fillText(gl,80,y); y+=52;
+      y+=70;
+      var chip=wdata.goalDone?'HIT':'MISSED';
+      g.font='700 26px Inter, Helvetica, Arial, sans-serif';
+      var cwid=g.measureText(chip).width+44;
+      g.fillStyle=wdata.goalDone?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.22)';
+      rr(M,y-34,cwid,46,23); g.fill();
+      g.fillStyle=wdata.goalDone?pal[0]:'rgba(255,255,255,0.85)';
+      g.textAlign='center';
+      g.fillText(chip,M+cwid/2,y-2);
+      g.textAlign='left';
+      g.fillStyle='rgba(255,255,255,0.92)';
+      g.font='500 36px Inter, Helvetica, Arial, sans-serif';
+      y=wrap(wdata.goal,M+cwid+22,y,W-M*2-cwid-22,46,1);
     }
-    if(wdata.score){
-      g.fillStyle='rgba(255,255,255,0.9)';
-      g.font='500 34px Inter, Helvetica, Arial, sans-serif';
-      g.fillText('Week felt: '+wdata.score+' out of 5',80,y);
+
+    if(wdata.change&&wdata.change.trim()&&y<1258){
+      y+=50;
+      g.fillStyle='rgba(255,255,255,0.55)';
+      g.font='600 24px Inter, Helvetica, Arial, sans-serif';
+      g.fillText('CHANGING NEXT WEEK',M,y);
+      g.fillStyle='rgba(255,255,255,0.88)';
+      g.font='italic 500 34px Inter, Helvetica, Arial, sans-serif';
+      wrap(wdata.change,M,y+48,W-M*2,44,1);
     }
-    g.fillStyle='rgba(255,255,255,0.45)';
-    g.font='500 26px Inter, Helvetica, Arial, sans-serif';
-    g.fillText('One Thing',80,1010);
 
     cv.toBlob(function(blob){
       if(!blob){note('Could not make the image');return}
