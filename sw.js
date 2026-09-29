@@ -2,7 +2,7 @@
 // Network first: always tries for the newest version, falls back to the
 // cached copy only when there is no connection. Bump CACHE when you
 // upload a new index.html and want old caches cleared.
-var CACHE='onething-v2';
+var CACHE='onething-v3';
 
 self.addEventListener('install',function(e){
   self.skipWaiting();

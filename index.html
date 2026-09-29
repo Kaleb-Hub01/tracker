@@ -705,7 +705,10 @@ input:focus,textarea:focus{outline-offset:2px}
     no.addEventListener('click',closePanel);
     panelRow.appendChild(ok); panelRow.appendChild(no);
     panel.className='panel on';
-    setTimeout(function(){inp.focus()},50);
+    setTimeout(function(){
+      panel.scrollIntoView({behavior:'smooth',block:'center'});
+      inp.focus();
+    },50);
   }
 
   function runSearch(q){
