@@ -101,6 +101,14 @@ body{background:var(--bg);color:var(--ink);font-family:"Inter","Helvetica Neue",
 .dots button svg path{fill:transparent;stroke:var(--line);stroke-width:1.6;stroke-linejoin:round}
 .dots button.on svg path{stroke:none}
 
+.notewrap{margin-top:8px}
+.notewrap.off{display:none}
+.notewrap textarea{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:inherit;font-size:15px;border-radius:12px;padding:11px 14px;resize:none;overflow:hidden;min-height:46px;line-height:1.45}
+.restrow{display:flex;justify-content:flex-end;margin-top:6px}
+.restrow.off{display:none}
+.restrow button{background:transparent;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px;cursor:pointer}
+.restrow button.on{border-color:var(--c3);color:var(--c3);background:var(--c3soft)}
+
 .status{margin-top:18px;font-size:14px;color:var(--muted);min-height:24px;display:flex;align-items:center;gap:8px}
 .status.clear{color:var(--c1);font-weight:500}
 .status .pip{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
@@ -130,9 +138,16 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.6}
 input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
 input:focus,textarea:focus{outline-offset:2px}
 
-.foot{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
-.foot button{background:var(--surface);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:12px;font-weight:500;padding:6px 13px;border-radius:20px;cursor:pointer;flex:none}
+.foot{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.fbtns{display:flex;gap:7px;flex:none}
+.foot button{background:var(--surface);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;cursor:pointer;flex:none}
 .foot button:hover{border-color:var(--c2);color:var(--c2)}
+.panel{display:none;margin-top:14px;background:var(--surface);border:1px solid var(--c2);border-radius:12px;padding:14px}
+.panel.on{display:block}
+.panel p{margin:0 0 11px;font-size:14px;line-height:1.45}
+.panel .prow{display:flex;gap:8px;flex-wrap:wrap}
+.panel button{font-family:inherit;font-size:13px;font-weight:500;padding:8px 13px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.panel button.danger{border-color:var(--c3);color:var(--c3)}
 .warn{margin-top:14px;font-size:13px;color:var(--muted);border-left:3px solid var(--c3);padding-left:10px;display:none}
 @media (prefers-reduced-motion: no-preference){
   .fill{transition:height .3s cubic-bezier(.3,.8,.3,1)}
@@ -149,6 +164,7 @@ input:focus,textarea:focus{outline-offset:2px}
 <div class="wrap">
 
   <button class="banner" id="banner" type="button"><span>Week review ready.</span> Tap to look back on the week.</button>
+  <button class="banner" id="bkBanner" type="button"><span>Backup due.</span> Tap to save a copy of everything.</button>
 
   <div class="top">
     <h1 class="date" id="dateLine">Today<span id="subLine"></span></h1>
@@ -185,8 +201,12 @@ input:focus,textarea:focus{outline-offset:2px}
     <span class="rate-label" id="dayRateLabel">How did today go?</span>
     <div class="dots" id="dayDots"></div>
   </div>
+  <div class="notewrap" id="noteWrap">
+    <textarea id="dayNote" rows="1" placeholder="A line about how the day actually went"></textarea>
+  </div>
 
   <div class="status" id="status"><span class="pip"></span><span id="statusText"></span></div>
+  <div class="restrow"><button id="restBtn" type="button">Rest day</button></div>
   <div class="warn" id="warn">This browser is blocking saved data, so nothing will stick. Try a normal window instead of private browsing.</div>
 
   <div class="review" id="review">
@@ -222,8 +242,14 @@ input:focus,textarea:focus{outline-offset:2px}
 
   <div class="foot">
     <span id="footNote">Saved in this browser only</span>
-    <button id="exportBtn" type="button">Export</button>
+    <div class="fbtns">
+      <button id="exportBtn" type="button">Export</button>
+      <button id="backupBtn" type="button">Backup</button>
+      <button id="restoreBtn" type="button">Restore</button>
+    </div>
   </div>
+  <input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+  <div class="panel" id="panel"><p id="panelMsg"></p><div class="prow" id="panelRow"></div></div>
 </div>
 
 <script>
@@ -249,13 +275,25 @@ input:focus,textarea:focus{outline-offset:2px}
   function read(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){storageOK=false;return null}}
   function write(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){storageOK=false;document.getElementById('warn').style.display='block'}}
 
-  function blank(){return {goal:'',goalDone:false,rate:0,todos:[{t:'',d:false},{t:'',d:false},{t:'',d:false}]}}
+  function stamp(){
+    var d=new Date(), o=-d.getTimezoneOffset(), sg=o>=0?'+':'-';
+    o=Math.abs(o);
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+
+      pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())+
+      sg+pad(Math.floor(o/60))+':'+pad(o%60);
+  }
+  function hhmm(s){return (typeof s==='string'&&s.length>=16)?s.slice(11,16):''}
+
+  function blank(){return {goal:'',goalDone:false,rate:0,rest:false,note:'',times:{},todos:[{t:'',d:false},{t:'',d:false},{t:'',d:false}]}}
   function load(k){
     var raw=read('day:'+k), d=blank();
     if(raw&&typeof raw==='object'){
       d.goal=typeof raw.goal==='string'?raw.goal:'';
+      d.note=typeof raw.note==='string'?raw.note:'';
       d.goalDone=!!raw.goalDone;
+      d.rest=!!raw.rest;
       d.rate=(typeof raw.rate==='number'&&raw.rate>=0&&raw.rate<=5)?raw.rate:0;
+      if(raw.times&&typeof raw.times==='object')d.times=raw.times;
       if(Array.isArray(raw.todos)){for(var i=0;i<3;i++){var r=raw.todos[i];
         if(r&&typeof r==='object'){d.todos[i]={t:typeof r.t==='string'?r.t:'',d:!!r.d}}}}
     }
@@ -273,10 +311,19 @@ input:focus,textarea:focus{outline-offset:2px}
     }
     return w;
   }
-  function score(d){var n=d.goalDone?1:0;for(var i=0;i<3;i++){if(d.todos[i].d)n++}return n}
-  function full(d){return score(d)===4}
+  function req(d){
+    var n=d.goal.trim()?1:0;
+    for(var i=0;i<3;i++){if(d.todos[i].t.trim())n++}
+    return n;
+  }
+  function score(d){
+    var n=(d.goal.trim()&&d.goalDone)?1:0;
+    for(var i=0;i<3;i++){if(d.todos[i].t.trim()&&d.todos[i].d)n++}
+    return n;
+  }
+  function full(d){return !!d.goal.trim()&&d.goalDone&&score(d)===req(d)}
   function empty(d){
-    if(d.goal.trim()||d.goalDone||d.rate)return false;
+    if(d.goal.trim()||d.goalDone||d.rate||d.rest||d.note.trim())return false;
     for(var i=0;i<3;i++){if(d.todos[i].t.trim()||d.todos[i].d)return false}
     return true;
   }
@@ -331,14 +378,16 @@ input:focus,textarea:focus{outline-offset:2px}
     }
   }
   buildDots(document.getElementById('dayDots'),function(v){
-    data.rate=(data.rate===v)?0:v; persist(); render();
+    data.rate=(data.rate===v)?0:v;
+    if(data.rate){data.times.rate=stamp()}else{delete data.times.rate}
+    persist(); render();
   });
   buildDots(document.getElementById('weekDots'),function(v){
     wdata.score=(wdata.score===v)?0:v; persistWk(); render();
   });
 
   function grow(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
-  function autogrow(){grow(goalText);[qWorked,qBlocked,qChange].forEach(grow)}
+  function autogrow(){grow(goalText);grow(document.getElementById('dayNote'));[qWorked,qBlocked,qChange].forEach(grow)}
 
   function mkDebounce(){
     var t=null;
@@ -349,26 +398,32 @@ input:focus,textarea:focus{outline-offset:2px}
   function persistWk(){write('week:'+wkKey,wdata)}
 
   function streak(){
-    var n=0, d=midnight(today);
-    if(!full(load(dayKey(d)))){d=shift(d,-1)}
+    var n=0, d=midnight(today), t0=load(dayKey(d));
+    if(!full(t0)&&!t0.rest){d=shift(d,-1)}
     for(var i=0;i<400;i++){
-      if(full(load(dayKey(d)))){n++;d=shift(d,-1)}else{break}
+      var rec=load(dayKey(d));
+      if(rec.rest){d=shift(d,-1);continue}
+      if(full(rec)){n++;d=shift(d,-1)}else{break}
     }
     return n;
   }
 
   function weekStats(anyDay){
-    var s=weekStart(anyDay), cleared=0, ticks=0, rates=[], best=-1, bestScore=0;
+    var s=weekStart(anyDay), cleared=0, dn=0, rq=0, rest=0, rates=[], best=-1, bestRatio=0, bestDone=0;
     for(var i=0;i<7;i++){
       var d=shift(s,i), rec=load(dayKey(d));
-      var sc=score(rec);
-      ticks+=sc;
-      if(sc===4)cleared++;
       if(rec.rate)rates.push(rec.rate);
-      if(sc>bestScore){bestScore=sc;best=i}
+      if(rec.rest){rest++;continue}
+      var r=req(rec), sc=score(rec);
+      dn+=sc; rq+=r;
+      if(full(rec))cleared++;
+      if(r>0){
+        var ratio=sc/r;
+        if(ratio>bestRatio||(ratio===bestRatio&&sc>bestDone)){bestRatio=ratio;bestDone=sc;best=i}
+      }
     }
     var avg=rates.length?(rates.reduce(function(a,b){return a+b},0)/rates.length):0;
-    return {cleared:cleared,ticks:ticks,best:best,bestScore:bestScore,avg:avg,start:s};
+    return {cleared:cleared,done:dn,req:rq,rest:rest,active:7-rest,best:best,bestDone:bestDone,avg:avg,start:s};
   }
 
   function renderWeek(){
@@ -379,15 +434,15 @@ input:focus,textarea:focus{outline-offset:2px}
     for(var i=0;i<7;i++){
       var d=shift(start,i), k=dayKey(d);
       var rec=(k===selKey)?data:load(k);
-      var pct=Math.round(score(rec)/4*100);
-      var c=hue(i), isSel=(k===selKey);
+      var r=req(rec), pct=(rec.rest?100:(r>0?Math.round(score(rec)/r*100):0));
+      var c=rec.rest?'var(--line)':hue(i), isSel=(k===selKey);
       var btn=document.createElement('button');
       btn.type='button';
       btn.className='day'+(isSel?' sel':'');
       btn.setAttribute('aria-label',DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()]);
-      btn.innerHTML='<div class="bar" style="'+(isSel?'border-color:'+c:'')+'">'+
+      btn.innerHTML='<div class="bar" style="'+(isSel?'border-color:'+hue(i):'')+'">'+
           '<div class="fill" style="height:'+pct+'%;background:'+c+'"></div></div>'+
-        '<b style="'+(isSel?'color:'+c:'')+'">'+labels[i]+'</b>'+
+        '<b style="'+(isSel?'color:'+hue(i):'')+'">'+labels[i]+'</b>'+
         '<div class="dot'+(k===tKey?'':' hide')+'"></div>';
       (function(dd){btn.addEventListener('click',function(){select(dd)})})(d);
       box.appendChild(btn);
@@ -396,6 +451,7 @@ input:focus,textarea:focus{outline-offset:2px}
 
   function fillFields(){
     goalText.value=data.goal;
+    document.getElementById('dayNote').value=data.note;
     for(var i=0;i<3;i++){rows[i].querySelector('input').value=data.todos[i].t}
     weeklyGoal.value=wdata.goal;
     qWorked.value=wdata.worked; qBlocked.value=wdata.blocked;
@@ -439,20 +495,30 @@ input:focus,textarea:focus{outline-offset:2px}
     }
 
     dayRate.className='rate'+(ahead?' off':'');
+    document.getElementById('noteWrap').className='notewrap'+(ahead?' off':'');
     dayRateLabel.textContent=isToday?'How did today go?':'How did that day go?';
     paintDots(document.getElementById('dayDots'),data.rate);
 
-    var s=score(data), cls='status', msg='';
-    if(ahead){
+    var restBtn=document.getElementById('restBtn');
+    restBtn.className=data.rest?'on':'';
+    restBtn.textContent=data.rest?'Resting':'Rest day';
+
+    var r=req(data), s=score(data), cls='status', msg='';
+    if(data.rest){
       cls='status plan';
-      msg=empty(data)?'Planning ahead. Nothing set for this day yet.':'Planned'+(s>0?'. '+s+' of 4 already ticked.':' and ready.');
-    } else if(s===4){
+      msg='Rest day. Your streak holds and this day sits out of the week stats.';
+    } else if(ahead){
+      cls='status plan';
+      msg=empty(data)?'Planning ahead. Nothing set for this day yet.':'Planned'+(s>0?'. '+s+' already ticked.':' and ready.');
+    } else if(r===0){
+      msg='Set your one thing to get started.';
+    } else if(full(data)){
       cls='status clear'; msg='Day cleared. That one counts towards your streak.';
     } else if(s===0){
       msg=behind?'Nothing ticked that day.':'Nothing ticked yet.';
     } else {
       cls='status part';
-      msg=s+' of 4 done'+(isToday?' today. ':' that day. ')+(4-s)+' to go for the streak.';
+      msg=s+' of '+r+' done'+(isToday?' today. ':' that day. ')+(r-s)+' to go for the streak.';
     }
     statusEl.className=cls; statusText.textContent=msg;
     document.getElementById('streakNum').textContent=streak();
@@ -475,10 +541,10 @@ input:focus,textarea:focus{outline-offset:2px}
 
     var goalSet=!!wdata.goal.trim();
     var goalLine = goalSet ? (wdata.goalDone?'Hit':'Missed') : 'None set';
-    var bestLine = st.bestScore>0 ? DAYS[shift(st.start,st.best).getDay()] : 'None yet';
+    var bestLine = st.bestDone>0 ? DAYS[shift(st.start,st.best).getDay()] : 'None yet';
     var html='';
-    html+='<div class="stat"><b>'+st.cleared+' of 7</b><small>Days cleared</small></div>';
-    html+='<div class="stat"><b>'+st.ticks+' of 28</b><small>Boxes ticked</small></div>';
+    html+='<div class="stat"><b>'+st.cleared+' of '+st.active+'</b><small>Days cleared</small></div>';
+    html+='<div class="stat"><b>'+st.done+' of '+st.req+'</b><small>Steps ticked</small></div>';
     if(goalSet){
       html+='<button type="button" class="stat statbtn" id="wkGoalStat"><b>'+goalLine+'</b><small>Weekly goal, tap to change</small></button>';
     } else {
@@ -486,6 +552,7 @@ input:focus,textarea:focus{outline-offset:2px}
     }
     html+='<div class="stat"><b>'+bestLine+'</b><small>Strongest day</small></div>';
     if(st.avg)html+='<div class="stat"><b>'+st.avg.toFixed(1)+' of 5</b><small>Average day rating</small></div>';
+    if(st.rest)html+='<div class="stat"><b>'+st.rest+'</b><small>Rest '+(st.rest===1?'day':'days')+'</small></div>';
     document.getElementById('stats').innerHTML=html;
     var gb=document.getElementById('wkGoalStat');
     if(gb)gb.addEventListener('click',function(){wdata.goalDone=!wdata.goalDone;persistWk();render()});
@@ -505,12 +572,33 @@ input:focus,textarea:focus{outline-offset:2px}
     }
   }
 
-  goalText.addEventListener('input',function(){grow(goalText);data.goal=goalText.value;dbDay(persist)});
-  goalTick.addEventListener('click',function(){data.goalDone=!data.goalDone;persist();render()});
+  var dayNote=document.getElementById('dayNote');
+  dayNote.addEventListener('input',function(){grow(dayNote);data.note=dayNote.value;dbDay(persist)});
+  document.getElementById('restBtn').addEventListener('click',function(){
+    data.rest=!data.rest;
+    if(data.rest){data.times.rest=stamp()}else{delete data.times.rest}
+    persist(); render();
+  });
+
+  goalText.addEventListener('input',function(){
+    grow(goalText);
+    data.goal=goalText.value;
+    if(data.goal.trim()&&!data.times.set)data.times.set=stamp();
+    dbDay(function(){persist();render()});
+  });
+  goalTick.addEventListener('click',function(){
+    data.goalDone=!data.goalDone;
+    if(data.goalDone){data.times.goal=stamp()}else{delete data.times.goal}
+    persist();render();
+  });
   rows.forEach(function(row,idx){
     var input=row.querySelector('input'), btn=row.querySelector('button');
-    input.addEventListener('input',function(){data.todos[idx].t=input.value;dbDay(persist)});
-    btn.addEventListener('click',function(){data.todos[idx].d=!data.todos[idx].d;persist();render()});
+    input.addEventListener('input',function(){data.todos[idx].t=input.value;dbDay(function(){persist();render()})});
+    btn.addEventListener('click',function(){
+      data.todos[idx].d=!data.todos[idx].d;
+      if(data.todos[idx].d){data.times['s'+idx]=stamp()}else{delete data.times['s'+idx]}
+      persist();render();
+    });
   });
   weeklyGoal.addEventListener('input',function(){wdata.goal=weeklyGoal.value;dbWk(persistWk)});
   weeklyTick.addEventListener('click',function(){wdata.goalDone=!wdata.goalDone;persistWk();render()});
@@ -542,12 +630,18 @@ input:focus,textarea:focus{outline-offset:2px}
       if(empty(rec))return;
       any=true;
       var p=k.split('-'), dt=new Date(+p[0],+p[1]-1,+p[2]);
-      out+=k+'  '+DAYS[dt.getDay()]+(full(rec)?'  *cleared*':'')+'\n';
-      out+='  Goal: '+(rec.goal||'(none)')+(rec.goalDone?'  [done]':'  [ ]')+'\n';
-      for(var i=0;i<3;i++){
-        out+='  '+(i+1)+'. '+(rec.todos[i].t||'(none)')+(rec.todos[i].d?'  [done]':'  [ ]')+'\n';
+      out+=k+'  '+DAYS[dt.getDay()]+(rec.rest?'  *rest day*':(full(rec)?'  *cleared*':''))+'\n';
+      if(!rec.rest){
+        out+='  Goal: '+(rec.goal||'(none)')+(rec.goalDone?'  [done'+(hhmm(rec.times.goal)?' '+hhmm(rec.times.goal):'')+']':'  [ ]')+'\n';
+        for(var i=0;i<3;i++){
+          if(!rec.todos[i].t)continue;
+          var ts=hhmm(rec.times['s'+i]);
+          out+='  '+(i+1)+'. '+rec.todos[i].t+(rec.todos[i].d?'  [done'+(ts?' '+ts:'')+']':'  [ ]')+'\n';
+        }
+        if(hhmm(rec.times.set))out+='  Planned at: '+hhmm(rec.times.set)+'\n';
       }
       if(rec.rate)out+='  Day rating: '+rec.rate+'/5\n';
+      if(rec.note&&rec.note.trim())out+='  Note: '+rec.note+'\n';
       out+='\n';
     });
     if(!any)out+='Nothing recorded yet.\n\n';
@@ -581,10 +675,138 @@ input:focus,textarea:focus{outline-offset:2px}
     setTimeout(function(){note.textContent='Saved in this browser only'},4000);
   });
 
+  var panel=document.getElementById('panel'), panelMsg=document.getElementById('panelMsg'),
+      panelRow=document.getElementById('panelRow'), fileInput=document.getElementById('fileInput');
+
+  function closePanel(){panel.className='panel';panelRow.innerHTML=''}
+  function ask(msg,choices){
+    panelMsg.textContent=msg;
+    panelRow.innerHTML='';
+    choices.forEach(function(c){
+      var b=document.createElement('button');
+      b.type='button'; b.textContent=c.label;
+      if(c.danger)b.className='danger';
+      b.addEventListener('click',function(){closePanel();if(c.run)c.run()});
+      panelRow.appendChild(b);
+    });
+    panel.className='panel on';
+    setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'nearest'})},40);
+  }
+  function note(t){
+    var n=document.getElementById('footNote');
+    n.textContent=t;
+    setTimeout(function(){n.textContent='Saved in this browser only'},4000);
+  }
+
+  function allKeys(prefix){
+    var out=[];
+    try{
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k&&k.indexOf(prefix)===0)out.push(k.slice(prefix.length));
+      }
+    }catch(e){}
+    return out.sort();
+  }
+  function wkUsed(w){return !!(w.goal.trim()||w.next.trim()||reviewDone(w))}
+
+  function collect(){
+    var pack={app:'onething',version:1,saved:new Date().toISOString(),days:{},weeks:{}};
+    allKeys('day:').forEach(function(k){var r=load(k);if(!empty(r))pack.days[k]=r});
+    allKeys('week:').forEach(function(k){var w=loadWk(k);if(wkUsed(w))pack.weeks[k]=w});
+    return pack;
+  }
+
+  function doBackup(){
+    persist(); persistWk();
+    var pack=collect();
+    var dc=Object.keys(pack.days).length, wc=Object.keys(pack.weeks).length;
+    var txt=JSON.stringify(pack,null,1);
+    try{
+      var blob=new Blob([txt],{type:'application/json'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url; a.download='onething-backup-'+dayKey(new Date())+'.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){URL.revokeObjectURL(url)},1000);
+      write('meta:lastBackup',new Date().toISOString());
+      note('Backed up '+dc+' days, '+wc+' weeks');
+      renderBkBanner();
+    }catch(e){
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){note('Backup copied to clipboard')});
+      } else { note('Backup not supported here') }
+    }
+  }
+
+  function applyRestore(pack,mode){
+    var added=0, skipped=0;
+    if(mode==='replace'){
+      allKeys('day:').forEach(function(k){try{localStorage.removeItem('day:'+k)}catch(e){}});
+      allKeys('week:').forEach(function(k){try{localStorage.removeItem('week:'+k)}catch(e){}});
+    }
+    Object.keys(pack.days||{}).forEach(function(k){
+      if(mode==='merge'&&!empty(load(k))){skipped++;return}
+      write('day:'+k,pack.days[k]); added++;
+    });
+    Object.keys(pack.weeks||{}).forEach(function(k){
+      if(mode==='merge'&&wkUsed(loadWk(k)))return;
+      write('week:'+k,pack.weeks[k]);
+    });
+    data=load(selKey); wdata=loadWk(wkKey);
+    fillFields(); render();
+    note('Restored '+added+' days'+(skipped?', kept '+skipped+' existing':''));
+  }
+
+  document.getElementById('backupBtn').addEventListener('click',doBackup);
+  document.getElementById('restoreBtn').addEventListener('click',function(){
+    closePanel(); fileInput.value=''; fileInput.click();
+  });
+  fileInput.addEventListener('change',function(){
+    var f=fileInput.files&&fileInput.files[0];
+    if(!f)return;
+    var rd=new FileReader();
+    rd.onload=function(){
+      var pack;
+      try{ pack=JSON.parse(rd.result); }catch(e){ ask('That file could not be read. It needs to be a backup file made by this app.',[{label:'OK'}]); return; }
+      if(!pack||pack.app!=='onething'||typeof pack.days!=='object'){
+        ask('That does not look like a backup from this app, so nothing has been changed.',[{label:'OK'}]); return;
+      }
+      var dc=Object.keys(pack.days).length, wc=Object.keys(pack.weeks||{}).length;
+      var when=pack.saved?String(pack.saved).slice(0,10):'unknown date';
+      ask('Backup from '+when+': '+dc+' days and '+wc+' weeks. How should it go in?',[
+        {label:'Add missing only',run:function(){applyRestore(pack,'merge')}},
+        {label:'Replace everything',danger:true,run:function(){
+          ask('This wipes what is on this device first, then loads the backup. There is no undo.',[
+            {label:'Yes, replace',danger:true,run:function(){applyRestore(pack,'replace')}},
+            {label:'Cancel'}
+          ]);
+        }},
+        {label:'Cancel'}
+      ]);
+    };
+    rd.readAsText(f);
+  });
+
+  function renderBkBanner(){
+    var b=document.getElementById('bkBanner');
+    var last=read('meta:lastBackup');
+    var due=true;
+    if(last){
+      var ms=Date.now()-new Date(last).getTime();
+      due = ms > 7*86400000;
+    } else {
+      due = Object.keys(collect().days).length>0;
+    }
+    b.className='banner'+(due?' on':'');
+  }
+  document.getElementById('bkBanner').addEventListener('click',doBackup);
+
   if(!storageOK){document.getElementById('warn').style.display='block'}
   carryForward();
   fillFields();
   render();
+  renderBkBanner();
   window.addEventListener('resize',autogrow);
 })();
 </script>
