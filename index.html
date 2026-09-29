@@ -134,10 +134,18 @@ body{background:var(--bg);color:var(--ink);font-family:"Inter","Helvetica Neue",
 .mstrip .mf{position:absolute;left:0;right:0;bottom:0;background:var(--c1)}
 .mlabels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px}
 
-.routines{display:none;flex-wrap:wrap;gap:7px;margin-top:11px}
-.routines.on{display:flex}
-.routines button{background:var(--c1soft);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:12px;padding:6px 11px;border-radius:20px;cursor:pointer}
-.routines button.ghost{background:transparent;color:var(--muted)}
+.common{margin-top:11px;position:relative}
+.ctoggle{background:transparent;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;cursor:pointer}
+.ctoggle span{font-size:10px}
+.ctoggle.open{border-color:var(--c2);color:var(--c2)}
+.cmenu{display:none;margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cmenu.on{display:block}
+.crow{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
+.crow:last-child{border-bottom:0}
+.crow .pick{flex:1;text-align:left;background:transparent;border:0;color:var(--ink);font-family:inherit;font-size:14px;padding:11px 14px;cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow .del{flex:none;background:transparent;border:0;border-left:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:14px;padding:0 15px;cursor:pointer}
+.cadd{width:100%;text-align:left;background:var(--c2soft);border:0;color:var(--c2);font-family:inherit;font-size:13px;font-weight:500;padding:11px 14px;cursor:pointer}
+.cempty{font-size:13px;color:var(--muted);padding:12px 14px}
 
 .search{margin-top:30px}
 .search input{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:inherit;font-size:15px;border-radius:20px;padding:10px 15px}
@@ -151,7 +159,7 @@ body{background:var(--bg);color:var(--ink);font-family:"Inter","Helvetica Neue",
 .msum b{color:var(--ink);font-weight:600}
 .msum .g{display:block;color:var(--ink);margin-top:5px}
 .msum .n{display:block;margin-top:3px;font-style:italic}
-.msum button{margin-top:9px;background:transparent;border:1px solid var(--line);color:var(--c2);font-family:inherit;font-size:12px;padding:5px 11px;border-radius:20px;cursor:pointer}
+.msum button{margin-top:9px;margin-right:7px;background:transparent;border:1px solid var(--line);color:var(--c2);font-family:inherit;font-size:12px;padding:5px 11px;border-radius:20px;cursor:pointer}
 
 .sharewk{margin-top:16px;width:100%;background:var(--c2soft);border:1px solid var(--c2);color:var(--c2);font-family:inherit;font-size:13px;font-weight:500;padding:10px;border-radius:10px;cursor:pointer}
 
@@ -249,7 +257,10 @@ input:focus,textarea:focus{outline-offset:2px}
   <div class="todos-head">Three small steps</div>
   <div class="steps" id="todos"></div>
   <div class="carry" id="carry"></div>
-  <div class="routines" id="routines"></div>
+  <div class="common" id="common">
+    <button class="ctoggle" id="ctoggle" type="button">Common tasks <span>&#9662;</span></button>
+    <div class="cmenu" id="cmenu"></div>
+  </div>
 
   <div class="rate" id="dayRate">
     <span class="rate-label" id="dayRateLabel">How did today go?</span>
@@ -263,16 +274,16 @@ input:focus,textarea:focus{outline-offset:2px}
   <div class="restrow"><button id="restBtn" type="button">Rest day</button></div>
   <div class="warn" id="warn">This browser is blocking saved data, so nothing will stick. Try a normal window instead of private browsing.</div>
 
-  <div class="search">
-    <input type="search" id="searchBox" placeholder="Search goals, steps and notes" autocomplete="off">
-    <div class="results" id="results"></div>
-  </div>
-
   <div class="month" id="month">
     <h3>Last 30 days</h3>
     <div class="mstrip" id="mstrip"></div>
     <div class="mlabels"><span id="mStart"></span><span id="mEnd"></span></div>
     <div class="msum" id="mSummary"></div>
+  </div>
+
+  <div class="search">
+    <input type="search" id="searchBox" placeholder="Search Goals, Steps and Notes" autocomplete="off">
+    <div class="results" id="results"></div>
   </div>
 
   <div class="review" id="review">
@@ -546,72 +557,88 @@ input:focus,textarea:focus{outline-offset:2px}
     el.className='carry on';
   }
 
-  function loadRoutines(){
-    var r=read('meta:routines');
-    return Array.isArray(r)?r:[];
-  }
-  function saveRoutines(list){write('meta:routines',list)}
-
-  function renderRoutines(){
-    var el=document.getElementById('routines');
-    el.innerHTML='';
-    if(data.rest||sel<today){el.className='routines';return}
-    var list=loadRoutines();
-    var hasText=false;
-    for(var i=0;i<3;i++){if(data.todos[i].t.trim())hasText=true}
-    if(!list.length&&!hasText){el.className='routines';return}
-
-    if(list.length){
-      var lab=document.createElement('span');
-      lab.className='clabel'; lab.textContent='Routines';
-      el.appendChild(lab);
+  function loadCommon(){
+    var r=read('meta:common');
+    if(Array.isArray(r))return r.filter(function(x){return typeof x==='string'});
+    var old=read('meta:routines');
+    if(Array.isArray(old)){
+      var out=[];
+      old.forEach(function(o){if(o&&Array.isArray(o.steps))o.steps.forEach(function(t){if(out.indexOf(t)<0)out.push(t)})});
+      if(out.length){write('meta:common',out);return out}
     }
-    list.forEach(function(r,idx){
-      var b=document.createElement('button');
-      b.type='button'; b.textContent=r.name;
-      b.addEventListener('click',function(){
-        var slot=0;
-        r.steps.forEach(function(t){
-          while(slot<3&&data.todos[slot].t.trim())slot++;
-          if(slot<3&&t){data.todos[slot].t=t;slot++}
-        });
+    return [];
+  }
+  function saveCommon(list){write('meta:common',list.slice(0,30))}
+
+  function addToStep(t){
+    for(var i=0;i<3;i++){
+      if(!data.todos[i].t.trim()){
+        data.todos[i].t=t;
         persist(); fillFields(); render();
-      });
-      el.appendChild(b);
-    });
-    if(hasText){
-      var sv=document.createElement('button');
-      sv.type='button'; sv.className='ghost'; sv.textContent='Save as routine';
-      sv.addEventListener('click',function(){
-        var steps=[];
-        for(var i=0;i<3;i++){if(data.todos[i].t.trim())steps.push(data.todos[i].t.trim())}
-        askText('Name this routine so you can drop these '+steps.length+' steps in with one tap.','e.g. Outreach day',function(name){
-          if(!name.trim())return;
-          var list=loadRoutines();
-          list.push({name:name.trim().slice(0,24),steps:steps});
-          saveRoutines(list.slice(0,8));
-          render();
-        });
-      });
-      el.appendChild(sv);
+        return true;
+      }
     }
-    if(list.length){
-      var mg=document.createElement('button');
-      mg.type='button'; mg.className='ghost'; mg.textContent='Edit';
-      mg.addEventListener('click',function(){
-        var list=loadRoutines();
-        var choices=list.map(function(r,i){
-          return {label:'Delete '+r.name,danger:true,run:function(){
-            var l=loadRoutines(); l.splice(i,1); saveRoutines(l); render();
-          }};
-        });
-        choices.push({label:'Cancel'});
-        ask('Remove a routine?',choices);
-      });
-      el.appendChild(mg);
-    }
-    el.className='routines on';
+    note('All three steps are full');
+    return false;
   }
+
+  var cOpen=false;
+  function renderCommon(){
+    var wrap=document.getElementById('common'), menu=document.getElementById('cmenu'),
+        tog=document.getElementById('ctoggle');
+    if(data.rest||sel<today){wrap.style.display='none';cOpen=false;menu.className='cmenu';return}
+    wrap.style.display='block';
+    tog.className='ctoggle'+(cOpen?' open':'');
+    menu.className='cmenu'+(cOpen?' on':'');
+    if(!cOpen){menu.innerHTML='';return}
+
+    var list=loadCommon();
+    menu.innerHTML='';
+    if(!list.length){
+      var e=document.createElement('div');
+      e.className='cempty';
+      e.textContent='Nothing saved yet. Add the things you do often.';
+      menu.appendChild(e);
+    }
+    list.forEach(function(t,idx){
+      var row=document.createElement('div');
+      row.className='crow';
+      var pick=document.createElement('button');
+      pick.type='button'; pick.className='pick'; pick.textContent=t;
+      pick.addEventListener('click',function(){if(addToStep(t)){cOpen=false;renderCommon()}});
+      var del=document.createElement('button');
+      del.type='button'; del.className='del'; del.textContent='\u00d7';
+      del.setAttribute('aria-label','Remove '+t);
+      del.addEventListener('click',function(){
+        ask('Remove "'+t+'" from your common tasks? This does not change any day you have already written it on.',[
+          {label:'Remove it',danger:true,run:function(){
+            var l=loadCommon(); l.splice(idx,1); saveCommon(l); renderCommon();
+          }},
+          {label:'Cancel'}
+        ]);
+      });
+      row.appendChild(pick); row.appendChild(del);
+      menu.appendChild(row);
+    });
+    var add=document.createElement('button');
+    add.type='button'; add.className='cadd'; add.textContent='+ Save a common task';
+    add.addEventListener('click',function(){
+      var def='';
+      for(var i=0;i<3;i++){if(data.todos[i].t.trim()){def=data.todos[i].t.trim();break}}
+      askText('Save a task you do often, so you can add it in one tap later.','e.g. Send five outreach emails',function(v){
+        v=(v||'').trim();
+        if(!v)return;
+        var l=loadCommon();
+        if(l.indexOf(v)<0)l.push(v);
+        saveCommon(l);
+        cOpen=true; renderCommon();
+      },def);
+    });
+    menu.appendChild(add);
+  }
+  document.getElementById('ctoggle').addEventListener('click',function(){
+    cOpen=!cOpen; renderCommon();
+  });
 
   var mPick=null;
   function renderMonth(){
@@ -656,14 +683,19 @@ input:focus,textarea:focus{outline-offset:2px}
     op.type='button'; op.textContent='Open this day';
     op.addEventListener('click',function(){var t=mPick;mPick=null;var q=t.split('-');select(new Date(+q[0],+q[1]-1,+q[2]));window.scrollTo({top:0,behavior:'smooth'})});
     sum.appendChild(op);
+    var cl=document.createElement('button');
+    cl.type='button'; cl.textContent='Close';
+    cl.addEventListener('click',function(){mPick=null;renderMonth()});
+    sum.appendChild(cl);
     sum.className='msum on';
   }
 
-  function askText(msg,placeholder,cb){
+  function askText(msg,placeholder,cb,def){
     panelMsg.textContent=msg;
     panelRow.innerHTML='';
     var inp=document.createElement('input');
     inp.type='text'; inp.placeholder=placeholder||''; inp.className='ptext';
+    if(def)inp.value=def;
     panelRow.appendChild(inp);
     var ok=document.createElement('button');
     ok.type='button'; ok.textContent='Save';
@@ -850,6 +882,7 @@ input:focus,textarea:focus{outline-offset:2px}
 
   function select(d){
     persist(); persistWk();
+    mPick=null; cOpen=false;
     sel=midnight(d); selKey=dayKey(sel);
     data=load(selKey);
     wkKey=weekKey(sel); wdata=loadWk(wkKey);
@@ -910,7 +943,7 @@ input:focus,textarea:focus{outline-offset:2px}
     renderWeek();
     renderYnote();
     renderCarry();
-    renderRoutines();
+    renderCommon();
     renderMonth();
     renderReview(thisWk);
     renderBanner();
