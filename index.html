@@ -171,36 +171,43 @@ body{background:var(--bg);color:var(--ink);font-family:"Inter","Helvetica Neue",
 .tabs button.on{border-color:var(--c2);color:var(--c2);background:var(--c2soft)}
 .view.off{display:none}
 .quote{margin:0 0 20px;text-align:center;font-size:13.5px;line-height:1.5;color:var(--muted);font-style:italic;padding:0 6px}
-.habhead{margin-bottom:18px}
-.habhead h2{font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:21px;font-weight:600;margin:0 0 3px;letter-spacing:-0.01em}
-.habhead p{margin:0;font-size:12px;color:var(--muted)}
-.hsum{display:none;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:20px}
+.hdone{flex:none;text-align:center;padding:9px 16px;border-radius:14px;background:var(--c2soft);border:1px solid var(--line)}
+.hdone b{font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:26px;font-weight:700;line-height:1;display:block;letter-spacing:-0.02em;color:var(--c2)}
+.hdone small{font-size:11px;font-weight:600;color:var(--muted)}
+.hsum{display:none;margin-bottom:18px}
 .hsum.on{display:block}
-.hsumtop{display:flex;align-items:baseline;gap:9px;margin-bottom:9px}
-.hsumtop b{font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.01em}
+.hsumtop{display:flex;align-items:baseline;gap:9px;margin-bottom:7px}
+.hsumtop b{font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:19px;font-weight:700;letter-spacing:-0.01em}
 .hsumtop span{font-size:12px;color:var(--muted)}
-.hbar{height:8px;border-radius:5px;background:var(--line);overflow:hidden}
+.hbar{height:7px;border-radius:5px;background:var(--line);overflow:hidden}
 .hbar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--c1),var(--c2))}
-.hab{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:11px}
-.hab.done{background:var(--tint)}
-.habicon{font-size:17px;margin-right:9px}
-.habname{display:flex;align-items:center}
-.habtop{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.habname{font-weight:600;font-size:16px;min-width:0;overflow:hidden;white-space:nowrap}
-.habstreak{flex:none;font-size:11px;font-weight:600;color:var(--c1);background:var(--c1soft);border-radius:12px;padding:4px 10px;white-space:nowrap}
-.habstreak.zero{color:var(--muted);background:transparent;border:1px solid var(--line)}
-.habrow{display:flex;align-items:center;gap:12px;margin-top:12px}
-.habcad{font-size:13px;color:var(--muted)}
-.habright{display:flex;align-items:center;gap:6px;flex:none}
-.habmenu{background:transparent;border:0;color:var(--muted);font-size:20px;line-height:1;padding:2px 4px;cursor:pointer;font-family:inherit}
-.habsec{font-size:12px;font-weight:600;color:var(--c2);margin:22px 0 9px;letter-spacing:.02em}
-.habsec:first-child{margin-top:0}
-.habempty{font-size:13px;color:var(--muted)}
-.habcad.off{opacity:.55}
+
+.hitem{margin-bottom:7px}
+.hitem.dragging{opacity:.9;position:relative;z-index:5}
+.hitem.dragging .hrow{box-shadow:0 8px 26px rgba(0,0,0,.22)}
+.hrow{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c1);border-radius:11px;padding:9px 11px;cursor:pointer}
+.hrow.open{border-bottom-left-radius:0;border-bottom-right-radius:0}
+.hgrip{flex:none;color:var(--muted);font-size:15px;line-height:1;padding:3px 2px;touch-action:none;opacity:.6}
+.hicon{flex:none;font-size:17px;line-height:1}
+.hmid{flex:1;min-width:0}
+.hname{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hchip{font-size:11px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hstreak{flex:none;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.hrow .tick{margin-top:0}
+.hdetail{display:none;background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 11px 11px;padding:4px 12px 12px}
+.hdetail.on{display:block}
+.hacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.hacts button{background:transparent;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:500;padding:5px 10px;border-radius:20px;cursor:pointer}
+.hacts button.danger{color:var(--c3);border-color:var(--c3)}
+.habempty{font-size:13px;color:var(--muted);text-align:center;padding:18px 6px;line-height:1.5}
 .daypick{display:flex;gap:5px;margin-top:11px}
 .daypick button{flex:1;background:transparent;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;font-weight:600;padding:6px 0;border-radius:8px;cursor:pointer}
 .daypick button.on{border-color:var(--c2);color:var(--c2);background:var(--c2soft)}
 .habnote{width:100%;margin-top:11px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:16px;border-radius:9px;padding:8px 11px}
+.hdots{display:flex;gap:3px;margin-top:11px}
+.hdots i{flex:1;height:9px;border-radius:3px;background:var(--line);display:block}
+.hdots i.on{background:var(--c1)}
+.hdots i.now{box-shadow:inset 0 0 0 2px var(--c3)}
 .hdots i.skip{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
 .hdots{display:flex;gap:3px;margin-top:12px}
 .hdots i{flex:1;height:9px;border-radius:3px;background:var(--line);display:block}
@@ -383,15 +390,26 @@ input:focus,textarea:focus{outline-offset:2px}
   </div>
 
   <div class="view off" id="viewHabits">
-    <div class="habhead">
-      <h2 id="habDate">Today</h2>
-      <p>These streaks are separate from your task streak.</p>
+    <div class="top">
+      <h1 class="date" id="habDateLine">Today<span id="habSubLine"></span></h1>
+      <div class="hdone" id="habDoneBadge"><b>0</b><small>Done</small></div>
     </div>
+
+    <div class="weekbar">
+      <button class="arrow" id="hPrevWk" type="button" aria-label="Previous week">&#8249;</button>
+      <div class="week" id="habWeek"></div>
+      <button class="arrow" id="hNextWk" type="button" aria-label="Next week">&#8250;</button>
+    </div>
+    <div class="jump">
+      <span class="dpick"><span id="hdpickLabel">Jump</span><input type="date" id="habDateJump" aria-label="Jump to a date"></span>
+      <button type="button" id="habTodayBtn" class="off">Back to today</button>
+    </div>
+
     <div class="hsum" id="habSummary"></div>
     <div id="habitList"></div>
     <div class="habbtns">
       <button type="button" id="habAdd">+ Add a habit</button>
-      <button type="button" id="habEdit">Edit</button>
+      <button type="button" id="habShowAll">Show all</button>
     </div>
   </div>
 
@@ -412,7 +430,7 @@ input:focus,textarea:focus{outline-offset:2px}
 
 <script>
 (function(){
-  var VERSION='33', BUILT='30 Sep 2026';
+  var VERSION='35', BUILT='30 Sep 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -798,11 +816,9 @@ input:focus,textarea:focus{outline-offset:2px}
     return h;
   }
   function saveHabits(list){write('meta:habits',list)}
-  function habById(id){var l=loadHabits();for(var i=0;i<l.length;i++){if(l[i].id===id)return l[i]}return null}
 
   var FORT0=new Date(1970,0,5);
   function fortIndex(d){return Math.floor((midnight(d)-FORT0)/(14*86400000))}
-
   function recKey(h,d){
     if(h.cad==='weekly')return 'habw:'+weekKey(d);
     if(h.cad==='fortnightly')return 'habf:'+fortIndex(d);
@@ -826,7 +842,6 @@ input:focus,textarea:focus{outline-offset:2px}
     for(var i=0;i<7;i++){if(tickedOn(h,shift(st,i)))n++}
     return n;
   }
-  // has the period containing d been satisfied?
   function habDone(h,d){
     if(h.cad==='times')return weekCount(h,d)>=(h.n||3);
     return tickedOn(h,d);
@@ -861,19 +876,49 @@ input:focus,textarea:focus{outline-offset:2px}
     return n+' '+w+(n===1?'':'s');
   }
   var DLET=['S','M','T','W','T','F','S'];
-  function cadText(h){
-    if(h.cad==='weekly')return 'Once this week';
-    if(h.cad==='fortnightly')return 'Once this fortnight';
-    if(h.cad==='times')return weekCount(h,today)+' of '+(h.n||3)+' this week';
-    if(h.cad==='days'){
-      if(!Array.isArray(h.days)||!h.days.length)return 'Tap the days below';
-      return scheduled(h,today)?'Today is one of your days':'Not scheduled today';
-    }
-    return 'Today';
+  function cadChip(h,d){
+    if(h.cad==='daily')return 'Every day';
+    if(h.cad==='weekly')return 'Weekly';
+    if(h.cad==='fortnightly')return 'Fortnightly';
+    if(h.cad==='times')return weekCount(h,d)+' of '+(h.n||3)+' this week';
+    if(!Array.isArray(h.days)||!h.days.length)return 'No days picked yet';
+    return [1,2,3,4,5,6,0].filter(function(x){return h.days.indexOf(x)>-1})
+      .map(function(x){return DLET[x]}).join(' ');
+  }
+  // which day was a week or fortnight habit actually ticked on?
+  function tickDay(h,d){
+    var r=periodRec(recKey(h,d));
+    if(!r.ticks[h.id])return null;
+    var t=r.times&&r.times[h.id];
+    if(typeof t==='string'&&t.length>=10)return t.slice(0,10);
+    return dayKey(weekStart(d));
+  }
+  // should it be on the list for day d?
+  function dueOn(h,d){
+    if(h.cad==='days')return scheduled(h,d);
+    if(h.cad==='daily')return true;
+    if(h.cad==='times')return tickedOn(h,d)||weekCount(h,d)<(h.n||3);
+    return tickDay(h,d)===dayKey(d)||!habDone(h,d);
+  }
+  // does day d's progress bar count this habit, and is it done for that day?
+  // weekly and fortnightly only land on the day they were ticked, so one tick
+  // does not fill every bar in the week. Before being ticked they sit on today.
+  function countedOn(h,d){
+    if(h.cad==='days')return scheduled(h,d);
+    if(h.cad==='daily')return true;
+    if(h.cad==='times')return tickedOn(h,d)||(dayKey(d)===tKey&&weekCount(h,d)<(h.n||3));
+    return tickDay(h,d)===dayKey(d)||(dayKey(d)===tKey&&!habDone(h,d));
+  }
+  function doneOn(h,d){
+    if(h.cad==='daily'||h.cad==='days'||h.cad==='times')return tickedOn(h,d);
+    return tickDay(h,d)===dayKey(d);
   }
 
+  var hsel=midnight(new Date()), hOpen=null, hShowAll=false;
+
   function habToggle(h){
-    var k=recKey(h,today), r=periodRec(k);
+    if(hsel>today)return;
+    var k=recKey(h,hsel), r=periodRec(k);
     if(r.ticks[h.id]){delete r.ticks[h.id]; if(r.times)delete r.times[h.id]}
     else{
       r.ticks[h.id]=true;
@@ -884,7 +929,7 @@ input:focus,textarea:focus{outline-offset:2px}
     renderHabits();
   }
   function habNote(h,val){
-    var k=recKey(h,today), r=periodRec(k);
+    var k=recKey(h,hsel), r=periodRec(k);
     if(val.trim())r.notes[h.id]=val; else delete r.notes[h.id];
     write(k,r);
   }
@@ -895,20 +940,11 @@ input:focus,textarea:focus{outline-offset:2px}
         var arr=Array.isArray(l[i].days)?l[i].days:[];
         var at=arr.indexOf(dow);
         if(at>-1)arr.splice(at,1); else arr.push(dow);
-        arr.sort();
-        l[i].days=arr;
+        arr.sort(); l[i].days=arr;
       }
     }
     saveHabits(l); renderHabits();
   }
-
-  var HSECTIONS=[
-    ['daily','Every day'],
-    ['days','Certain days'],
-    ['times','A few times a week'],
-    ['weekly','Weekly'],
-    ['fortnightly','Fortnightly']
-  ];
 
   var HPAL=['var(--c1)',
     'color-mix(in oklab, var(--c1), var(--c2) 35%)',
@@ -918,178 +954,248 @@ input:focus,textarea:focus{outline-offset:2px}
     'color-mix(in oklab, var(--c3), var(--c1) 55%)'];
   var HICON={gratitude:'\ud83d\ude4f',meditation:'\ud83e\uddd8',exercise:'\ud83c\udfc3',yoga:'\ud83e\udd38',gooddeed:'\ud83d\udc9b',newthing:'\u2728'};
   function habIcon(h){return h.icon||HICON[h.id]||'\u2b50'}
+  function habColour(h){
+    var l=loadHabits();
+    for(var i=0;i<l.length;i++){if(l[i].id===h.id)return HPAL[i%HPAL.length]}
+    return HPAL[0];
+  }
 
-  function habCard(h,idx){
-    var col=HPAL[idx%HPAL.length];
-    var doneNow=tickedOn(h,today);
-    var card=document.createElement('div');
-    card.className='hab'+(doneNow?' done':'');
-    card.style.borderLeft='5px solid '+col;
-    if(doneNow){
-      card.style.background='color-mix(in oklab, '+col+' 15%, var(--surface))';
-      card.style.borderTopColor='color-mix(in oklab, '+col+' 35%, var(--line))';
-      card.style.borderRightColor='color-mix(in oklab, '+col+' 35%, var(--line))';
-      card.style.borderBottomColor='color-mix(in oklab, '+col+' 35%, var(--line))';
-    }
-
-    var top=document.createElement('div');
-    top.className='habtop';
-    var nm=document.createElement('div');
-    nm.className='habname';
-    var ic=document.createElement('span');
-    ic.className='habicon'; ic.textContent=habIcon(h);
-    var tx=document.createElement('span'); tx.textContent=h.name;
-    nm.appendChild(ic); nm.appendChild(tx);
-    var right=document.createElement('div');
-    right.className='habright';
-    var sn=habStreak(h);
-    var stk=document.createElement('span');
-    stk.className='habstreak'+(sn?'':' zero');
-    if(sn){stk.style.color=col;stk.style.background='color-mix(in oklab, '+col+' 14%, transparent)'}
-    stk.textContent=sn?habUnit(h,sn):'No streak yet';
-    var mn=document.createElement('button');
-    mn.type='button'; mn.className='habmenu'; mn.textContent='\u22ef';
-    mn.setAttribute('aria-label','Options for '+h.name);
-    mn.addEventListener('click',function(){habMenu(h,card)});
-    right.appendChild(stk); right.appendChild(mn);
-    top.appendChild(nm); top.appendChild(right);
-    card.appendChild(top);
+  function habRow(h){
+    var col=habColour(h), on=tickedOn(h,hsel), future=(hsel>today);
+    var item=document.createElement('div');
+    item.className='hitem';
+    item.setAttribute('data-id',h.id);
 
     var row=document.createElement('div');
-    row.className='habrow';
+    row.className='hrow'+(on?' done':'')+(hOpen===h.id?' open':'');
+    row.style.borderLeftColor=col;
+    if(on){
+      row.style.background='color-mix(in oklab, '+col+' 15%, var(--surface))';
+      row.style.borderTopColor='color-mix(in oklab, '+col+' 35%, var(--line))';
+      row.style.borderRightColor='color-mix(in oklab, '+col+' 35%, var(--line))';
+      if(hOpen!==h.id)row.style.borderBottomColor='color-mix(in oklab, '+col+' 35%, var(--line))';
+    }
+
+    var grip=document.createElement('span');
+    grip.className='hgrip'; grip.textContent='\u2630';
+    grip.setAttribute('aria-label','Drag to reorder');
+
+    var ic=document.createElement('span');
+    ic.className='hicon'; ic.textContent=habIcon(h);
+
+    var mid=document.createElement('div');
+    mid.className='hmid';
+    var nm=document.createElement('div');
+    nm.className='hname'; nm.textContent=h.name;
+    var ch=document.createElement('div');
+    ch.className='hchip'; ch.textContent=cadChip(h,hsel);
+    mid.appendChild(nm); mid.appendChild(ch);
+
+    var sn=habStreak(h);
+    var stk=document.createElement('span');
+    stk.className='hstreak';
+    if(sn){stk.style.color=col;stk.textContent=sn}
+    else stk.textContent='';
+
     var b=document.createElement('button');
-    b.type='button';
-    b.className='tick sq habtick';
-    b.setAttribute('aria-pressed',doneNow?'true':'false');
+    b.type='button'; b.className='tick sq';
+    b.setAttribute('aria-pressed',on?'true':'false');
     b.setAttribute('aria-label','Mark '+h.name+' done');
-    if(doneNow){b.style.background=col;b.style.borderColor=col}else{b.style.borderColor='color-mix(in oklab, '+col+' 45%, var(--line))'}
-    b.addEventListener('click',function(){habToggle(h)});
-    var cad=document.createElement('span');
-    cad.className='habcad'; cad.textContent=cadText(h);
-    if(h.cad==='days'&&!scheduled(h,today))cad.className='habcad off';
-    row.appendChild(b); row.appendChild(cad);
-    card.appendChild(row);
+    if(on){b.style.background=col;b.style.borderColor=col}
+    else b.style.borderColor='color-mix(in oklab, '+col+' 45%, var(--line))';
+    if(future){b.disabled=true;b.style.opacity='.4'}
+    b.addEventListener('click',function(e){e.stopPropagation();habToggle(h)});
 
-    if(h.cad==='days'){
-      var dr=document.createElement('div');
-      dr.className='daypick';
-      [1,2,3,4,5,6,0].forEach(function(dw){
-        var db2=document.createElement('button');
-        db2.type='button';
-        db2.textContent=DLET[dw];
-        if(Array.isArray(h.days)&&h.days.indexOf(dw)>-1)db2.className='on';
-        db2.addEventListener('click',function(){toggleDay(h,dw)});
-        dr.appendChild(db2);
+    row.appendChild(grip); row.appendChild(ic); row.appendChild(mid);
+    row.appendChild(stk); row.appendChild(b);
+    row.addEventListener('click',function(){
+      hOpen=(hOpen===h.id)?null:h.id;
+      renderHabits();
+    });
+    item.appendChild(row);
+
+    if(hOpen===h.id){
+      var det=document.createElement('div');
+      det.className='hdetail on';
+
+      if(h.cad==='days'){
+        var dr=document.createElement('div');
+        dr.className='daypick';
+        [1,2,3,4,5,6,0].forEach(function(dw){
+          var db2=document.createElement('button');
+          db2.type='button'; db2.textContent=DLET[dw];
+          if(Array.isArray(h.days)&&h.days.indexOf(dw)>-1)db2.className='on';
+          db2.addEventListener('click',function(){toggleDay(h,dw)});
+          dr.appendChild(db2);
+        });
+        det.appendChild(dr);
+      }
+
+      var nt=document.createElement('input');
+      nt.type='text'; nt.className='habnote';
+      nt.placeholder=(h.cad==='fortnightly'||h.cad==='weekly')?'What is it, or what was it?':'Optional note';
+      nt.value=periodRec(recKey(h,hsel)).notes[h.id]||'';
+      var dbn=mkDebounce();
+      nt.addEventListener('input',function(){var v=nt.value;dbn(function(){habNote(h,v)})});
+      det.appendChild(nt);
+
+      var n=(h.cad==='weekly'||h.cad==='fortnightly')?8:14;
+      var dots=document.createElement('div');
+      dots.className='hdots';
+      for(var j=n-1;j>=0;j--){
+        var d=(h.cad==='weekly')?shift(hsel,-7*j):(h.cad==='fortnightly'?shift(hsel,-14*j):shift(hsel,-j));
+        var dot=document.createElement('i');
+        var cls='';
+        if(h.cad==='days'){ if(!scheduled(h,d))cls='skip'; else if(tickedOn(h,d))cls='on' }
+        else if(h.cad==='times'){ if(tickedOn(h,d))cls='on' }
+        else if(habDone(h,d))cls='on';
+        dot.className=cls+(j===0?' now':'');
+        if(cls.indexOf('on')>-1)dot.style.background=col;
+        dots.appendChild(dot);
+      }
+      det.appendChild(dots);
+
+      var acts=document.createElement('div');
+      acts.className='hacts';
+      [['Frequency',function(){freqMenu(h,det)}],
+       ['Rename',function(){
+          askText('Rename this habit.','',function(v){
+            v=(v||'').trim(); if(!v)return;
+            var l=loadHabits();
+            for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].name=v.slice(0,28)}
+            saveHabits(l); renderHabits();
+          },h.name);
+        }],
+       ['Icon',function(){
+          askText('Paste any emoji to use as this habit\u2019s icon.','\u2b50',function(v){
+            v=(v||'').trim(); if(!v)return;
+            var l=loadHabits();
+            for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].icon=Array.from(v)[0]}
+            saveHabits(l); renderHabits();
+          },habIcon(h));
+        }],
+       ['Move up',function(){moveHabit(h,-1)}],
+       ['Move down',function(){moveHabit(h,1)}]
+      ].forEach(function(a){
+        var bt=document.createElement('button');
+        bt.type='button'; bt.textContent=a[0];
+        bt.addEventListener('click',function(e){e.stopPropagation();a[1]()});
+        acts.appendChild(bt);
       });
-      card.appendChild(dr);
+      var rm=document.createElement('button');
+      rm.type='button'; rm.className='danger'; rm.textContent='Remove';
+      rm.addEventListener('click',function(e){
+        e.stopPropagation();
+        ask('Remove "'+h.name+'"? Its history stays saved, it just stops showing here.',[
+          {label:'Remove it',danger:true,run:function(){
+            var l=loadHabits().filter(function(x){return x.id!==h.id});
+            saveHabits(l); hOpen=null; renderHabits();
+          }},
+          {label:'Cancel'}
+        ],det);
+      });
+      acts.appendChild(rm);
+      det.appendChild(acts);
+      item.appendChild(det);
     }
-
-    var nt=document.createElement('input');
-    nt.type='text'; nt.className='habnote';
-    nt.placeholder=(h.cad==='fortnightly'||h.cad==='weekly')?'What is it, or what was it?':'Optional note';
-    nt.value=periodRec(recKey(h,today)).notes[h.id]||'';
-    var dbn=mkDebounce();
-    nt.addEventListener('input',function(){var v=nt.value;dbn(function(){habNote(h,v)})});
-    card.appendChild(nt);
-
-    var n=(h.cad==='weekly'||h.cad==='fortnightly')?8:14;
-    var dots=document.createElement('div');
-    dots.className='hdots';
-    for(var j=n-1;j>=0;j--){
-      var d=(h.cad==='weekly')?shift(today,-7*j):(h.cad==='fortnightly'?shift(today,-14*j):shift(today,-j));
-      var dot=document.createElement('i');
-      var cls='';
-      if(h.cad==='times'){ if(tickedOn(h,d))cls='on' }
-      else if(h.cad==='days'){ if(!scheduled(h,d))cls='skip'; else if(tickedOn(h,d))cls='on' }
-      else if(habDone(h,d))cls='on';
-      dot.className=cls+(j===0?' now':'');
-      if(cls.indexOf('on')>-1)dot.style.background=col;
-      dots.appendChild(dot);
-    }
-    card.appendChild(dots);
-    return card;
+    return item;
   }
 
-  function dueToday(h){
-    if(h.cad==='daily')return true;
-    if(h.cad==='days')return scheduled(h,today);
-    if(h.cad==='times')return weekCount(h,today)<(h.n||3);
-    return !habDone(h,today);
+  function moveHabit(h,dir){
+    var l=loadHabits(), i=-1;
+    for(var k=0;k<l.length;k++){if(l[k].id===h.id)i=k}
+    var j=i+dir;
+    if(i<0||j<0||j>=l.length)return;
+    var tmp=l[i]; l[i]=l[j]; l[j]=tmp;
+    saveHabits(l); renderHabits();
   }
+  function reorderTo(id,beforeId){
+    var l=loadHabits(), from=-1, item=null;
+    for(var i=0;i<l.length;i++){if(l[i].id===id){from=i;item=l[i]}}
+    if(from<0)return;
+    l.splice(from,1);
+    if(beforeId==null){l.push(item)}
+    else{
+      var at=l.length;
+      for(var j=0;j<l.length;j++){if(l[j].id===beforeId){at=j;break}}
+      l.splice(at,0,item);
+    }
+    saveHabits(l);
+  }
+
+  function habWeekStrip(){
+    var box=document.getElementById('habWeek');
+    box.innerHTML='';
+    var st=weekStart(hsel), list=loadHabits(), labels=['M','T','W','T','F','S','S'];
+    for(var i=0;i<7;i++){
+      var d=shift(st,i), k=dayKey(d), isSel=(k===dayKey(hsel));
+      var due=0, got=0;
+      list.forEach(function(h){
+        if(!countedOn(h,d))return;
+        due++;
+        if(doneOn(h,d))got++;
+      });
+      var pct=due>0?Math.round(Math.min(got,due)/due*100):0;
+      var c=hue(i);
+      var btn=document.createElement('button');
+      btn.type='button';
+      btn.className='day'+(isSel?' sel':'')+(k===tKey?' tdy':'');
+      btn.setAttribute('aria-label',DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()]);
+      btn.innerHTML='<div class="bar" style="'+(isSel?'border-color:'+c:'')+'">'+
+        '<div class="fill" style="height:'+pct+'%;background:'+c+'"></div></div>'+
+        '<b style="'+(isSel?'color:'+c:'')+'">'+labels[i]+'</b>'+
+        '<i class="dnum">'+d.getDate()+'</i>';
+      (function(dd){btn.addEventListener('click',function(){hsel=midnight(dd);hOpen=null;renderHabits()})})(d);
+      box.appendChild(btn);
+    }
+  }
+
   function renderHabits(){
     var box=document.getElementById('habitList');
     box.innerHTML='';
-    document.getElementById('habDate').textContent=DAYS[today.getDay()]+' '+today.getDate()+' '+MONTHS[today.getMonth()];
-    var list=loadHabits();
+    var isToday=(dayKey(hsel)===tKey);
+    document.getElementById('habDateLine').childNodes[0].nodeValue=isToday?'Today':DAYS[hsel.getDay()];
+    document.getElementById('habSubLine').textContent=hsel.getDate()+' '+MONTHS[hsel.getMonth()];
+    document.getElementById('habTodayBtn').className=isToday?'off':'';
+    document.getElementById('habDateJump').value=dayKey(hsel);
+    document.getElementById('hdpickLabel').textContent=hsel.getDate()+' '+MONTHS[hsel.getMonth()].slice(0,3);
 
+    var list=loadHabits();
     var due=0, got=0;
     list.forEach(function(h){
-      var d=dueToday(h), t=tickedOn(h,today);
-      if(d||t)due++;
-      if(t)got++;
+      if(!countedOn(h,hsel))return;
+      due++;
+      if(doneOn(h,hsel))got++;
     });
+    document.getElementById('habDoneBadge').innerHTML='<b>'+got+'</b><small>Done</small>';
+
     var sum=document.getElementById('habSummary');
     if(due>0){
-      var pct=Math.round(got/due*100);
-      sum.innerHTML='<div class="hsumtop"><b>'+got+' of '+due+'</b><span>'+(got===due?'all done':'on the list today')+'</span></div>'+
+      var pct=Math.round(Math.min(got,due)/due*100);
+      sum.innerHTML='<div class="hsumtop"><b>'+got+' of '+due+'</b><span>'+(got>=due?'all done':'on the list')+'</span></div>'+
         '<div class="hbar"><i style="width:'+pct+'%"></i></div>';
       sum.className='hsum on';
     } else { sum.className='hsum'; sum.innerHTML=''; }
 
-    var idx=0;
-    HSECTIONS.forEach(function(sec){
-      var inSec=list.filter(function(h){return h.cad===sec[0]});
-      if(!inSec.length)return;
-      var head=document.createElement('h3');
-      head.className='habsec'; head.textContent=sec[1];
-      box.appendChild(head);
-      inSec.forEach(function(h){box.appendChild(habCard(h,idx));idx++});
-    });
-    if(!list.length){
+    var shown=list.filter(function(h){return hShowAll||dueOn(h,hsel)});
+    if(!shown.length){
       var e=document.createElement('p');
-      e.className='habempty'; e.textContent='No habits yet. Add one below.';
+      e.className='habempty';
+      e.textContent=list.length?'Nothing due today. Everything is either done or not scheduled.':'No habits yet. Add one below.';
       box.appendChild(e);
     }
+    shown.forEach(function(h){box.appendChild(habRow(h))});
+    document.getElementById('habShowAll').textContent=hShowAll?'Show due only':'Show all';
+    habWeekStrip();
+    dragSetup(box);
   }
 
-  function habMenu(h,anchor){
-    anchor=anchor||document.getElementById('habitList');
-    ask(habIcon(h)+'  '+h.name,[
-      {label:'Change frequency',run:function(){freqMenu(h,anchor)}},
-      {label:'Change icon',run:function(){
-        askText('Paste any emoji to use as this habit\u2019s icon.','\u2b50',function(v){
-          v=(v||'').trim(); if(!v)return;
-          var l=loadHabits();
-          for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].icon=Array.from(v)[0]}
-          saveHabits(l); renderHabits();
-        },habIcon(h));
-      }},
-      {label:'Rename',run:function(){
-        askText('Rename this habit.','',function(v){
-          v=(v||'').trim(); if(!v)return;
-          var l=loadHabits();
-          for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].name=v.slice(0,28)}
-          saveHabits(l); renderHabits();
-        },h.name);
-      }},
-      {label:'Remove',danger:true,run:function(){
-        ask('Remove "'+h.name+'"? Its history stays saved, it just stops showing here.',[
-          {label:'Remove it',danger:true,run:function(){
-            var l=loadHabits().filter(function(x){return x.id!==h.id});
-            saveHabits(l); renderHabits();
-          }},
-          {label:'Cancel'}
-        ],anchor);
-      }},
-      {label:'Cancel'}
-    ],anchor);
-  }
   function setCad(h,cad,extra){
     var l=loadHabits();
     for(var i=0;i<l.length;i++){
       if(l[i].id===h.id){
         l[i].cad=cad;
-        if(cad==='days')l[i].days=Array.isArray(l[i].days)&&l[i].days.length?l[i].days:[today.getDay()];
+        if(cad==='days')l[i].days=Array.isArray(l[i].days)&&l[i].days.length?l[i].days:[hsel.getDay()];
         if(cad==='times')l[i].n=extra||3;
       }
     }
@@ -1114,6 +1220,69 @@ input:focus,textarea:focus{outline-offset:2px}
     ],anchor);
   }
 
+  // drag to reorder: grip drags at once, long press on the row also starts it
+  var dragEl=null, dragId=null, dragY=0, dragTimer=null, dragStartY=0;
+  function dragSetup(box){
+    var items=box.querySelectorAll('.hitem');
+    Array.prototype.forEach.call(items,function(it){
+      var grip=it.querySelector('.hgrip');
+      if(grip)grip.addEventListener('pointerdown',function(e){startDrag(e,it)});
+      it.addEventListener('pointerdown',function(e){
+        if(e.target.closest('.hgrip'))return;
+        if(e.target.closest('button')&&!e.target.closest('.hrow'))return;
+        dragStartY=e.clientY;
+        clearTimeout(dragTimer);
+        dragTimer=setTimeout(function(){startDrag(e,it)},450);
+      });
+      it.addEventListener('pointermove',function(e){
+        if(!dragEl&&Math.abs(e.clientY-dragStartY)>10)clearTimeout(dragTimer);
+      });
+      it.addEventListener('pointerup',function(){clearTimeout(dragTimer)});
+      it.addEventListener('pointercancel',function(){clearTimeout(dragTimer)});
+    });
+  }
+  function startDrag(e,item){
+    clearTimeout(dragTimer);
+    dragEl=item; dragId=item.getAttribute('data-id'); dragY=e.clientY;
+    item.classList.add('dragging');
+    document.body.style.userSelect='none';
+    try{ if(navigator.vibrate)navigator.vibrate(12) }catch(x){}
+  }
+  document.addEventListener('pointermove',function(e){
+    if(!dragEl)return;
+    e.preventDefault();
+    var dy=e.clientY-dragY;
+    dragEl.style.transform='translateY('+dy+'px)';
+    var box=document.getElementById('habitList');
+    var items=Array.prototype.slice.call(box.querySelectorAll('.hitem'));
+    for(var i=0;i<items.length;i++){
+      var it=items[i];
+      if(it===dragEl)continue;
+      var r=it.getBoundingClientRect();
+      var mid=r.top+r.height/2;
+      if(e.clientY<mid && it.compareDocumentPosition(dragEl)&Node.DOCUMENT_POSITION_FOLLOWING){
+        box.insertBefore(dragEl,it); dragY=e.clientY; dragEl.style.transform=''; break;
+      }
+      if(e.clientY>mid && it.compareDocumentPosition(dragEl)&Node.DOCUMENT_POSITION_PRECEDING){
+        box.insertBefore(dragEl,it.nextSibling); dragY=e.clientY; dragEl.style.transform=''; break;
+      }
+    }
+  },{passive:false});
+  function endDrag(){
+    if(!dragEl)return;
+    dragEl.style.transform='';
+    dragEl.classList.remove('dragging');
+    document.body.style.userSelect='';
+    var box=document.getElementById('habitList');
+    var ids=Array.prototype.map.call(box.querySelectorAll('.hitem'),function(i){return i.getAttribute('data-id')});
+    var at=ids.indexOf(dragId);
+    reorderTo(dragId, at>-1&&at+1<ids.length?ids[at+1]:null);
+    dragEl=null; dragId=null;
+    renderHabits();
+  }
+  document.addEventListener('pointerup',endDrag);
+  document.addEventListener('pointercancel',endDrag);
+
   document.getElementById('habAdd').addEventListener('click',function(){
     askText('Name the habit you want to build.','e.g. Walk after dinner',function(v){
       v=(v||'').trim(); if(!v)return;
@@ -1121,18 +1290,23 @@ input:focus,textarea:focus{outline-offset:2px}
       var l=loadHabits();
       l.push({id:id,name:v.slice(0,28),cad:'daily'});
       saveHabits(l.slice(0,20));
-      renderHabits();
-      freqMenu({id:id,name:v});
+      hOpen=id; renderHabits();
+      freqMenu({id:id,name:v},document.getElementById('habitList'));
     });
   });
-  document.getElementById('habEdit').addEventListener('click',function(){
-    var list=loadHabits();
-    if(!list.length)return;
-    var choices=list.map(function(h){
-      return {label:h.name,run:function(){habMenu(h)}};
-    });
-    choices.push({label:'Cancel'});
-    ask('Which habit?',choices,document.getElementById('habitList'));
+  document.getElementById('habShowAll').addEventListener('click',function(){
+    hShowAll=!hShowAll; renderHabits();
+  });
+  document.getElementById('habTodayBtn').addEventListener('click',function(){
+    hsel=midnight(new Date()); hOpen=null; renderHabits();
+  });
+  document.getElementById('hPrevWk').addEventListener('click',function(){hsel=shift(hsel,-7);hOpen=null;renderHabits()});
+  document.getElementById('hNextWk').addEventListener('click',function(){hsel=shift(hsel,7);hOpen=null;renderHabits()});
+  document.getElementById('habDateJump').addEventListener('change',function(){
+    var v=this.value;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(v))return;
+    var p2=v.split('-');
+    hsel=new Date(+p2[0],+p2[1]-1,+p2[2]); hOpen=null; renderHabits();
   });
 
   function showTab(which){
