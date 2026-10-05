@@ -75,6 +75,8 @@ body{
 
 
 .jump{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:22px;min-height:28px}
+.jumpbtn{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:6px 13px;border-radius:20px;cursor:pointer}
+.jumpbtn:active{transform:scale(.93)}
 .dpick{position:relative;display:inline-flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:5px 12px;color:var(--muted);font-size:12px;font-weight:500;line-height:1.2}
 .dpick input[type=date]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;font-size:16px;border:0;padding:0;margin:0;background:transparent;-webkit-appearance:none;appearance:none}
 .jump button{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:4px 11px;border-radius:20px;cursor:pointer;flex:none}
@@ -195,6 +197,52 @@ body{
 .hbar{height:7px;border-radius:5px;background:var(--line);overflow:hidden}
 .hbar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--c1),var(--c2))}
 
+.cal{width:100%;max-width:310px;margin:0 auto}
+.cal-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.cal-top b{font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:14.5px;font-weight:600;letter-spacing:-0.01em}
+.cal-top button{flex:none;border:1px solid var(--line);background:transparent;color:var(--muted);width:28px;height:28px;border-radius:8px;font-size:14px;line-height:1;padding:0;cursor:pointer}
+.cal-wd{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px}
+.cal-wd span{text-align:center;font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-grid button{height:34px;border:0;background:transparent;color:var(--ink);font-family:inherit;font-size:13px;font-weight:500;border-radius:8px;position:relative;cursor:pointer;padding:0}
+.cal-grid button.pad{visibility:hidden}
+.cal-grid button.past{color:var(--muted);opacity:.5}
+.cal-grid button.today{box-shadow:inset 0 0 0 1.5px var(--c3);font-weight:700}
+.cal-grid button.has::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:3.5px;height:3.5px;border-radius:50%;background:var(--c2)}
+.cal-grid button.on{background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-weight:700;box-shadow:none}
+.cal-grid button.on::after{background:#fff}
+.cal-foot .ok{border:0;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-weight:600}
+.cal-foot .ok[disabled]{opacity:.4;background:var(--line);color:var(--muted)}
+.cal-grid button:active{transform:scale(.88)}
+.cal-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px}
+.cal-foot .legend{font-size:10.5px;color:var(--muted);line-height:1.3}
+.cal-foot button{font-size:12px;padding:6px 12px}
+.capture{display:flex;gap:8px;margin-bottom:18px}
+.capture input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:inherit;font-size:16px;border-radius:12px;padding:12px 14px}
+.capture input:focus{border-color:var(--c2)}
+.capture button{flex:none;border:0;border-radius:12px;padding:0 18px;font-family:inherit;font-size:14px;font-weight:600;color:#fff;
+  background:linear-gradient(135deg,var(--c1),var(--c2));cursor:pointer}
+.capture button:active{transform:scale(.94)}
+.lrow{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:7px}
+.lrow .ltick{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid color-mix(in oklab,var(--c1) 45%,var(--line));background:transparent;cursor:pointer;padding:0}
+.lrow .ltick:active{transform:scale(.9)}
+.ltext{flex:1;min-width:0;font-size:15px;line-height:1.35;word-break:break-word}
+.lage{flex:none;font-size:11px;font-weight:600;color:var(--muted)}
+.lage.old{color:var(--c3)}
+.lgo{flex:none;border:1px solid var(--line);background:transparent;color:var(--c2);font-family:inherit;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:20px;cursor:pointer}
+.ldel{flex:none;border:0;background:transparent;color:var(--muted);font-size:17px;line-height:1;padding:2px 4px;cursor:pointer}
+.lrow{cursor:pointer}
+.lrow.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent}
+.ldetail{background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:4px 12px 13px;margin:-7px 0 7px}
+.lseg{display:flex;gap:6px;margin-top:9px}
+.lseg button{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:inherit;font-size:12px;font-weight:600;padding:8px 6px;border-radius:9px;cursor:pointer}
+.lseg button.on{border-color:var(--c2);color:var(--c2);background:color-mix(in oklab,var(--c2) 12%,transparent)}
+.lwhen{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:9px}
+.lwhen button{border:1px solid var(--line);background:transparent;color:var(--ink);font-family:inherit;font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;cursor:pointer}
+.lwhen button:active{transform:scale(.93)}
+.lhint{font-size:11px;color:var(--muted);margin-top:9px}
+.lempty{text-align:center;font-size:13px;color:var(--muted);padding:26px 10px;line-height:1.6}
+.tabs button{padding:10px 6px;font-size:12.5px}
 .hitem{margin-bottom:7px}
 .hitem.dragging{opacity:.9;position:relative;z-index:5}
 .hitem.dragging .hrow{box-shadow:0 8px 26px rgba(0,0,0,.22)}
@@ -321,6 +369,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   <div class="tabs">
     <button type="button" id="tabTodayBtn" class="on">Today</button>
     <button type="button" id="tabHabitsBtn">Habits</button>
+    <button type="button" id="tabLaterBtn">Later</button>
   </div>
 
   <p class="quote" id="quote"></p>
@@ -338,7 +387,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     <button class="arrow" id="nextWk" type="button" aria-label="Next week">&#8250;</button>
   </div>
   <div class="jump" id="jump">
-    <span class="dpick"><span id="dpickLabel">Jump</span><input type="date" id="dateJump" aria-label="Jump to a date"></span>
+    <button type="button" class="jumpbtn" id="dateJump">Jump to a day</button>
     <button type="button" id="todayBtn">Back to today</button>
   </div>
 
@@ -363,6 +412,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   <div class="todos-head">Three small steps</div>
   <div class="steps" id="todos"></div>
   <div class="carry" id="carry"></div>
+  <div class="carry" id="parked"></div>
   <div class="common" id="common">
     <button class="ctoggle" id="ctoggle" type="button">Common tasks <span>&#9662;</span></button>
     <div class="cmenu" id="cmenu"></div>
@@ -438,7 +488,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       <button class="arrow" id="hNextWk" type="button" aria-label="Next week">&#8250;</button>
     </div>
     <div class="jump">
-      <span class="dpick"><span id="hdpickLabel">Jump</span><input type="date" id="habDateJump" aria-label="Jump to a date"></span>
+      <button type="button" class="jumpbtn" id="habDateJump">Jump to a day</button>
       <button type="button" id="habTodayBtn" class="off">Back to today</button>
     </div>
 
@@ -448,6 +498,21 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       <button type="button" id="habAdd">+ Add a habit</button>
       <button type="button" id="habShowAll">Show all</button>
     </div>
+  </div>
+
+  <div class="view off" id="viewLater">
+    <div class="top">
+      <h1 class="date" id="laterTitle">Later<span id="laterSub">Things with no day yet</span></h1>
+      <div class="hdone" id="laterCount"><b>0</b><small>Parked</small></div>
+    </div>
+
+    <div class="capture">
+      <input type="text" id="laterInput" placeholder="Write it down, sort it out later" autocomplete="off" enterkeyhint="done">
+      <button type="button" id="laterAdd">Add</button>
+    </div>
+
+    <button class="banner" id="staleBanner" type="button"></button>
+    <div id="laterList"></div>
   </div>
 
   <div class="foot">
@@ -467,7 +532,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='38', BUILT='30 Sep 2026';
+  var VERSION='45', BUILT='30 Sep 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -830,6 +895,269 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var dn=Math.floor(midnight(today)/86400000);
     document.getElementById('quote').textContent=arr[dn%arr.length];
   }
+
+
+  // ---- later: unscheduled things ----
+  var lOpen=null, lWhere={};
+  function loadLater(){
+    var l=read('meta:later');
+    if(!Array.isArray(l))return [];
+    return l.filter(function(x){return x&&typeof x.t==='string'});
+  }
+  function saveLater(l){write('meta:later',l.slice(0,200))}
+  function ageDays(it){
+    if(!it.c)return 0;
+    var p2=String(it.c).slice(0,10).split('-');
+    var d=new Date(+p2[0],+p2[1]-1,+p2[2]);
+    if(isNaN(d.getTime()))return 0;
+    return Math.max(0,Math.round((midnight(today)-midnight(d))/86400000));
+  }
+  function ageText(n){
+    if(n<1)return 'today';
+    if(n<7)return n+'d';
+    if(n<56)return Math.round(n/7)+'w';
+    return Math.round(n/30)+'mo';
+  }
+  function addLater(t){
+    t=(t||'').trim();
+    if(!t)return;
+    var l=loadLater();
+    l.unshift({id:'l'+Date.now().toString(36),t:t.slice(0,160),c:dayKey(today)});
+    saveLater(l);
+    renderLater();
+  }
+  function removeLater(id){
+    saveLater(loadLater().filter(function(x){return x.id!==id}));
+    renderLater();
+    if(document.getElementById('viewToday').className.indexOf('off')<0)render();
+  }
+
+
+  // place a parked item onto a day, either as the one thing or as a step
+  function placeTodo(text,dateObj,asGoal,force){
+    var k=dayKey(dateObj), here=(k===selKey);
+    var rec=here?data:load(k);
+    if(asGoal){
+      if(rec.goal.trim()&&!force)return {ok:false,why:'goal',existing:rec.goal};
+      rec.goal=text;
+      if(!rec.times||typeof rec.times!=='object')rec.times={};
+      if(!rec.times.set)rec.times.set=stamp();
+    } else {
+      var slot=-1;
+      for(var i=0;i<3;i++){if(!rec.todos[i].t.trim()){slot=i;break}}
+      if(slot<0)return {ok:false,why:'full'};
+      rec.todos[slot].t=text;
+    }
+    if(here){persist();fillFields();render()}
+    else write('day:'+k,rec);
+    return {ok:true};
+  }
+  function dayLabel(d){
+    if(dayKey(d)===tKey)return 'today';
+    if(dayKey(d)===dayKey(shift(today,1)))return 'tomorrow';
+    return DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3);
+  }
+  function schedule(it,d,asGoal,anchor){
+    var r=placeTodo(it.t,d,asGoal,false);
+    if(r.ok){
+      removeLater(it.id);
+      note((asGoal?'One thing set for ':'Step added for ')+dayLabel(d));
+      return;
+    }
+    if(r.why==='goal'){
+      ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has "'+r.existing.slice(0,50)+'" as its one thing.',[
+        {label:'Replace it',danger:true,run:function(){
+          placeTodo(it.t,d,true,true); removeLater(it.id);
+          note('One thing set for '+dayLabel(d));
+        }},
+        {label:'Add as a step',run:function(){
+          var r2=placeTodo(it.t,d,false,false);
+          if(r2.ok){removeLater(it.id);note('Step added for '+dayLabel(d))}
+          else note('That day has no free step slots');
+        }},
+        {label:'Cancel'}
+      ],anchor);
+    } else {
+      ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has three steps written.',[
+        {label:'Make it the one thing',run:function(){schedule(it,d,true,anchor)}},
+        {label:'Cancel'}
+      ],anchor);
+    }
+  }
+
+  function renderLater(){
+    var box=document.getElementById('laterList');
+    box.innerHTML='';
+    var l=loadLater();
+    document.getElementById('laterCount').innerHTML='<b>'+l.length+'</b><small>Parked</small>';
+    document.getElementById('tabLaterBtn').textContent=l.length?('Later '+l.length):'Later';
+
+    var stale=l.filter(function(x){return ageDays(x)>=30});
+    var sb=document.getElementById('staleBanner');
+    if(stale.length){
+      sb.innerHTML='<span>'+stale.length+(stale.length===1?' item has':' items have')+' sat here over a month.</span> Tap to clear or keep.';
+      sb.className='banner on';
+      sb.onclick=function(){
+        ask(stale.length===1?'One item has been here over a month. Things that sit this long are usually things you have decided not to do.':stale.length+' items have been here over a month. Things that sit this long are usually things you have decided not to do.',[
+          {label:'Clear them',danger:true,run:function(){
+            var ids={}; stale.forEach(function(x){ids[x.id]=1});
+            saveLater(loadLater().filter(function(x){return !ids[x.id]}));
+            renderLater();
+          }},
+          {label:'Keep them',run:function(){
+            var l2=loadLater();
+            l2.forEach(function(x){if(ageDays(x)>=30)x.c=dayKey(today)});
+            saveLater(l2); renderLater();
+          }},
+          {label:'Cancel'}
+        ],sb);
+      };
+    } else { sb.className='banner'; sb.onclick=null; }
+
+    if(!l.length){
+      var e=document.createElement('p');
+      e.className='lempty';
+      e.textContent='Nothing parked. Anything you need to do but have not given a day to goes here.';
+      box.appendChild(e);
+      return;
+    }
+    l.forEach(function(it){
+      var row=document.createElement('div');
+      row.className='lrow';
+
+      var tk=document.createElement('button');
+      tk.type='button'; tk.className='ltick';
+      tk.setAttribute('aria-label','Mark done and remove');
+      tk.addEventListener('click',function(){removeLater(it.id)});
+
+      var tx=document.createElement('div');
+      tx.className='ltext'; tx.textContent=it.t;
+
+      var n=ageDays(it);
+      var ag=document.createElement('span');
+      ag.className='lage'+(n>=30?' old':''); ag.textContent=ageText(n);
+
+      var go=document.createElement('button');
+      go.type='button'; go.className='lgo'; go.textContent=(lOpen===it.id)?'Close':'Plan';
+      go.addEventListener('click',function(e){
+        e.stopPropagation();
+        lOpen=(lOpen===it.id)?null:it.id;
+        renderLater();
+      });
+
+      var dl=document.createElement('button');
+      dl.type='button'; dl.className='ldel'; dl.textContent='\u00d7';
+      dl.setAttribute('aria-label','Delete');
+      dl.addEventListener('click',function(e){
+        e.stopPropagation();
+        ask('Delete "'+it.t.slice(0,60)+'"?',[
+          {label:'Delete',danger:true,run:function(){removeLater(it.id)}},
+          {label:'Cancel'}
+        ],row);
+      });
+
+      row.className='lrow'+(lOpen===it.id?' open':'');
+      row.addEventListener('click',function(){
+        lOpen=(lOpen===it.id)?null:it.id;
+        renderLater();
+      });
+      row.appendChild(tk); row.appendChild(tx); row.appendChild(ag);
+      row.appendChild(go); row.appendChild(dl);
+      box.appendChild(row);
+
+      if(lOpen===it.id){
+        var det=document.createElement('div');
+        det.className='ldetail';
+        var asGoal=(lWhere[it.id]==='goal');
+
+        var seg=document.createElement('div');
+        seg.className='lseg';
+        [['The one thing',true],['A small step',false]].forEach(function(o){
+          var b2=document.createElement('button');
+          b2.type='button'; b2.textContent=o[0];
+          if(asGoal===o[1])b2.className='on';
+          b2.addEventListener('click',function(){
+            lWhere[it.id]=o[1]?'goal':'step';
+            renderLater();
+          });
+          seg.appendChild(b2);
+        });
+        det.appendChild(seg);
+
+        var when=document.createElement('div');
+        when.className='lwhen';
+        [['Today',0],['Tomorrow',1]].forEach(function(o){
+          var b3=document.createElement('button');
+          b3.type='button'; b3.textContent=o[0];
+          b3.addEventListener('click',function(){schedule(it,shift(today,o[1]),asGoal,det)});
+          when.appendChild(b3);
+        });
+        var nd=shift(today,2);
+        for(var q=2;q<5;q++){
+          (function(off){
+            var d2=shift(today,off);
+            var b4=document.createElement('button');
+            b4.type='button'; b4.textContent=DAYS[d2.getDay()].slice(0,3);
+            b4.addEventListener('click',function(){schedule(it,d2,asGoal,det)});
+            when.appendChild(b4);
+          })(q);
+        }
+        var pick=document.createElement('button');
+        pick.type='button'; pick.textContent='Pick a day';
+        pick.addEventListener('click',function(e){
+          e.stopPropagation();
+          askDate('Pick a day for "'+it.t.slice(0,44)+'"',today,det,function(d3){
+            schedule(it,d3,asGoal,det);
+          },true);
+        });
+        when.appendChild(pick);
+        det.appendChild(when);
+
+        var hint=document.createElement('div');
+        hint.className='lhint';
+        hint.textContent=asGoal?'It becomes that day\u2019s one thing.':'It drops into the first free step slot on that day.';
+        det.appendChild(hint);
+
+        box.appendChild(det);
+      }
+    });
+  }
+
+  // parked items offered on the Today page when there is a free slot
+  function renderParked(){
+    var el=document.getElementById('parked');
+    el.innerHTML='';
+    if(sel<today){el.className='carry';return}
+    var slot=-1;
+    for(var i=0;i<3;i++){if(!data.todos[i].t.trim()){slot=i;break}}
+    if(slot<0){el.className='carry';return}
+    var l=loadLater();
+    if(!l.length){el.className='carry';return}
+    var lab=document.createElement('span');
+    lab.className='clabel'; lab.textContent='From your Later list';
+    el.appendChild(lab);
+    l.slice(0,3).forEach(function(it){
+      var b=document.createElement('button');
+      b.type='button'; b.textContent=it.t;
+      b.addEventListener('click',function(){
+        if(addToStep(it.t))removeLater(it.id);
+      });
+      el.appendChild(b);
+    });
+    el.className='carry on';
+  }
+
+  document.getElementById('laterAdd').addEventListener('click',function(){
+    var inp=document.getElementById('laterInput');
+    addLater(inp.value); inp.value='';
+    try{inp.focus({preventScroll:true})}catch(e){}
+  });
+  document.getElementById('laterInput').addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      e.preventDefault();
+      addLater(this.value); this.value='';
+    }
+  });
 
   // ---- habits ----
   // cad: daily | days (certain weekdays) | times (n per week) | weekly | fortnightly
@@ -1194,8 +1522,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     document.getElementById('habDateLine').childNodes[0].nodeValue=isToday?'Today':DAYS[hsel.getDay()];
     document.getElementById('habSubLine').textContent=hsel.getDate()+' '+MONTHS[hsel.getMonth()];
     document.getElementById('habTodayBtn').className=isToday?'off':'';
-    document.getElementById('habDateJump').value=dayKey(hsel);
-    document.getElementById('hdpickLabel').textContent=hsel.getDate()+' '+MONTHS[hsel.getMonth()].slice(0,3);
+    document.getElementById('habDateJump').textContent=hsel.getDate()+' '+MONTHS[hsel.getMonth()].slice(0,3);
 
     var list=loadHabits();
     var due=0, got=0;
@@ -1339,11 +1666,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   });
   document.getElementById('hPrevWk').addEventListener('click',function(){hsel=shift(hsel,-7);hOpen=null;renderHabits()});
   document.getElementById('hNextWk').addEventListener('click',function(){hsel=shift(hsel,7);hOpen=null;renderHabits()});
-  document.getElementById('habDateJump').addEventListener('change',function(){
-    var v=this.value;
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(v))return;
-    var p2=v.split('-');
-    hsel=new Date(+p2[0],+p2[1]-1,+p2[2]); hOpen=null; renderHabits();
+  document.getElementById('habDateJump').addEventListener('click',function(){
+    askDate('Jump to a day',hsel,null,function(d){
+      hsel=midnight(d); hOpen=null; renderHabits();
+    });
   });
 
   function stagger(view){
@@ -1360,17 +1686,20 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     }
   }
   function showTab(which){
-    var t=(which==='habits');
-    document.getElementById('viewToday').className='view'+(t?' off':'');
-    document.getElementById('viewHabits').className='view'+(t?'':' off');
-    document.getElementById('tabTodayBtn').className=t?'':'on';
-    document.getElementById('tabHabitsBtn').className=t?'on':'';
-    if(t)renderHabits();
-    stagger(document.getElementById(t?'viewHabits':'viewToday'));
+    var ids={today:'viewToday',habits:'viewHabits',later:'viewLater'};
+    var btns={today:'tabTodayBtn',habits:'tabHabitsBtn',later:'tabLaterBtn'};
+    Object.keys(ids).forEach(function(k){
+      document.getElementById(ids[k]).className='view'+(k===which?'':' off');
+      document.getElementById(btns[k]).className=(k===which)?'on':'';
+    });
+    if(which==='habits')renderHabits();
+    if(which==='later')renderLater();
+    stagger(document.getElementById(ids[which]));
     window.scrollTo({top:0});
   }
   document.getElementById('tabTodayBtn').addEventListener('click',function(){showTab('today')});
   document.getElementById('tabHabitsBtn').addEventListener('click',function(){showTab('habits')});
+  document.getElementById('tabLaterBtn').addEventListener('click',function(){showTab('later')});
 
   function renderYnote(){
     var el=document.getElementById('ynote');
@@ -1574,6 +1903,90 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     document.getElementById('backdrop').className='backdrop on';
     panel.className='panel on modal';
     try{ inp.focus({preventScroll:true}); }catch(e){ try{inp.focus()}catch(e2){} }
+  }
+
+
+  // a month calendar in the floating panel, used anywhere a day is picked
+  function askDate(msg,startFrom,anchor,cb,confirmFirst){
+    var view=new Date((startFrom||today).getFullYear(),(startFrom||today).getMonth(),1), picked=null;
+    function draw(){
+      panelMsg.textContent=msg;
+      panelRow.innerHTML='';
+      var cal=document.createElement('div'); cal.className='cal';
+
+      var top=document.createElement('div'); top.className='cal-top';
+      var prev=document.createElement('button'); prev.type='button'; prev.innerHTML='&#8249;';
+      prev.setAttribute('aria-label','Previous month');
+      var lab=document.createElement('b'); lab.textContent=MONTHS[view.getMonth()]+' '+view.getFullYear();
+      var next=document.createElement('button'); next.type='button'; next.innerHTML='&#8250;';
+      next.setAttribute('aria-label','Next month');
+      prev.addEventListener('click',function(){view=new Date(view.getFullYear(),view.getMonth()-1,1);draw()});
+      next.addEventListener('click',function(){view=new Date(view.getFullYear(),view.getMonth()+1,1);draw()});
+      top.appendChild(prev); top.appendChild(lab); top.appendChild(next);
+      cal.appendChild(top);
+
+      var wd=document.createElement('div'); wd.className='cal-wd';
+      ['M','T','W','T','F','S','S'].forEach(function(x){
+        var sp=document.createElement('span'); sp.textContent=x; wd.appendChild(sp);
+      });
+      cal.appendChild(wd);
+
+      var grid=document.createElement('div'); grid.className='cal-grid';
+      var first=new Date(view.getFullYear(),view.getMonth(),1);
+      var lead=(first.getDay()+6)%7;
+      var days=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+      for(var i=0;i<lead;i++){
+        var pd=document.createElement('button');
+        pd.type='button'; pd.className='pad'; pd.disabled=true; pd.textContent='';
+        grid.appendChild(pd);
+      }
+      for(var dnum=1;dnum<=days;dnum++){
+        (function(num){
+          var d=new Date(view.getFullYear(),view.getMonth(),num);
+          var k=dayKey(d), rec=load(k);
+          var cls='';
+          if(k===tKey)cls+=' today';
+          if(d<today)cls+=' past';
+          if(!empty(rec))cls+=' has';
+          if(picked&&dayKey(picked)===k)cls+=' on';
+          var b=document.createElement('button');
+          b.type='button'; b.className=cls.trim(); b.textContent=num;
+          b.setAttribute('aria-label',DAYS[d.getDay()]+' '+num+' '+MONTHS[view.getMonth()]);
+          b.addEventListener('click',function(){
+            if(confirmFirst){picked=d;draw()}
+            else{closePanel();cb(d)}
+          });
+          grid.appendChild(b);
+        })(dnum);
+      }
+      cal.appendChild(grid);
+
+      var foot=document.createElement('div'); foot.className='cal-foot';
+      var leg=document.createElement('span'); leg.className='legend';
+      leg.textContent=confirmFirst
+        ? (picked?(DAYS[picked.getDay()]+' '+picked.getDate()+' '+MONTHS[picked.getMonth()].slice(0,3)):'Pick a day, then OK')
+        : 'Dot means that day already has something.';
+      var cancel=document.createElement('button'); cancel.type='button'; cancel.textContent='Cancel';
+      cancel.addEventListener('click',closePanel);
+      foot.appendChild(leg); foot.appendChild(cancel);
+      if(confirmFirst){
+        var okb=document.createElement('button');
+        okb.type='button'; okb.className='ok'; okb.textContent='OK';
+        if(!picked)okb.disabled=true;
+        okb.addEventListener('click',function(){
+          if(!picked)return;
+          var chosen=picked;
+          closePanel(); cb(chosen);
+        });
+        foot.appendChild(okb);
+      }
+      cal.appendChild(foot);
+
+      panelRow.appendChild(cal);
+      document.getElementById('backdrop').className='backdrop on';
+      panel.className='panel on modal';
+    }
+    draw();
   }
 
   function runSearch(q){
@@ -1865,8 +2278,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     document.getElementById('subLine').textContent=sel.getDate()+' '+MONTHS[sel.getMonth()];
     heroHead.textContent=isToday?'The one thing today':'The one thing on '+DAYS[sel.getDay()];
     document.getElementById('todayBtn').className=isToday?'off':'';
-    document.getElementById('dateJump').value=selKey;
-    document.getElementById('dpickLabel').textContent=sel.getDate()+' '+MONTHS[sel.getMonth()].slice(0,3);
+    document.getElementById('dateJump').textContent=sel.getDate()+' '+MONTHS[sel.getMonth()].slice(0,3);
 
     var thisWk=(wkKey===weekKey(today));
     document.getElementById('weeklyLabel').textContent=thisWk?'This week':'Week of '+weekStart(sel).getDate()+' '+MONTHS[weekStart(sel).getMonth()];
@@ -1913,6 +2325,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     renderWeek();
     renderYnote();
     renderCarry();
+    renderParked();
     renderCommon();
     renderMonth();
     renderReview(thisWk);
@@ -2011,11 +2424,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   document.getElementById('prevWk').addEventListener('click',function(){select(shift(sel,-7))});
   document.getElementById('nextWk').addEventListener('click',function(){select(shift(sel,7))});
   document.getElementById('todayBtn').addEventListener('click',function(){select(new Date())});
-  document.getElementById('dateJump').addEventListener('change',function(){
-    var v=this.value;
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(v))return;
-    var p=v.split('-');
-    select(new Date(+p[0],+p[1]-1,+p[2]));
+  document.getElementById('dateJump').addEventListener('click',function(){
+    askDate('Jump to a day',sel,null,function(d){select(d)});
   });
 
   document.getElementById('exportBtn').addEventListener('click',function(){
@@ -2065,6 +2475,12 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       if(w.next.trim())out+='  Next week: '+w.next+'\n';
       out+='\n';
     });
+    var lt2=loadLater();
+    if(lt2.length){
+      out+='=== LATER, NOT YET SCHEDULED ===\n\n';
+      lt2.forEach(function(it){out+='  '+it.t+'   (added '+(it.c||'?')+')\n'});
+      out+='\n';
+    }
     out+='=== HABITS ===\n\n';
     var hl=loadHabits();
     hl.forEach(function(h){
@@ -2171,6 +2587,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     });
     var hd=read('meta:habits'); if(Array.isArray(hd))pack.habitDefs=hd;
     var cm=read('meta:common'); if(Array.isArray(cm))pack.common=cm;
+    var lt=read('meta:later'); if(Array.isArray(lt))pack.later=lt;
     return pack;
   }
 
@@ -2234,6 +2651,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     });
     if(Array.isArray(pack.habitDefs)&&(mode==='replace'||!read('meta:habits')))write('meta:habits',pack.habitDefs);
     if(Array.isArray(pack.common)&&(mode==='replace'||!read('meta:common')))write('meta:common',pack.common);
+    if(Array.isArray(pack.later)&&(mode==='replace'||!read('meta:later')))write('meta:later',pack.later);
+    if(typeof renderLater==='function')renderLater();
     if(typeof renderHabits==='function')renderHabits();
     data=load(selKey); wdata=loadWk(wkKey);
     fillFields(); render();
@@ -2320,6 +2739,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   render();
   renderBkBanner();
   resetNote();
+  renderLater();
   stagger(document.getElementById('viewToday'));
   window.addEventListener('resize',autogrow);
 })();
