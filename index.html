@@ -103,6 +103,9 @@ body{
 .tick.wk[aria-pressed="true"]{background:var(--c3);border-color:var(--c3)}
 .tick[aria-pressed="true"]::after{content:"";position:absolute;left:50%;top:46%;width:28%;height:52%;border:solid var(--surface);border-width:0 2.5px 2.5px 0;transform:translate(-50%,-50%) rotate(45deg)}
 
+.rowmenu{flex:none;background:transparent;border:0;color:var(--muted);font-size:17px;line-height:1;padding:3px 2px 3px 8px;cursor:pointer;opacity:.6}
+.rowmenu:active{transform:scale(.9)}
+.goal-row .rowmenu{align-self:flex-start;margin-top:4px}
 .todos-head{font-size:12px;font-weight:600;color:var(--c2);margin-bottom:8px}
 .steps{background:linear-gradient(165deg, color-mix(in oklab, var(--c2) 6%, var(--surface)), var(--surface) 62%);border:1px solid var(--line);border-radius:14px;padding:4px 16px}
 .todo{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
@@ -226,7 +229,7 @@ body{
 .lrow{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:7px}
 .lrow .ltick{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid color-mix(in oklab,var(--c1) 45%,var(--line));background:transparent;cursor:pointer;padding:0}
 .lrow .ltick:active{transform:scale(.9)}
-.ltext{flex:1;min-width:0;font-size:15px;line-height:1.35;word-break:break-word}
+.ltext{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-family:inherit;font-size:16px;line-height:1.35;padding:3px 0}
 .lage{flex:none;font-size:11px;font-weight:600;color:var(--muted)}
 .lage.old{color:var(--c3)}
 .lgo{flex:none;border:1px solid var(--line);background:transparent;color:var(--c2);font-family:inherit;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:20px;cursor:pointer}
@@ -309,14 +312,28 @@ input:focus,textarea:focus{outline-offset:2px}
 .fbtns{display:flex;gap:7px;flex:none}
 .foot button{background:var(--surface);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;cursor:pointer;flex:none}
 .foot button:hover{border-color:var(--c2);color:var(--c2)}
+.steps .panel{margin:0 -16px 4px;border-radius:0;border-left:0;border-right:0;background:color-mix(in oklab,var(--c2) 7%,var(--surface))}
 .panel{display:none;margin-top:14px;background:var(--surface);border:1px solid var(--c2);border-radius:12px;padding:14px}
 .panel.on{display:block}
 .panel p{margin:0 0 11px;font-size:14px;line-height:1.45}
 .panel .prow{display:flex;gap:8px;flex-wrap:wrap}
+.panel .prow.stack{display:block}
+.panel p:empty{display:none;margin:0}
+.panel .lseg{display:flex;gap:6px;margin:0 0 10px}
+.panel .lseg button{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:12.5px;font-weight:600;padding:9px 6px;border-radius:10px}
+.panel .lseg button.on{border-color:var(--c2);color:var(--c2);background:color-mix(in oklab,var(--c2) 12%,transparent)}
+.panel .lwhen{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 9px}
+.panel .lwhen button{border:1px solid var(--line);background:transparent;color:var(--ink);font-size:12px;font-weight:500;padding:7px 13px;border-radius:20px}
+.panel .lhint{font-size:11.5px;color:var(--muted);margin:0 0 9px}
 .panel button{font-family:inherit;font-size:13px;font-weight:500;padding:8px 13px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
 .panel button.danger{border-color:var(--c3);color:var(--c3)}
 #fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:60;display:none}
 #fx.on{display:block}
+.toast{position:fixed;left:50%;transform:translate(-50%,-14px);top:calc(env(safe-area-inset-top, 0px) + 14px);z-index:70;
+  max-width:88%;padding:11px 16px;border-radius:14px;font-size:13.5px;font-weight:500;line-height:1.35;text-align:center;
+  background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.28);
+  opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease}
+.toast.on{opacity:1;transform:translate(-50%,0)}
 .backdrop{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:40}
 .backdrop.on{display:block}
 .panel.modal{position:fixed;left:14px;right:14px;top:calc(env(safe-area-inset-top, 0px) + 64px);max-width:520px;margin:0 auto;z-index:50;box-shadow:0 14px 44px rgba(0,0,0,.35)}
@@ -406,6 +423,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     <div class="goal-row">
       <button class="tick" id="goalTick" aria-pressed="false" aria-label="Mark goal done"></button>
       <textarea class="goal-text" id="goalText" rows="1" placeholder="What has to happen?"></textarea>
+      <button class="rowmenu" id="goalMenu" type="button" aria-label="Options for the one thing">&#8943;</button>
     </div>
   </div>
 
@@ -525,6 +543,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   </div>
   <div class="ver" id="ver"></div>
   <div class="backdrop" id="backdrop"></div>
+  <div class="toast" id="toast"></div>
   <canvas id="fx"></canvas>
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none">
   <div class="panel" id="panel"><p id="panelMsg"></p><div class="prow" id="panelRow"></div></div>
@@ -532,7 +551,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='45', BUILT='30 Sep 2026';
+  var VERSION='51', BUILT='30 Sep 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -633,7 +652,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     row.className='todo';
     row.innerHTML='<span class="num">'+(i+1)+'</span>'+
       '<button class="tick sq" aria-pressed="false" aria-label="Mark step '+(i+1)+' done"></button>'+
-      '<input type="text" autocomplete="off" placeholder="Small step '+(i+1)+'">';
+      '<input type="text" autocomplete="off" placeholder="Small step '+(i+1)+'">'+
+      '<button class="rowmenu" type="button" aria-label="Options for step '+(i+1)+'">&#8943;</button>';
     todosBox.appendChild(row);
   }
   var rows=todosBox.querySelectorAll('.todo');
@@ -1030,8 +1050,22 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       tk.setAttribute('aria-label','Mark done and remove');
       tk.addEventListener('click',function(){removeLater(it.id)});
 
-      var tx=document.createElement('div');
-      tx.className='ltext'; tx.textContent=it.t;
+      var tx=document.createElement('input');
+      tx.type='text'; tx.className='ltext'; tx.value=it.t;
+      tx.setAttribute('aria-label','Edit this item');
+      var dbt=mkDebounce();
+      tx.addEventListener('click',function(e){e.stopPropagation()});
+      tx.addEventListener('input',function(){
+        var v=tx.value;
+        dbt(function(){
+          var l2=loadLater();
+          for(var z=0;z<l2.length;z++){if(l2[z].id===it.id)l2[z].t=v.slice(0,160)}
+          saveLater(l2);
+        });
+      });
+      tx.addEventListener('blur',function(){
+        if(!tx.value.trim())removeLater(it.id);
+      });
 
       var n=ageDays(it);
       var ag=document.createElement('span');
@@ -1057,10 +1091,6 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       });
 
       row.className='lrow'+(lOpen===it.id?' open':'');
-      row.addEventListener('click',function(){
-        lOpen=(lOpen===it.id)?null:it.id;
-        renderLater();
-      });
       row.appendChild(tk); row.appendChild(tx); row.appendChild(ag);
       row.appendChild(go); row.appendChild(dl);
       box.appendChild(row);
@@ -1701,6 +1731,167 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   document.getElementById('tabHabitsBtn').addEventListener('click',function(){showTab('habits')});
   document.getElementById('tabLaterBtn').addEventListener('click',function(){showTab('later')});
 
+
+  // close gaps in the three steps after one is moved or removed
+  function compactSteps(rec){
+    var items=[];
+    for(var i=0;i<3;i++){
+      if(rec.todos[i].t.trim())items.push({t:rec.todos[i].t,d:rec.todos[i].d,time:rec.times?rec.times['s'+i]:null});
+    }
+    for(var j=0;j<3;j++){
+      rec.todos[j]=items[j]?{t:items[j].t,d:items[j].d}:{t:'',d:false};
+    }
+    if(!rec.times||typeof rec.times!=='object')rec.times={};
+    for(var k=0;k<3;k++)delete rec.times['s'+k];
+    items.forEach(function(it,idx){ if(it.time)rec.times['s'+idx]=it.time });
+  }
+
+  // move or re-file something already on a day
+  function itemMenu(isGoal,idx,anchor){
+    var text=isGoal?data.goal:data.todos[idx].t;
+    if(!text.trim())return;
+    var short=text.length>52?text.slice(0,52)+'...':text;
+
+    function dropSource(){
+      if(isGoal){
+        data.goal=''; data.goalDone=false;
+        if(data.times){delete data.times.goal;delete data.times.set}
+      } else {
+        data.todos[idx]={t:'',d:false};
+        if(data.times)delete data.times['s'+idx];
+        compactSteps(data);
+      }
+      persist(); fillFields(); render();
+    }
+    function landOn(d,wantGoal){
+      if(dayKey(d)===selKey){
+        if(wantGoal===isGoal){note('It is already there');return}
+        convertHere(wantGoal); return;
+      }
+      var r=placeTodo(text,d,wantGoal,false);
+      if(r.ok){dropSource();note('Moved to '+dayLabel(d));return}
+      if(r.why==='goal'){
+        ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has "'+r.existing.slice(0,46)+'" as its one thing.',[
+          {label:'Replace it',danger:true,run:function(){placeTodo(text,d,true,true);dropSource();note('Moved to '+dayLabel(d))}},
+          {label:'Add as a step',run:function(){
+            var r2=placeTodo(text,d,false,false);
+            if(r2.ok){dropSource();note('Moved to '+dayLabel(d))}else note('That day has no free step slots');
+          }},
+          {label:'Cancel'}
+        ],anchor);
+      } else {
+        ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has three steps.',[
+          {label:'Make it the one thing',run:function(){landOn(d,true)}},
+          {label:'Cancel'}
+        ],anchor);
+      }
+    }
+
+    function convertHere(wantGoal){
+      if(wantGoal){
+        if(data.goal.trim()){
+          ask(dayLabel(sel).charAt(0).toUpperCase()+dayLabel(sel).slice(1)+' already has "'+data.goal.slice(0,44)+'" as its one thing.',[
+            {label:'Replace it',danger:true,run:function(){
+              data.goal=text; data.goalDone=false;
+              data.todos[idx]={t:'',d:false};
+              if(data.times)delete data.times['s'+idx];
+              compactSteps(data); persist(); fillFields(); render();
+              note('Set as the one thing');
+            }},
+            {label:'Cancel'}
+          ],anchor);
+          return;
+        }
+        data.goal=text; data.goalDone=data.todos[idx].d;
+        data.todos[idx]={t:'',d:false};
+        if(data.times)delete data.times['s'+idx];
+        compactSteps(data); persist(); fillFields(); render();
+        note('Set as the one thing');
+      } else {
+        var slot=-1;
+        for(var i=0;i<3;i++){if(!data.todos[i].t.trim()){slot=i;break}}
+        if(slot<0){note('All three steps are full');return}
+        data.todos[slot].t=text;
+        data.goal=''; data.goalDone=false;
+        if(data.times)delete data.times.goal;
+        persist(); fillFields(); render();
+        note('Moved into the steps');
+      }
+    }
+
+    var asGoal=isGoal;
+    function draw(){
+      panelCustom('',function(host){
+        var seg=document.createElement('div');
+        seg.className='lseg';
+        [['The one thing',true],['A small step',false]].forEach(function(o){
+          var b=document.createElement('button');
+          b.type='button'; b.textContent=o[0];
+          if(asGoal===o[1])b.className='on';
+          b.addEventListener('click',function(){asGoal=o[1];draw()});
+          seg.appendChild(b);
+        });
+        host.appendChild(seg);
+
+        var when=document.createElement('div');
+        when.className='lwhen';
+        [['Today',0],['Tomorrow',1]].forEach(function(o){
+          var b2=document.createElement('button');
+          b2.type='button'; b2.textContent=o[0];
+          b2.addEventListener('click',function(){closePanel();landOn(shift(today,o[1]),asGoal)});
+          when.appendChild(b2);
+        });
+        for(var q=2;q<5;q++){
+          (function(off){
+            var d2=shift(today,off);
+            var b3=document.createElement('button');
+            b3.type='button'; b3.textContent=DAYS[d2.getDay()].slice(0,3);
+            b3.addEventListener('click',function(){closePanel();landOn(d2,asGoal)});
+            when.appendChild(b3);
+          })(q);
+        }
+        var pick=document.createElement('button');
+        pick.type='button'; pick.textContent='Pick a day';
+        pick.addEventListener('click',function(){
+          askDate('Move "'+short+'" from '+dayLabel(sel)+' to which day?',sel,anchor,function(d){landOn(d,asGoal)},true);
+        });
+        when.appendChild(pick);
+        host.appendChild(when);
+
+        var hint=document.createElement('div');
+        hint.className='lhint';
+        hint.textContent=asGoal?'It becomes that day\u2019s one thing.':'It drops into the first free step slot on that day.';
+        host.appendChild(hint);
+
+        var more=document.createElement('div');
+        more.className='lwhen';
+        function chip(label,fn,danger){
+          var b4=document.createElement('button');
+          b4.type='button'; b4.textContent=label;
+          if(danger){b4.style.borderColor='var(--c3)';b4.style.color='var(--c3)'}
+          b4.addEventListener('click',fn);
+          more.appendChild(b4);
+        }
+        chip('Send to Later',function(){
+          closePanel();
+          var l=loadLater();
+          l.unshift({id:'l'+Date.now().toString(36),t:text.slice(0,160),c:dayKey(today)});
+          saveLater(l); dropSource(); renderLater(); note('Parked in Later');
+        });
+        chip('Delete',function(){
+          closePanel();
+          ask('Delete "'+short+'"?',[
+            {label:'Delete',danger:true,run:function(){dropSource();note('Deleted')}},
+            {label:'Cancel'}
+          ],anchor);
+        },true);
+        chip('Close',function(){closePanel()});
+        host.appendChild(more);
+      },anchor);
+    }
+    draw();
+  }
+
   function renderYnote(){
     var el=document.getElementById('ynote');
     var wk=weekStart(sel), txt='', jump=null;
@@ -1888,6 +2079,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
   function askText(msg,placeholder,cb,def){
     panelMsg.textContent=msg;
+    panelRow.className='prow';
     panelRow.innerHTML='';
     var inp=document.createElement('input');
     inp.type='text'; inp.placeholder=placeholder||''; inp.className='ptext';
@@ -1911,6 +2103,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var view=new Date((startFrom||today).getFullYear(),(startFrom||today).getMonth(),1), picked=null;
     function draw(){
       panelMsg.textContent=msg;
+      panelRow.className='prow';
       panelRow.innerHTML='';
       var cal=document.createElement('div'); cal.className='cal';
 
@@ -2397,8 +2590,13 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     persist();render();
     if(!was&&full(data)&&sel<=today)celebrate('day');
   });
+  document.getElementById('goalMenu').addEventListener('click',function(){
+    itemMenu(true,0,document.getElementById('hero'));
+  });
   rows.forEach(function(row,idx){
     var input=row.querySelector('input'), btn=row.querySelector('button');
+    var mb=row.querySelector('.rowmenu');
+    if(mb)mb.addEventListener('click',function(){itemMenu(false,idx,row)});
     input.addEventListener('input',function(){data.todos[idx].t=input.value;dbDay(function(){persist();render()})});
     btn.addEventListener('click',function(){
       var was=full(data);
@@ -2528,8 +2726,19 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(bd)bd.className='backdrop';
     if(panel.parentNode!==panelHome)panelHome.appendChild(panel);
   }
+  function panelCustom(msg,build,anchor){
+    panelMsg.textContent=msg||'';
+    panelRow.className='prow stack';
+    panelRow.innerHTML='';
+    build(panelRow);
+    if(anchor&&anchor.parentNode){anchor.parentNode.insertBefore(panel,anchor.nextSibling)}
+    else if(panel.parentNode!==panelHome){panelHome.appendChild(panel)}
+    panel.className='panel on';
+    setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'center'})},40);
+  }
   function ask(msg,choices,anchor){
     panelMsg.textContent=msg;
+    panelRow.className='prow';
     panelRow.innerHTML='';
     choices.forEach(function(c){
       var b=document.createElement('button');
@@ -2557,9 +2766,19 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   }
   function resetNote(){document.getElementById('footNote').textContent=bkText()}
 
+  var toastTimer=null;
+  function toast(t){
+    var el=document.getElementById('toast');
+    if(!el)return;
+    el.textContent=t;
+    el.className='toast on';
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){el.className='toast'},2600);
+  }
   function note(t){
     var n=document.getElementById('footNote');
     n.textContent=t;
+    toast(t);
     setTimeout(resetNote,4000);
   }
 
