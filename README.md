@@ -115,14 +115,11 @@ version in `sw.js` is the fix. It never touches saved data.
 - Text inputs must be 16px or larger or iOS zooms when you tap them.
 - The Google Fonts stylesheet is loaded non-blocking and cached by `sw.js`. Both are needed for the app to open offline.
 
-## If you are an AI assistant reading this
+##
 
-The owner is not a developer. Explain in plain English, avoid jargon, and assume
-no tooling beyond a browser and the GitHub web interface. Keep the app a single
-self contained file.
+Keep the app a single self contained file.
 
 Before changing anything: the storage keys above are load bearing, renaming one
 loses that history. When editing by find and replace, assert that the search text
-actually matched; a silently failed edit has shipped before and was found by the
-owner rather than by testing. Test logic (streaks, generators, date maths) by
+actually matched. Test logic (streaks, generators, date maths) by
 running it before publishing, not by reading it.
