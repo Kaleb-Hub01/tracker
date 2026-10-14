@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v69, 13 Oct 2026
+<!-- v70, 14 Oct 2026
      offline loading fixed (fonts no longer block rendering)
      steps, weekly goal and Later items expand when tapped
      undo when ticking or deleting in Later
@@ -710,7 +710,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='69', BUILT='13 Oct 2026';
+  var VERSION='70', BUILT='14 Oct 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -4198,39 +4198,192 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     }
   }
 
-  function applyRestore(pack,mode){
-    var added=0, skipped=0;
-    if(mode==='replace'){
-      allKeys('day:').forEach(function(k){try{localStorage.removeItem('day:'+k)}catch(e){}});
-      allKeys('week:').forEach(function(k){try{localStorage.removeItem('week:'+k)}catch(e){}});
+  // Merge helpers. The rule throughout: the backup fills gaps, and never
+  // overwrites anything that is on the device now. Without these, "add missing
+  // only" skipped a whole day or the whole Later list if it had any content,
+  // so a single deleted item never came back.
+  function mergeDay(cur,bak){
+    var n=0, i, j, s;
+    if(!cur.goal.trim()&&bak.goal&&String(bak.goal).trim()){
+      cur.goal=bak.goal; cur.goalDone=!!bak.goalDone; n++;
+      if(bak.times){
+        if(bak.times.goal)cur.times.goal=bak.times.goal;
+        if(bak.times.set)cur.times.set=bak.times.set;
+      }
     }
+    var have={};
+    for(i=0;i<3;i++){var ct=cur.todos[i].t.trim().toLowerCase();if(ct)have[ct]=1}
+    var bt=Array.isArray(bak.todos)?bak.todos:[];
+    for(j=0;j<bt.length&&j<3;j++){
+      var txt=bt[j]?String(bt[j].t||'').trim():'';
+      if(!txt||have[txt.toLowerCase()])continue;
+      var slot=-1;
+      for(s=0;s<3;s++){if(!cur.todos[s].t.trim()){slot=s;break}}
+      if(slot<0)continue;
+      cur.todos[slot]={t:bt[j].t,d:!!bt[j].d,moved:bt[j].moved||''};
+      if(bak.times&&bak.times['s'+j])cur.times['s'+slot]=bak.times['s'+j];
+      have[txt.toLowerCase()]=1;
+      n++;
+    }
+    if(!cur.rate&&bak.rate){cur.rate=bak.rate;n++}
+    if(!cur.note.trim()&&bak.note&&String(bak.note).trim()){cur.note=bak.note;n++}
+    if(!cur.rest&&bak.rest){cur.rest=true;n++}
+    if(!cur.restWhy.trim()&&bak.restWhy&&String(bak.restWhy).trim()){cur.restWhy=bak.restWhy;n++}
+    if(!cur.tag&&bak.tag){cur.tag=bak.tag;n++}
+    return n;
+  }
+  function mergeWeek(cur,bak){
+    var n=0;
+    ['goal','worked','blocked','change','next'].forEach(function(f){
+      if(!String(cur[f]||'').trim()&&bak[f]&&String(bak[f]).trim()){cur[f]=bak[f];n++}
+    });
+    if(!cur.goalDone&&bak.goalDone)cur.goalDone=true;
+    if(!cur.score&&bak.score){cur.score=bak.score;n++}
+    return n;
+  }
+  function mergeHabRec(cur,bak){
+    var n=0;
+    ['ticks','notes','text','log','times'].forEach(function(grp){
+      var b=bak[grp];
+      if(!b||typeof b!=='object')return;
+      if(!cur[grp]||typeof cur[grp]!=='object')cur[grp]={};
+      Object.keys(b).forEach(function(id){
+        if(cur[grp][id]===undefined){cur[grp][id]=b[id];if(grp==='ticks')n++}
+      });
+    });
+    return n;
+  }
+  function mergeById(cur,bak){
+    var n=0, have={};
+    cur.forEach(function(x){if(x&&x.id)have[x.id]=1});
+    bak.forEach(function(x){if(x&&x.id&&!have[x.id]){cur.push(x);n++}});
+    return n;
+  }
+  // Later keeps the backup's order for old items, and anything added since
+  // stays at the top, because the list reads newest first.
+  function mergeLater(cur,bak){
+    var inBak={}, inCur={}, n=0;
+    bak.forEach(function(x){if(x&&x.id)inBak[x.id]=x});
+    cur.forEach(function(x){if(x&&x.id)inCur[x.id]=x});
+    var fresh=cur.filter(function(x){return x&&x.id&&!inBak[x.id]});
+    var rest=[];
+    bak.forEach(function(x){
+      if(!x||!x.id)return;
+      if(inCur[x.id]){rest.push(inCur[x.id])}
+      else{rest.push(x);n++}
+    });
+    return {list:fresh.concat(rest),added:n};
+  }
+
+  function applyRestore(pack,mode){
+    var days=0, items=0, later=0, hab=0, other=0, noRoom=0;
+
+    if(mode==='replace'){
+      ['day:','week:','hab:','habw:','habf:','dinner:','shop:'].forEach(function(pre){
+        allKeys(pre).forEach(function(k){try{localStorage.removeItem(pre+k)}catch(e){}});
+      });
+    }
+
     Object.keys(pack.days||{}).forEach(function(k){
-      if(mode==='merge'&&!empty(load(k))){skipped++;return}
-      write('day:'+k,pack.days[k]); added++;
+      var bak=pack.days[k];
+      if(mode==='replace'||empty(load(k))){write('day:'+k,bak);days++;return}
+      var cur=load(k);
+      var before=0;
+      for(var i=0;i<3;i++){if(!cur.todos[i].t.trim())before++}
+      var wantSlots=0;
+      var bt=Array.isArray(bak.todos)?bak.todos:[];
+      for(var j=0;j<bt.length&&j<3;j++){if(bt[j]&&String(bt[j].t||'').trim())wantSlots++}
+      var n=mergeDay(cur,bak);
+      if(n){write('day:'+k,cur);days++;items+=n}
+      if(wantSlots>before)noRoom++;
     });
+
     Object.keys(pack.weeks||{}).forEach(function(k){
-      if(mode==='merge'&&wkUsed(loadWk(k)))return;
-      write('week:'+k,pack.weeks[k]);
+      var bak=pack.weeks[k];
+      if(mode==='replace'||!wkUsed(loadWk(k))){write('week:'+k,bak);return}
+      var cur=loadWk(k);
+      if(mergeWeek(cur,bak))write('week:'+k,cur);
     });
+
     Object.keys(pack.habits||{}).forEach(function(k){
-      if(mode==='merge'&&read(k))return;
-      write(k,pack.habits[k]);
+      var bak=pack.habits[k];
+      var cur=read(k);
+      if(mode==='replace'||!cur||typeof cur!=='object'){write(k,bak);return}
+      hab+=mergeHabRec(cur,bak);
+      write(k,cur);
     });
-    if(Array.isArray(pack.habitDefs)&&(mode==='replace'||!read('meta:habits')))write('meta:habits',pack.habitDefs);
-    if(Array.isArray(pack.common)&&(mode==='replace'||!read('meta:common')))write('meta:common',pack.common);
-    if(Array.isArray(pack.later)&&(mode==='replace'||!read('meta:later')))write('meta:later',pack.later);
-    if(Array.isArray(pack.dishes)&&(mode==='replace'||!read('meta:dishes')))write('meta:dishes',pack.dishes);
+
+    function mergeMetaList(key,fromPack){
+      if(!Array.isArray(fromPack))return 0;
+      var cur=read(key);
+      if(mode==='replace'||!Array.isArray(cur)||!cur.length){write(key,fromPack);return 0}
+      var n=mergeById(cur,fromPack);
+      if(n)write(key,cur);
+      return n;
+    }
+    other+=mergeMetaList('meta:habits',pack.habitDefs);
+    other+=mergeMetaList('meta:dishes',pack.dishes);
+
+    if(Array.isArray(pack.common)){
+      var cc=read('meta:common');
+      if(mode==='replace'||!Array.isArray(cc)||!cc.length){write('meta:common',pack.common)}
+      else{
+        var seen={}, cn=0;
+        cc.forEach(function(x){seen[x]=1});
+        pack.common.forEach(function(x){if(!seen[x]){cc.push(x);cn++}});
+        if(cn)write('meta:common',cc);
+        other+=cn;
+      }
+    }
+
+    if(Array.isArray(pack.later)){
+      var cl=read('meta:later');
+      if(mode==='replace'||!Array.isArray(cl)||!cl.length){write('meta:later',pack.later);later+=pack.later.length}
+      else{
+        var res=mergeLater(cl,pack.later);
+        if(res.added)write('meta:later',res.list);
+        later+=res.added;
+      }
+    }
+
     if(pack.dinnerRules&&(mode==='replace'||!read('meta:dinnerRules')))write('meta:dinnerRules',pack.dinnerRules);
     if(pack.dinnerCfg&&(mode==='replace'||!read('meta:dinnerCfg')))write('meta:dinnerCfg',pack.dinnerCfg);
+
     Object.keys(pack.dinners||{}).forEach(function(k){
-      if(mode==='merge'&&read(k))return;
-      write(k,pack.dinners[k]);
+      var bak=pack.dinners[k], cur=read(k);
+      if(mode==='replace'||!cur||typeof cur!=='object'){write(k,bak);return}
+      if(k.indexOf('shop:')===0){
+        var ci=Array.isArray(cur.items)?cur.items:[];
+        var bi=Array.isArray(bak.items)?bak.items:[];
+        var hk={}, sn=0;
+        ci.forEach(function(x){if(x&&x.key)hk[x.key]=1});
+        bi.forEach(function(x){if(x&&x.key&&!hk[x.key]){ci.push(x);sn++}});
+        if(sn){write(k,{items:ci});other+=sn}
+        return;
+      }
+      if(!cur.id&&bak.id){write(k,bak);other++}
     });
+
     if(typeof renderLater==='function')renderLater();
     if(typeof renderHabits==='function')renderHabits();
+    if(typeof renderDinner==='function'&&document.getElementById('viewDinner').className.indexOf('off')<0)renderDinner();
     data=load(selKey); wdata=loadWk(wkKey);
     fillFields(); render();
-    note('Restored '+added+' days'+(skipped?', kept '+skipped+' existing':''));
+
+    if(mode==='replace'){
+      note('Replaced everything from the backup');
+      return;
+    }
+    var bits=[];
+    if(items)bits.push(items+(items===1?' task':' tasks'));
+    if(later)bits.push(later+(later===1?' later item':' later items'));
+    if(hab)bits.push(hab+(hab===1?' habit tick':' habit ticks'));
+    if(other)bits.push(other+(other===1?' other item':' other items'));
+    if(!bits.length){
+      note('Nothing was missing, so nothing changed');
+    } else {
+      note('Put back '+bits.join(', ')+(noRoom?'. Some days had no free step slot.':''));
+    }
   }
 
   document.getElementById('backdrop').addEventListener('click',closePanel);
@@ -4251,7 +4404,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var dc=Object.keys(pack.days).length, wc=Object.keys(pack.weeks||{}).length;
       var when=pack.saved?String(pack.saved).slice(0,10):'unknown date';
       ask('Backup from '+when+': '+dc+' days and '+wc+' weeks. How should it go in?',[
-        {label:'Add missing only',run:function(){applyRestore(pack,'merge')}},
+        {label:'Put back anything missing',run:function(){applyRestore(pack,'merge')}},
         {label:'Replace everything',danger:true,run:function(){
           ask('This wipes what is on this device first, then loads the backup. There is no undo.',[
             {label:'Yes, replace',danger:true,run:function(){applyRestore(pack,'replace')}},
