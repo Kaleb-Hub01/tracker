@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v77, 14 Oct 2026
+<!-- v78, 14 Oct 2026
      offline loading fixed (fonts no longer block rendering)
      steps, weekly goal and Later items expand when tapped
      undo when ticking or deleting in Later
@@ -346,7 +346,10 @@ body{
   font-family:inherit;font-size:12.5px;font-weight:600;padding:10px;border-radius:12px;cursor:pointer}
 .laterlink:active{transform:scale(.98)}
 .laterlink b{color:var(--c2)}
-.backlink{background:transparent;border:0;color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:600;padding:0 0 12px;cursor:pointer}
+.backlink{display:inline-flex;align-items:center;gap:7px;background:var(--c2soft);border:1px solid var(--c2);color:var(--c2);
+  font-family:inherit;font-size:13.5px;font-weight:700;padding:9px 16px 9px 13px;border-radius:20px;margin-bottom:16px;cursor:pointer}
+.backlink:active{transform:scale(.95)}
+.backlink i{font-style:normal;font-size:16px;line-height:1}
 .capture{display:flex;gap:8px;margin-bottom:18px}
 .capture input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:inherit;font-size:16px;border-radius:12px;padding:12px 14px}
 .capture input:focus{border-color:var(--c2)}
@@ -684,7 +687,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   </div>
 
   <div class="view off" id="viewLater">
-    <button class="backlink" id="laterBack" type="button">&#8249; Back to today</button>
+    <button class="backlink" id="laterBack" type="button"><i>&#8249;</i> Back to today</button>
     <div class="top">
       <h1 class="date" id="laterTitle">Later<span id="laterSub">Things with no day yet</span></h1>
       <div class="hdone" id="laterCount"><b>0</b><small>Parked</small></div>
@@ -783,7 +786,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='77', BUILT='14 Oct 2026';
+  var VERSION='78', BUILT='14 Oct 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -934,11 +937,26 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     wdata.score=(wdata.score===v)?0:v; persistWk(); render();
   });
 
-  function grow(el){if(!el)return;el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+  // A box inside a hidden view reports no layout at all, so scrollHeight comes
+  // back as 0 and any height worked out from it is 0px, which is a box with
+  // text in it that you cannot see. So measure only when the box is really on
+  // screen, and otherwise leave a note to measure it later.
+  function laidOut(el){
+    try{ return !!(el.offsetParent||el.getClientRects().length) }catch(e){ return true }
+  }
+  function grow(el){
+    if(!el)return;
+    if(!laidOut(el)){el._refit='grow';return}
+    el._refit=null;
+    el.style.height='auto';
+    el.style.height=el.scrollHeight+'px';
+  }
   // collapse to a single line when it is not being edited
   function shrink(el){
     if(!el)return;
     if(document.activeElement===el){grow(el);return}
+    if(!laidOut(el)){el._refit='shrink';return}
+    el._refit=null;
     el.style.height='auto';
     var one=Math.ceil(parseFloat(getComputedStyle(el).lineHeight)||22);
     var pad=el.offsetHeight-el.clientHeight;
@@ -958,6 +976,14 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     el.addEventListener('focus',function(){grow(el)});
     el.addEventListener('blur',function(){ always?grow(el):shrink(el) });
     el.addEventListener('input',function(){grow(el)});
+  }
+  // size anything that was skipped while its view was hidden
+  function refit(root){
+    var l=(root||document).querySelectorAll('textarea');
+    for(var i=0;i<l.length;i++){
+      if(l[i]._refit==='grow')grow(l[i]);
+      else if(l[i]._refit==='shrink')shrink(l[i]);
+    }
   }
   function autogrow(){grow(goalText);grow(weeklyGoal);grow(document.getElementById('dayNote'));[qWorked,qBlocked,qChange].forEach(grow)}
 
@@ -3564,6 +3590,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(which==='later')renderLater();
     if(which==='dinner')renderDinner();
     if(which==='reward')renderRewards();
+    // a view that was hidden may hold boxes that never got measured
+    refit(document.getElementById(ids[which]));
     stagger(document.getElementById(ids[which]));
     window.scrollTo({top:0});
   }
@@ -5251,6 +5279,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     wdata=loadWk(wkKey);
     fillFields();
     render();
+    refit();
   }
   window.addEventListener('pageshow',function(e){if(e&&e.persisted)restoreUI()});
   document.addEventListener('visibilitychange',function(){if(!document.hidden)restoreUI()});

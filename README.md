@@ -5,7 +5,7 @@ steps plus optional bonus tasks, habits, a parked list, dinner planning with a
 shopping list, and rewards tied to conditions the app can judge. Hosted free on
 GitHub Pages, used from the iPhone home screen, works offline.
 
-Current version: 77. The version and build date show at the bottom of the app,
+Current version: 78. The version and build date show at the bottom of the app,
 which is how you check whether an upload has reached your phone.
 
 ## Files
@@ -142,6 +142,7 @@ version in `sw.js` is the fix. It never touches saved data.
 - Text inputs must be 16px or larger or iOS zooms when you tap them.
 - The Google Fonts stylesheet is loaded non-blocking and cached by `sw.js`. Both are needed for the app to open offline.
 - An expanded text box keeps the scroll position the cursor left it at, so collapsing one resets `scrollTop` twice, once immediately and once on the next frame.
+- A text box inside a hidden tab reports no layout, so `scrollHeight` is 0 and a height worked out from it would be `0px`: text present but invisible. `grow` and `shrink` therefore measure only a box that is really on screen, and otherwise flag it on `_refit`. `refit()` sizes those flagged boxes, and runs when a tab is shown and when the app returns to the foreground. Removing either call brings back blank-looking rows after a task is added to a day from another tab.
 
 ## Before changing the code
 
