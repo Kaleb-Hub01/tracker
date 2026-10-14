@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v78, 14 Oct 2026
+<!-- v79, 14 Oct 2026
      offline loading fixed (fonts no longer block rendering)
      steps, weekly goal and Later items expand when tapped
      undo when ticking or deleting in Later
@@ -786,7 +786,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='78', BUILT='14 Oct 2026';
+  var VERSION='79', BUILT='14 Oct 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -818,7 +818,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   function hhmm(s){return (typeof s==='string'&&s.length>=16)?s.slice(11,16):''}
 
   var CORE=3, MAXTODOS=10;   // three core steps, up to seven bonus on top
-  function blank(){return {goal:'',goalDone:false,rate:0,rest:false,restWhy:'',note:'',tag:'',times:{},todos:[{t:'',d:false,moved:''},{t:'',d:false,moved:''},{t:'',d:false,moved:''}]}}
+  function blank(){return {goal:'',goalDone:false,goalLc:'',rate:0,rest:false,restWhy:'',note:'',tag:'',times:{},todos:[{t:'',d:false,moved:''},{t:'',d:false,moved:''},{t:'',d:false,moved:''}]}}
   function bonusOf(d){return d.todos.slice(CORE)}
   function bonusReq(d){var n=0;bonusOf(d).forEach(function(x){if(x.t.trim())n++});return n}
   function bonusDone(d){var n=0;bonusOf(d).forEach(function(x){if(x.t.trim()&&x.d)n++});return n}
@@ -832,6 +832,9 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       d.tag=typeof raw.tag==='string'?raw.tag:'';
       d.restWhy=typeof raw.restWhy==='string'?raw.restWhy:'';
       d.goalDone=!!raw.goalDone;
+      // lc is the day this text was first parked in Later, kept so that going
+      // Later to a day and back again does not reset its age to today
+      d.goalLc=(typeof raw.goalLc==='string')?raw.goalLc:'';
       d.rest=!!raw.rest;
       d.rate=(typeof raw.rate==='number'&&raw.rate>=0&&raw.rate<=5)?raw.rate:0;
       if(raw.times&&typeof raw.times==='object')d.times=raw.times;
@@ -841,7 +844,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         for(var i=0;i<want;i++){
           var r=raw.todos[i];
           d.todos.push((r&&typeof r==='object')
-            ?{t:typeof r.t==='string'?r.t:'',d:!!r.d,moved:(typeof r.moved==='string')?r.moved:''}
+            ?{t:typeof r.t==='string'?r.t:'',d:!!r.d,moved:(typeof r.moved==='string')?r.moved:'',
+               lc:(typeof r.lc==='string')?r.lc:''}
             :{t:'',d:false,moved:''});
         }
       }
@@ -1252,12 +1256,14 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 
   // place a parked item onto a day, either as the one thing or as a step
-  function placeTodo(text,dateObj,asGoal,force,asBonus){
+  function placeTodo(text,dateObj,asGoal,force,asBonus,born){
     var k=dayKey(dateObj), here=(k===selKey);
     var rec=here?data:load(k);
+    born=born||'';
     if(asGoal){
       if(rec.goal.trim()&&!force)return {ok:false,why:'goal',existing:rec.goal};
       rec.goal=text;
+      rec.goalLc=born;
       if(!rec.times||typeof rec.times!=='object')rec.times={};
       if(!rec.times.set)rec.times.set=stamp();
     } else {
@@ -1266,10 +1272,11 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       if(slot<0){
         if(!asBonus)return {ok:false,why:'full'};
         if(rec.todos.length>=MAXTODOS)return {ok:false,why:'max'};
-        rec.todos.push({t:text,d:false,moved:''});
+        rec.todos.push({t:text,d:false,moved:'',lc:born});
         slot=rec.todos.length-1;
       } else {
         rec.todos[slot].t=text;
+        rec.todos[slot].lc=born;
       }
     }
     if(here){persist();fillFields();render()}
@@ -1282,7 +1289,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     return DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3);
   }
   function schedule(it,d,asGoal,anchor){
-    var r=placeTodo(it.t,d,asGoal,false);
+    var r=placeTodo(it.t,d,asGoal,false,false,it.c||'');
     if(r.ok){
       removeLater(it.id);
       note((asGoal?'One thing set for ':'Step added for ')+dayLabel(d));
@@ -1291,11 +1298,11 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(r.why==='goal'){
       ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has "'+r.existing.slice(0,50)+'" as its one thing.',[
         {label:'Replace it',danger:true,run:function(){
-          placeTodo(it.t,d,true,true); removeLater(it.id);
+          placeTodo(it.t,d,true,true,false,it.c||''); removeLater(it.id);
           note('One thing set for '+dayLabel(d));
         }},
         {label:'Add as a step',run:function(){
-          var r2=placeTodo(it.t,d,false,false);
+          var r2=placeTodo(it.t,d,false,false,false,it.c||'');
           if(r2.ok){removeLater(it.id);note('Step added for '+dayLabel(d))}
           else note('That day has no free step slots');
         }},
@@ -1304,7 +1311,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     } else {
       ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has three steps written.',[
         {label:'Add it as a bonus',run:function(){
-          var rb=placeTodo(it.t,d,false,false,true);
+          var rb=placeTodo(it.t,d,false,false,true,it.c||'');
           if(rb.ok){removeLater(it.id);note('Added as a bonus on '+dayLabel(d))}
           else note('That day is full');
         }},
@@ -3609,13 +3616,13 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var items=[], i;
     for(i=0;i<CORE;i++){
       if(rec.todos[i]&&rec.todos[i].t.trim())items.push({t:rec.todos[i].t,d:rec.todos[i].d,
-        moved:rec.todos[i].moved||'',time:rec.times['s'+i]});
+        moved:rec.todos[i].moved||'',lc:rec.todos[i].lc||'',time:rec.times['s'+i]});
     }
     var bonus=rec.todos.slice(CORE);
     var bonusTimes=bonus.map(function(x,j){return rec.times['s'+(CORE+j)]});
     var core=[];
     for(i=0;i<CORE;i++){
-      core.push(items[i]?{t:items[i].t,d:items[i].d,moved:items[i].moved}:{t:'',d:false,moved:''});
+      core.push(items[i]?{t:items[i].t,d:items[i].d,moved:items[i].moved,lc:items[i].lc||''}:{t:'',d:false,moved:''});
     }
     rec.todos=core.concat(bonus);
     Object.keys(rec.times).forEach(function(k){if(/^s\d+$/.test(k))delete rec.times[k]});
@@ -3647,6 +3654,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   function itemMenu(isGoal,idx,anchor){
     var text=isGoal?data.goal:data.todos[idx].t;
     if(!text.trim())return;
+    // where this text was first parked, if it came from the Later list
+    var born=(isGoal?data.goalLc:(data.todos[idx]||{}).lc)||'';
     var short=text.length>52?text.slice(0,52)+'...':text;
 
     // movedTo: mark it incomplete here and show where it went.
@@ -3673,13 +3682,13 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         if(wantGoal===isGoal){note('It is already there');return}
         convertHere(wantGoal); return;
       }
-      var r=placeTodo(text,d,wantGoal,false);
+      var r=placeTodo(text,d,wantGoal,false,false,born);
       if(r.ok){dropSource(dayKey(d));note('Moved to '+dayLabel(d));return}
       if(r.why==='goal'){
         ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has "'+r.existing.slice(0,46)+'" as its one thing.',[
-          {label:'Replace it',danger:true,run:function(){placeTodo(text,d,true,true);dropSource(dayKey(d));note('Moved to '+dayLabel(d))}},
+          {label:'Replace it',danger:true,run:function(){placeTodo(text,d,true,true,false,born);dropSource(dayKey(d));note('Moved to '+dayLabel(d))}},
           {label:'Add as a step',run:function(){
-            var r2=placeTodo(text,d,false,false,true);
+            var r2=placeTodo(text,d,false,false,true,born);
             if(r2.ok){dropSource(dayKey(d));note('Moved to '+dayLabel(d))}else note('That day is full');
           }},
           {label:'Cancel'}
@@ -3687,7 +3696,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       } else {
         ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has three steps.',[
           {label:'Add it as a bonus',run:function(){
-            var r3=placeTodo(text,d,false,false,true);
+            var r3=placeTodo(text,d,false,false,true,born);
             if(r3.ok){dropSource(dayKey(d));note('Added as a bonus on '+dayLabel(d))}
             else note('That day is full');
           }},
@@ -3785,8 +3794,9 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         chip('Send to Later',function(){
           closePanel();
           var l=loadLater();
-          l.unshift({id:'l'+Date.now().toString(36),t:text.slice(0,160),c:dayKey(today)});
-          saveLater(l); dropSource(); renderLater(); note('Parked in Later');
+          l.unshift({id:'l'+Date.now().toString(36),t:text.slice(0,160),c:born||dayKey(today)});
+          saveLater(l); dropSource(); renderLater();
+          note(born?('Back in Later, still dated '+ageText(ageDays({c:born}))):'Parked in Later');
         });
         if(!isGoal&&data.todos[idx].moved){
           chip('Clear moved mark',function(){
