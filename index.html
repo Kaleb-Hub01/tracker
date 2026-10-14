@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v79, 14 Oct 2026
+<!-- v80, 14 Oct 2026
      offline loading fixed (fonts no longer block rendering)
      steps, weekly goal and Later items expand when tapped
      undo when ticking or deleting in Later
@@ -786,7 +786,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='79', BUILT='14 Oct 2026';
+  var VERSION='80', BUILT='14 Oct 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -1368,6 +1368,16 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var box=document.getElementById('laterList');
     box.innerHTML='';
     var l=loadLater();
+    // Newest at the top, oldest at the bottom, by the day the item was parked.
+    // Sorting only the copy being drawn, so the stored order stays as it is and
+    // undo can still put an item back where it was. An item with no date is
+    // treated as parked today, which is what its age badge already says. The
+    // sort is stable, so several parked on the same day keep newest first.
+    var parkedOn=function(x){return x.c||dayKey(today)};
+    l.sort(function(a,b){
+      var ka=parkedOn(a), kb=parkedOn(b);
+      return (ka===kb)?0:(ka<kb?1:-1);
+    });
     document.getElementById('laterCount').innerHTML='<b>'+l.length+'</b><small>Parked</small>';
     var ol=document.getElementById('openLater');
     if(ol)ol.innerHTML=l.length?('Later list <b>'+l.length+'</b>'):'Later list';

@@ -5,7 +5,7 @@ steps plus optional bonus tasks, habits, a parked list, dinner planning with a
 shopping list, and rewards tied to conditions the app can judge. Hosted free on
 GitHub Pages, used from the iPhone home screen, works offline.
 
-Current version: 78. The version and build date show at the bottom of the app,
+Current version: 80. The version and build date show at the bottom of the app,
 which is how you check whether an upload has reached your phone.
 
 ## Files
@@ -50,7 +50,7 @@ any server. Keys:
 - `meta:dishes` the dish library
 - `meta:dinnerRules` what each weekday wants
 - `meta:dinnerCfg` cooldown weeks and the quality targets
-- `meta:later` the parked list
+- `meta:later` the parked list, each item carrying `c`, the day it was parked. The stored order is not the display order: the Later tab sorts a copy newest first so undo can still put an item back where it was
 - `meta:laterDone` Later items ticked off without ever being given a day
 - `meta:rewards` the rewards and their claim history
 - `meta:common` saved common tasks
@@ -59,7 +59,9 @@ any server. Keys:
 A day record holds: `goal`, `goalDone`, `todos`, `rate` 0 to 5, `note`, `rest`,
 `restWhy`, and `times`, which records when each item was ticked in local time
 with the offset. `todos` starts at three items and grows to a maximum of ten.
-Each item has `t` text, `d` done, and `moved`, a date if it was moved elsewhere.
+Each item has `t` text, `d` done, `moved`, a date if it was moved elsewhere, and
+`lc`, the day the text was first parked in the Later list, if it came from there.
+The day record's `goalLc` is the same thing for the one thing.
 The first three are the core steps; anything past those is a bonus task.
 
 A habit holds: `name`, `cad`, optional `days` or `n`, `icon`, `min` for the
@@ -81,7 +83,9 @@ Consequences worth remembering:
 
 **Days.** A day counts as cleared when the goal is written and ticked, and every
 one of the three core steps that has text is also ticked. Blank slots are
-ignored. Bonus tasks never count towards clearing a day, so leaving them
+ignored. A task that came from the Later list carries its original parked date in
+`lc`, so sending it to a day and later back to Later shows its true age instead of
+resetting to today. Bonus tasks never count towards clearing a day, so leaving them
 unticked cannot break a streak. A cleared day with at least one bonus task
 ticked is a big day, shown in rose in the 30 day strip. The streak counts back
 from today over cleared days; a rest day is skipped, so it neither breaks nor
