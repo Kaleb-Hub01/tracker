@@ -5,7 +5,7 @@ steps plus optional bonus tasks, habits, a parked list, dinner planning with a
 shopping list, and rewards tied to conditions the app can judge. Hosted free on
 GitHub Pages, used from the iPhone home screen, works offline.
 
-Current version: 80. The version and build date show at the bottom of the app,
+Current version: 81. The version and build date show at the bottom of the app,
 which is how you check whether an upload has reached your phone.
 
 ## Files
@@ -124,6 +124,7 @@ repeating reward can be claimed again next week.
 - **Restore** offers "add missing only", which is safe, or "replace everything", which wipes the device first and asks twice.
 - Before restoring, the dialog states the backup's save date and time and counts of days, weeks, Later items, habits and dishes, so a wrong file announces itself.
 - "Add missing only" merges item by item, not record by record. A single task deleted from a day comes back without disturbing the rest of that day.
+- A restored task brings its tick time and its `lc` parked date with it. A bonus task may land in a different slot than it held in the backup, so its tick time is re-keyed to the new slot.
 - Backups are named by date so they never overwrite each other. Keep them in iCloud Drive, not just Downloads.
 - The banner nags after seven days. The footer shows how long since the last one.
 

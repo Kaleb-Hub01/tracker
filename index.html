@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v80, 14 Oct 2026
+<!-- v81, 14 Oct 2026
      offline loading fixed (fonts no longer block rendering)
      steps, weekly goal and Later items expand when tapped
      undo when ticking or deleting in Later
@@ -786,7 +786,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='80', BUILT='14 Oct 2026';
+  var VERSION='81', BUILT='14 Oct 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -5008,6 +5008,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var n=0, i, j, s;
     if(!cur.goal.trim()&&bak.goal&&String(bak.goal).trim()){
       cur.goal=bak.goal; cur.goalDone=!!bak.goalDone; n++;
+      if(typeof bak.goalLc==='string'&&bak.goalLc)cur.goalLc=bak.goalLc;
       if(bak.times){
         if(bak.times.goal)cur.times.goal=bak.times.goal;
         if(bak.times.set)cur.times.set=bak.times.set;
@@ -5022,17 +5023,20 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var slot=-1;
       for(s=0;s<CORE;s++){if(!cur.todos[s].t.trim()){slot=s;break}}
       if(slot<0)continue;
-      cur.todos[slot]={t:bt[j].t,d:!!bt[j].d,moved:bt[j].moved||''};
+      cur.todos[slot]={t:bt[j].t,d:!!bt[j].d,moved:bt[j].moved||'',lc:bt[j].lc||''};
       if(bak.times&&bak.times['s'+j])cur.times['s'+slot]=bak.times['s'+j];
       have[txt.toLowerCase()]=1;
       n++;
     }
     var bonus=Array.isArray(bak.todos)?bak.todos.slice(CORE):[];
-    bonus.forEach(function(bx){
+    bonus.forEach(function(bx,bi){
       var txt2=bx?String(bx.t||'').trim():'';
       if(!txt2||have[txt2.toLowerCase()])return;
       if(cur.todos.length>=MAXTODOS)return;
-      cur.todos.push({t:bx.t,d:!!bx.d,moved:bx.moved||''});
+      cur.todos.push({t:bx.t,d:!!bx.d,moved:bx.moved||'',lc:bx.lc||''});
+      // the tick time moves with it, from its slot in the backup to its new one
+      var ni=cur.todos.length-1;
+      if(bak.times&&bak.times['s'+(CORE+bi)])cur.times['s'+ni]=bak.times['s'+(CORE+bi)];
       have[txt2.toLowerCase()]=1;
       n++;
     });
