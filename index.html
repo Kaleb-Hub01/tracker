@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v81, 14 Oct 2026
+<!-- v89, 29 Oct 2026
      offline loading fixed (fonts no longer block rendering)
      steps, weekly goal and Later items expand when tapped
      undo when ticking or deleting in Later
@@ -65,6 +65,9 @@ body{
 .streak small{font-size:11px;font-weight:600;color:var(--muted)}
 
 .weekbar{display:flex;align-items:stretch;gap:8px;margin-bottom:10px}
+.bests{font-size:11.5px;color:var(--muted);text-align:right;margin:-6px 0 10px;min-height:1px}
+.bests b{color:var(--c1);font-weight:700}
+.bests.now b{color:var(--c3)}
 .arrow{flex:none;width:30px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;cursor:pointer;font-size:16px;line-height:1;padding:0}
 .arrow:hover{color:var(--ink);border-color:var(--c2)}
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;flex:1}
@@ -89,6 +92,18 @@ body{
 .dpick input[type=date]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;font-size:16px;border:0;padding:0;margin:0;background:transparent;-webkit-appearance:none;appearance:none}
 .jump button{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:4px 11px;border-radius:20px;cursor:pointer;flex:none}
 .jump button.off{visibility:hidden}
+.rwrings{display:none}
+.rwrings.on{display:flex;gap:10px;margin:0 0 20px;padding:0 2px}
+.rwrg{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.rwrg svg{display:block;flex:none}
+.rwrg .trk{fill:none;stroke:var(--line);stroke-width:3.5}
+.rwrg .arc{fill:none;stroke:var(--c2);stroke-width:3.5;stroke-linecap:round;transition:stroke-dashoffset .45s ease}
+.rwrg .num{font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:10.5px;font-weight:700;fill:var(--muted)}
+.rwrg span{font-size:10px;line-height:1.2;color:var(--muted);text-align:center;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word}
+.rwrg.got .arc{stroke:var(--c3)}
+.rwrg.got .num{fill:var(--c3)}
+.rwrg.got span{color:var(--c3);font-weight:700}
+.rwrg:active{opacity:.55}
 
 .weekly{background:var(--c3soft);border-left:3px solid var(--c3);border-radius:0 10px 10px 0;padding:11px 14px;margin-bottom:26px;display:flex;gap:12px;align-items:center}
 .weekly .wg{flex:1;min-width:0}
@@ -133,6 +148,68 @@ body{
 .rwchips{display:flex;flex-wrap:wrap;gap:6px}
 .rwchips button{border:1px solid var(--line);background:transparent;color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:20px;cursor:pointer}
 .rwchips button.on{border-color:var(--c2);color:var(--c2);background:color-mix(in oklab,var(--c2) 12%,transparent)}
+.dcadd{width:100%;border:1px dashed var(--line);background:transparent;color:var(--c2);font-family:inherit;font-size:13px;font-weight:600;padding:12px;border-radius:12px;cursor:pointer;margin-bottom:12px}
+.dcadd:active{transform:scale(.98)}
+.dcrow{display:flex;align-items:flex-start;gap:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c2);border-radius:12px;padding:11px 12px;margin-bottom:7px;cursor:pointer}
+.dcrow.due{border-left-color:var(--c3);background:color-mix(in oklab,var(--c3) 11%,var(--surface))}
+.dcrow.open{border-left-color:var(--c1)}
+.dcmid{flex:1;min-width:0}
+.dcq{font-size:14.5px;font-weight:600;line-height:1.3;word-break:break-word}
+.dcmeta{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+.dcstate{flex:none;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:3px 9px;white-space:nowrap}
+.dcstate.due{color:var(--c3);border-color:var(--c3)}
+.dcstate.open{color:var(--c1);border-color:var(--c1)}
+.dcdots{display:flex;gap:3px;margin-bottom:16px}
+.dcdots i{flex:1;height:4px;border-radius:2px;background:var(--line);display:block;cursor:pointer}
+.dcdots i.on{background:var(--c2)}
+.dcdots i.now{background:var(--c1)}
+.dcstep{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c2);margin-bottom:5px}
+.dch2{font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:21px;font-weight:600;letter-spacing:-0.01em;line-height:1.25;margin:0 0 6px}
+.dchint{font-size:12.5px;color:var(--muted);line-height:1.45;margin:0 0 12px}
+.dcta,.dcin{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:inherit;font-size:16px;border-radius:11px;padding:11px 13px;line-height:1.45}
+.dcta{resize:none;overflow:hidden;min-height:54px;display:block}
+.dcopt .dcta{margin-bottom:7px}
+.dcopt .dcta:last-child{margin-bottom:0}
+.dclab{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+.dcitem{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px}
+.dcitem .n{flex:none;width:16px;padding-top:12px;font-size:12px;font-weight:700;color:var(--muted);font-family:"Bricolage Grotesque","Inter",sans-serif}
+.dcitem.first .n{color:var(--c1)}
+.dcitem .col{flex:1;min-width:0}
+.dcitem .up,.dcitem .rm{flex:none;border:0;background:transparent;color:var(--muted);font-size:14px;line-height:1;padding:12px 3px;cursor:pointer}
+.dcitem .up:active,.dcitem .rm:active{transform:scale(.85)}
+.dcsub{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:14px;border-radius:9px;padding:7px 11px;margin-top:4px}
+.dcopt{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:9px}
+.dcoptn{font-size:13.5px;font-weight:600;margin-bottom:7px;word-break:break-word}
+.dcval{font-size:14px;line-height:1.45;word-break:break-word}
+.dcnav{display:flex;gap:8px;margin-top:20px}
+.dcnav button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font-family:inherit;font-size:13.5px;font-weight:600;padding:12px 15px;border-radius:12px;cursor:pointer}
+.dcnav .next{flex:1;border:0;color:#fff;background:linear-gradient(135deg,var(--c1),var(--c2))}
+.dcnav button:active{transform:scale(.97)}
+.dcgate{background:color-mix(in oklab,var(--c1) 10%,var(--surface));border:1px solid color-mix(in oklab,var(--c1) 35%,var(--line));border-radius:12px;padding:12px 13px;margin-top:12px;font-size:13px;line-height:1.45}
+.dcgate button{display:block;margin-top:10px;border:1px solid var(--c1);background:transparent;color:var(--c1);font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:20px;cursor:pointer}
+.dcsaved{background:color-mix(in oklab,var(--c2) 10%,var(--surface));border:1px solid color-mix(in oklab,var(--c2) 35%,var(--line));border-radius:12px;padding:12px 13px;margin-top:18px}
+.dcsaved p{margin:0 0 10px;font-size:13px;line-height:1.45}
+.dcsaved .prow2{display:flex;flex-wrap:wrap;gap:7px}
+.dcsaved button{border:1px solid var(--c2);background:transparent;color:var(--c2);font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:20px;cursor:pointer}
+.dcsaved button:active{transform:scale(.95)}
+.dchelp{display:block;width:100%;margin-top:12px;border:1px solid var(--line);background:transparent;color:var(--c2);
+  font-family:inherit;font-size:12.5px;font-weight:600;padding:9px;border-radius:12px;cursor:pointer}
+.dchelp:active{transform:scale(.98)}
+.dcnudge{margin:9px 0 0;font-size:12.5px;line-height:1.45;color:var(--c3);
+  background:color-mix(in oklab,var(--c3) 10%,var(--surface));
+  border:1px solid color-mix(in oklab,var(--c3) 35%,var(--line));border-radius:11px;padding:10px 12px}
+.dcgate p{margin:0 0 9px}
+.dcgate p:last-child{margin-bottom:0}
+.dcgate b{display:block;margin-bottom:2px}
+.dcitem .keep{margin-top:5px;border:1px solid var(--line);background:transparent;color:var(--muted);
+  font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 10px;border-radius:20px;cursor:pointer}
+.dcitem .keep.on{border-color:var(--c1);color:var(--c1);background:color-mix(in oklab,var(--c1) 12%,transparent)}
+.dcitem.parked .col .dcta{opacity:.55}
+textarea.clipped{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238d9794' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 1px top 6px;background-size:12px;
+  padding-right:18px}
 .movedtag{flex:none;display:none;font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--c3);
   border:1px solid var(--c3);border-radius:20px;padding:2px 7px;white-space:nowrap}
 .movedtag.on{display:block}
@@ -477,7 +554,7 @@ input:focus,textarea:focus{outline-offset:2px}
 .panel button.danger{border-color:var(--c3);color:var(--c3)}
 #fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:60;display:none}
 #fx.on{display:block}
-.toast{position:fixed;left:50%;transform:translate(-50%,-14px);top:calc(env(safe-area-inset-top, 0px) + 14px);z-index:70;
+.toast{position:fixed;left:50%;transform:translate(-50%,14px);bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);z-index:70;
   max-width:88%;padding:11px 16px;border-radius:14px;font-size:13.5px;font-weight:500;line-height:1.35;text-align:center;
   background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.28);
   opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease}
@@ -491,6 +568,9 @@ input:focus,textarea:focus{outline-offset:2px}
 .panel.modal{position:fixed;left:14px;right:14px;top:calc(env(safe-area-inset-top, 0px) + 64px);max-width:520px;margin:0 auto;z-index:50;box-shadow:0 14px 44px rgba(0,0,0,.35)}
 .panel .ptext{width:100%;margin-bottom:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:16px;border-radius:9px;padding:9px 11px}
 .ver{margin-top:9px;font-size:11px;color:var(--muted);opacity:.75;text-align:right}
+.fixlink{display:block;margin:6px 0 0 auto;background:transparent;border:0;color:var(--muted);
+  font-family:inherit;font-size:11px;opacity:.6;padding:2px 0;cursor:pointer;text-decoration:underline}
+.fixlink:active{opacity:1}
 .warn{margin-top:14px;font-size:13px;color:var(--muted);border-left:3px solid var(--c3);padding-left:10px;display:none}
 .hero,.steps,.review,.hsum-card{position:relative;overflow:hidden}
 .hero::before{
@@ -504,6 +584,19 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 .hrow{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, border-color .25s ease}
 .sharewk:active,.banner:active{transform:scale(.985)}
 .tabs button.on{background:linear-gradient(135deg, color-mix(in oklab, var(--c1) 16%, transparent), color-mix(in oklab, var(--c2) 20%, transparent));border-color:color-mix(in oklab, var(--c2) 45%, var(--line));color:var(--ink)}
+.tabs button{padding:11px 8px;font-size:13.5px}
+.morebtn{flex:none!important;width:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:11px 0!important;position:relative}
+.morebtn i{display:block;width:17px;height:2px;border-radius:2px;background:var(--muted);transition:background .2s ease}
+.morebtn.on i{background:var(--c2)}
+.morebtn.alert::after{content:"";position:absolute;top:8px;right:11px;width:7px;height:7px;border-radius:50%;
+  background:var(--c3);box-shadow:0 0 0 2px var(--surface)}
+.moremenu{display:none;margin:-12px 0 20px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.moremenu.on{display:block}
+.moremenu button{display:block;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);
+  color:var(--ink);font-family:inherit;font-size:15px;font-weight:600;padding:14px 17px;cursor:pointer}
+.moremenu button:last-child{border-bottom:0}
+.moremenu button:active{background:var(--tint)}
+.moremenu button.on{color:var(--c2)}
 .hero-head,.todos-head,.weekly label,.nextwk label{text-transform:uppercase;letter-spacing:.09em;font-size:10.5px}
 .month h3{text-transform:uppercase;letter-spacing:.09em}
 .streak{background:linear-gradient(140deg, color-mix(in oklab, var(--c1) 16%, transparent), color-mix(in oklab, var(--c2) 16%, transparent))}
@@ -534,12 +627,17 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
   <button class="banner" id="banner" type="button"><span>Week review ready.</span> Tap to look back on the week.</button>
   <button class="banner" id="bkBanner" type="button"><span>Backup due.</span> Tap to save a copy of everything.</button>
+  <button class="banner" id="decBanner" type="button"></button>
 
   <div class="tabs">
     <button type="button" id="tabTodayBtn" class="on">Today</button>
     <button type="button" id="tabHabitsBtn">Habits</button>
+    <button type="button" id="moreBtn" class="morebtn" aria-label="More" aria-expanded="false"><i></i><i></i><i></i></button>
+  </div>
+  <div class="moremenu" id="moreMenu">
     <button type="button" id="tabDinnerBtn">Dinners</button>
     <button type="button" id="tabRewardBtn">Rewards</button>
+    <button type="button" id="tabDecideBtn">Decisions</button>
   </div>
 
   <p class="quote" id="quote"></p>
@@ -551,6 +649,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     <div class="streak"><b id="streakNum">0</b><small>Day Streak</small></div>
   </div>
 
+  <div class="bests" id="bests"></div>
+
   <div class="weekbar">
     <button class="arrow" id="prevWk" type="button" aria-label="Previous week">&#8249;</button>
     <div class="week" id="week"></div>
@@ -560,6 +660,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     <button type="button" class="jumpbtn" id="dateJump">Jump to a day</button>
     <button type="button" id="todayBtn">Back to today</button>
   </div>
+
+  <div class="rwrings" id="rwRings"></div>
 
   <div class="weekly" id="weeklyBox">
     <div class="wg">
@@ -640,6 +742,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     </div>
 
     <div class="rq">
+      <label for="qWeekNote">How was the week?</label>
+      <textarea id="qWeekNote" rows="3" placeholder="Anything you want to say about it, in your own words"></textarea>
+    </div>
+    <div class="rq">
       <label for="qWorked">What worked this week?</label>
       <textarea id="qWorked" rows="2" placeholder="The things you want more of"></textarea>
     </div>
@@ -680,6 +786,12 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
     <div class="hsum" id="habSummary"></div>
     <div id="habitList"></div>
+    <div class="dinsec" id="habArcSec" style="display:none">
+      <button class="dinsec-h" id="habArcToggle" type="button">Archived <span>&#9662;</span></button>
+      <div id="habArcBody" class="dinbody">
+        <div id="habArcList"></div>
+      </div>
+    </div>
     <div class="habbtns">
       <button type="button" id="habAdd">+ Add a habit</button>
       <button type="button" id="habShowAll">Show all</button>
@@ -707,6 +819,34 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         <div id="doneList"></div>
       </div>
     </div>
+  </div>
+
+  <div class="view off" id="viewFixes">
+    <button class="backlink" id="fixBack" type="button"><i>&#8249;</i> Back to today</button>
+    <div class="top">
+      <h1 class="date" id="fixTitle">App ideas<span id="fixSub">Fixes and changes to ask for</span></h1>
+      <div class="hdone" id="fixCount"><b>0</b><small>Open</small></div>
+    </div>
+    <div class="capture">
+      <input type="text" id="fixInput" placeholder="What needs fixing or adding" autocomplete="off" enterkeyhint="done">
+      <button type="button" id="fixAdd">Add</button>
+    </div>
+    <div id="fixList"></div>
+    <div class="dinsec" id="fixDoneSec">
+      <button class="dinsec-h" id="fixDoneToggle" type="button">Done <span>&#9662;</span></button>
+      <div id="fixDoneBody" class="dinbody">
+        <div id="fixDoneList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view off" id="viewDecide">
+    <button class="backlink" id="decBack" type="button"><i>&#8249;</i> Back to today</button>
+    <div class="top">
+      <h1 class="date" id="decTitle">Decisions<span id="decSub">Think it through on paper</span></h1>
+      <div class="hdone" id="decCount"><b>0</b><small>Open</small></div>
+    </div>
+    <div id="decBody"></div>
   </div>
 
   <div class="view off" id="viewDinner">
@@ -777,6 +917,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     </div>
   </div>
   <div class="ver" id="ver"></div>
+  <button class="fixlink" id="openFixes" type="button">App ideas</button>
   <div class="backdrop" id="backdrop"></div>
   <div class="toast" id="toast"></div>
   <canvas id="fx"></canvas>
@@ -786,7 +927,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='81', BUILT='14 Oct 2026';
+  var VERSION='88', BUILT='29 Oct 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -806,7 +947,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
   var storageOK=true;
   function read(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){storageOK=false;return null}}
-  function write(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){storageOK=false;document.getElementById('warn').style.display='block'}}
+  function write(k,v){rwCache=null;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){storageOK=false;document.getElementById('warn').style.display='block'}}
 
   function stamp(){
     var d=new Date(), o=-d.getTimezoneOffset(), sg=o>=0?'+':'-';
@@ -852,11 +993,11 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     }
     return d;
   }
-  function blankWk(){return {goal:'',goalDone:false,score:0,worked:'',blocked:'',change:'',next:''}}
+  function blankWk(){return {goal:'',goalDone:false,score:0,wnote:'',worked:'',blocked:'',change:'',next:''}}
   function loadWk(k){
     var raw=read('week:'+k), w=blankWk();
     if(raw&&typeof raw==='object'){
-      ['goal','worked','blocked','change','next'].forEach(function(f){
+      ['goal','wnote','worked','blocked','change','next'].forEach(function(f){
         if(typeof raw[f]==='string')w[f]=raw[f];
       });
       w.goalDone=!!raw.goalDone;
@@ -880,7 +1021,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     for(var i=0;i<d.todos.length;i++){if(d.todos[i].t.trim()||d.todos[i].d)return false}
     return true;
   }
-  function reviewDone(w){return !!(w.score||w.worked.trim()||w.blocked.trim()||w.change.trim())}
+  function reviewDone(w){return !!(w.score||w.wnote.trim()||w.worked.trim()||w.blocked.trim()||w.change.trim())}
 
   var today=midnight(new Date());
   var tKey=dayKey(today);
@@ -896,6 +1037,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   var weeklyTick=document.getElementById('weeklyTick'), weeklyBox=document.getElementById('weeklyBox');
   var statusEl=document.getElementById('status'), statusText=document.getElementById('statusText');
   var jump=document.getElementById('jump'), review=document.getElementById('review');
+  var qWeekNote=document.getElementById('qWeekNote');
   var qWorked=document.getElementById('qWorked'), qBlocked=document.getElementById('qBlocked');
   var qChange=document.getElementById('qChange'), qNext=document.getElementById('qNext');
   var dayRate=document.getElementById('dayRate'), dayRateLabel=document.getElementById('dayRateLabel');
@@ -952,8 +1094,17 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(!el)return;
     if(!laidOut(el)){el._refit='grow';return}
     el._refit=null;
+    // Setting height to auto collapses the box for an instant. On a long note
+    // the page scrolls up to fill the gap and then back down when it expands
+    // again, which reads as the box jumping about while you type. When the text
+    // only needs more room, grow straight to it and never collapse. When it
+    // needs less, remeasure but put the scroll position back.
+    var want=el.scrollHeight;
+    if(want>el.clientHeight){ el.style.height=want+'px'; return }
+    var sy=window.pageYOffset;
     el.style.height='auto';
     el.style.height=el.scrollHeight+'px';
+    if(window.pageYOffset!==sy)window.scrollTo(0,sy);
   }
   // collapse to a single line when it is not being edited
   function shrink(el){
@@ -962,11 +1113,17 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(!laidOut(el)){el._refit='shrink';return}
     el._refit=null;
     el.style.height='auto';
-    var one=Math.ceil(parseFloat(getComputedStyle(el).lineHeight)||22);
-    var pad=el.offsetHeight-el.clientHeight;
+    // scrollHeight counts the box's own padding but not its border, so the
+    // comparison has to add the padding too. Measuring the border instead, as
+    // this used to, made every single-line box look clipped by the height of
+    // its own padding. Nothing showed for it until clipped boxes got a marker.
+    var cs=getComputedStyle(el);
+    var one=Math.ceil(parseFloat(cs.lineHeight)||22);
+    var padY=(parseFloat(cs.paddingTop)||0)+(parseFloat(cs.paddingBottom)||0);
+    var bord=(parseFloat(cs.borderTopWidth)||0)+(parseFloat(cs.borderBottomWidth)||0);
     var full=el.scrollHeight;
-    var clipped=full>one+pad+2;
-    el.style.height=(clipped?(one+pad):full)+'px';
+    var clipped=full>one+padY+2;
+    el.style.height=(clipped?(one+padY+bord):(full+bord))+'px';
     el.classList.toggle('clipped',clipped);
     // the box keeps the scroll position the cursor left it at, which shows the
     // last line instead of the first once it is one line tall
@@ -989,15 +1146,42 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       else if(l[i]._refit==='shrink')shrink(l[i]);
     }
   }
-  function autogrow(){grow(goalText);grow(weeklyGoal);grow(document.getElementById('dayNote'));[qWorked,qBlocked,qChange].forEach(grow)}
+  function autogrow(){grow(goalText);grow(weeklyGoal);grow(document.getElementById('dayNote'));[qWeekNote,qWorked,qBlocked,qChange].forEach(grow)}
 
   function mkDebounce(){
     var t=null;
     return function(fn){clearTimeout(t);t=setTimeout(fn,250)};
   }
   var dbDay=mkDebounce(), dbWk=mkDebounce(), dbRev=mkDebounce();
-  function persist(){write('day:'+selKey,data)}
+  function persist(){bestCache=null;write('day:'+selKey,data)}
   function persistWk(){write('week:'+wkKey,wdata)}
+
+  // Every finished run of cleared days, by the same rules the live streak uses:
+  // a rest day is stepped over without breaking or extending it, and anything
+  // else that is not cleared ends the run. Walked day by day rather than over
+  // the records that exist, because a day with no record at all is a break.
+  // Cached, since this reads every day you have and render runs often.
+  var bestCache=null;
+  function streakBest(){
+    if(bestCache)return bestCache;
+    var keys=allKeys('day:');
+    var runs=[], n=0;
+    if(keys.length){
+      var f=String(keys[0]).split('-');
+      var d=new Date(+f[0],+f[1]-1,+f[2]);
+      var end=midnight(today), guard=0;
+      while(d<=end&&guard++<4000){
+        var rec=load(dayKey(d));
+        if(rec.rest){d=shift(d,1);continue}
+        if(full(rec)){n++}else{if(n)runs.push(n);n=0}
+        d=shift(d,1);
+      }
+      if(n)runs.push(n);
+    }
+    runs.sort(function(a,b){return b-a});
+    bestCache={best:runs[0]||0, prev:runs[1]||0};
+    return bestCache;
+  }
 
   function streak(){
     var n=0, d=midnight(today), t0=load(dayKey(d));
@@ -2649,6 +2833,77 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     renderRewards();
   }
 
+  // Reward progress for the Today rings and the menu dot. Working out a
+  // reward's value means walking day records, which is too slow to redo on
+  // every redraw, so the answer is held until something is written.
+  var rwCache=null;
+  function rwSnapshot(){
+    if(rwCache)return rwCache;
+    var out=[];
+    try{
+      loadRewards().forEach(function(r){
+        var st=evalReward(r);
+        if(st.claimed||st.past)return;          // done with, nothing left to show
+        out.push({id:r.id,name:r.name,pct:st.pct,value:st.value,target:st.target,ok:st.ok});
+      });
+    }catch(e){}
+    out.sort(function(a,b){
+      if(a.ok!==b.ok)return a.ok?-1:1;          // ready to claim first
+      return b.pct-a.pct;                        // then closest to done
+    });
+    rwCache=out;
+    return out;
+  }
+  var RINGMAX=5;
+  function ringSvg(pct,label){
+    var C=2*Math.PI*15, v=Math.max(0,Math.min(100,pct));
+    return '<svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true">'+
+      '<circle class="trk" cx="19" cy="19" r="15"></circle>'+
+      (v>0?('<circle class="arc" cx="19" cy="19" r="15" stroke-dasharray="'+C.toFixed(2)+
+        '" stroke-dashoffset="'+(C*(1-v/100)).toFixed(2)+'" transform="rotate(-90 19 19)"></circle>'):'')+
+      '<text class="num" x="19" y="22.6" text-anchor="middle">'+label+'</text>'+
+      '</svg>';
+  }
+  function ringBtn(id,label,pct,name,aria,got){
+    var b=document.createElement('button');
+    b.type='button';
+    b.className='rwrg'+(got?' got':'');
+    b.setAttribute('data-rw',id);
+    b.setAttribute('aria-label',aria);
+    b.innerHTML=ringSvg(pct,label);
+    var s=document.createElement('span');
+    s.textContent=name;
+    b.appendChild(s);
+    return b;
+  }
+  // One ring per live reward, filled by how far along it is, amber once it is
+  // yours to claim. Nothing shows at all until there is a reward to track.
+  function renderRings(){
+    var box=document.getElementById('rwRings');
+    if(!box)return;
+    var list=rwSnapshot();
+    box.innerHTML='';
+    if(!list.length){box.className='rwrings';return}
+    box.className='rwrings on';
+    list.slice(0,RINGMAX).forEach(function(x){
+      box.appendChild(ringBtn(x.id, x.ok?'\u2713':(x.pct+'%'), x.pct, x.name,
+        x.name+', '+(x.ok?'ready to claim':(x.value+' of '+x.target))+', open rewards', x.ok));
+    });
+    if(list.length>RINGMAX){
+      var n=list.length-RINGMAX;
+      box.appendChild(ringBtn('', '+'+n, 0, n===1?'1 more':(n+' more'),
+        n+' more '+(n===1?'reward':'rewards')+', open rewards', false));
+    }
+  }
+  document.addEventListener('click',function(e){
+    var b=null;
+    try{b=e.target.closest('.rwrg')}catch(err){}
+    if(!b)return;
+    var id=b.getAttribute('data-rw');
+    rwOpen=id||null;                             // tapping a ring opens that card
+    showTab('reward');
+  });
+
   var rwOpen=null;
   function renderRewards(){
     var box=document.getElementById('rwList');
@@ -2832,6 +3087,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
     document.getElementById('rwCount').innerHTML='<b>'+earnedNow+'</b><small>Ready</small>';
     document.getElementById('tabRewardBtn').textContent=earnedNow?('Rewards '+earnedNow):'Rewards';
+    menuAlert();
     renderRewardHistory();
   }
 
@@ -2881,10 +3137,966 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       renderRewards();
     });
   });
+  document.getElementById('habArcToggle').addEventListener('click',function(){
+    habArcOpen=!habArcOpen; renderHabArchive();
+  });
   document.getElementById('rwHistToggle').addEventListener('click',function(){
     var b=document.getElementById('rwHistBody');
     b.className='dinbody'+(b.className.indexOf('on')<0?' on':'');
     renderRewardHistory();
+  });
+
+  // ---- app ideas ----
+  // A second parked list, deliberately out of the way, for things to ask for
+  // in this app. Same quick add and tick as Later, without the scheduling,
+  // because an app idea never needs to be given a day.
+  var fixDoneOpen=false, fixUndo=[], fixUndoTimer=null;
+  function loadFixes(){
+    var l=read('meta:fixes');
+    return Array.isArray(l)?l.filter(function(x){return x&&typeof x.t==='string'}):[];
+  }
+  function saveFixes(l){write('meta:fixes',l.slice(0,300))}
+  function loadFixDone(){
+    var l=read('meta:fixesDone');
+    return Array.isArray(l)?l.filter(function(x){return x&&typeof x.t==='string'}):[];
+  }
+  function saveFixDone(l){write('meta:fixesDone',l.slice(0,400))}
+  function addFix(t){
+    t=(t||'').trim(); if(!t)return;
+    var l=loadFixes();
+    l.unshift({id:'f'+Date.now().toString(36),t:t.slice(0,300),c:dayKey(today)});
+    saveFixes(l); renderFixes();
+  }
+  function tickFix(it,at){
+    saveFixes(loadFixes().filter(function(x){return x.id!==it.id}));
+    var dn=loadFixDone();
+    dn.unshift({id:it.id,t:it.t,c:it.c||'',done:stamp()});
+    saveFixDone(dn);
+    fixUndo.push({item:it,at:(at<0?0:at)});
+    clearTimeout(fixUndoTimer);
+    fixUndoTimer=setTimeout(function(){fixUndo=[]},6000);
+    renderFixes();
+    var n=fixUndo.length;
+    toast('Done'+(n>1?(' '+n):''),'Undo',function(){
+      var l=loadFixes();
+      for(var i=fixUndo.length-1;i>=0;i--){
+        var u=fixUndo[i], dup=false;
+        l.forEach(function(x){if(x.id===u.item.id)dup=true});
+        if(!dup)l.splice(Math.min(u.at,l.length),0,u.item);
+        saveFixDone(loadFixDone().filter(function(x){return x.id!==u.item.id}));
+      }
+      saveFixes(l); fixUndo=[]; clearTimeout(fixUndoTimer);
+      renderFixes(); note(n>1?(n+' put back'):'Put back');
+    });
+  }
+  function renderFixes(){
+    var box=document.getElementById('fixList');
+    if(!box)return;
+    var l=loadFixes();
+    var cnt=document.getElementById('fixCount');
+    if(cnt)cnt.innerHTML='<b>'+l.length+'</b><small>Open</small>';
+    var ol=document.getElementById('openFixes');
+    if(ol)ol.textContent=l.length?('App ideas '+l.length):'App ideas';
+    box.innerHTML='';
+    if(!l.length){
+      var e=document.createElement('p'); e.className='lempty';
+      e.textContent='Nothing yet. Anything you want changed about this app goes here, so it does not clutter the Later list.';
+      box.appendChild(e);
+    }
+    l.forEach(function(it,i){
+      var row=document.createElement('div'); row.className='lrow';
+      var tk=document.createElement('button');
+      tk.type='button'; tk.className='ltick';
+      tk.setAttribute('aria-label','Mark done');
+      tk.addEventListener('click',function(e){e.stopPropagation();tickFix(it,i)});
+      var tx=document.createElement('textarea');
+      tx.className='ltext'; tx.rows=1; tx.value=it.t;
+      tx.setAttribute('autocomplete','off');
+      var db=mkDebounce();
+      tx.addEventListener('input',function(){
+        grow(tx);
+        var v=tx.value;
+        db(function(){
+          var ll=loadFixes();
+          for(var j=0;j<ll.length;j++){if(ll[j].id===it.id)ll[j].t=v.slice(0,300)}
+          saveFixes(ll);
+        });
+      });
+      autoField(tx);
+      var ag=document.createElement('span');
+      var n=ageDays(it);
+      ag.className='lage'+(n>=30?' old':''); ag.textContent=ageText(n);
+      var dl=document.createElement('button');
+      dl.type='button'; dl.className='ldel'; dl.innerHTML='&times;';
+      dl.setAttribute('aria-label','Delete');
+      dl.addEventListener('click',function(e){
+        e.stopPropagation();
+        saveFixes(loadFixes().filter(function(x){return x.id!==it.id}));
+        renderFixes();
+        toast('Deleted','Undo',function(){
+          var ll=loadFixes();
+          ll.splice(Math.min(i,ll.length),0,it);
+          saveFixes(ll); renderFixes(); note('Put back');
+        });
+      });
+      row.appendChild(tk); row.appendChild(tx); row.appendChild(ag); row.appendChild(dl);
+      box.appendChild(row);
+      shrink(tx);
+    });
+    renderFixDone();
+  }
+  function renderFixDone(){
+    var box=document.getElementById('fixDoneList');
+    if(!box)return;
+    var dn=loadFixDone();
+    document.getElementById('fixDoneToggle').innerHTML='Done'+(dn.length?(' '+dn.length):'')+' <span>&#9662;</span>';
+    document.getElementById('fixDoneBody').className='dinbody'+(fixDoneOpen?' on':'');
+    box.innerHTML='';
+    if(!dn.length){
+      var e=document.createElement('p'); e.className='lempty'; e.textContent='Nothing ticked off yet.';
+      box.appendChild(e); return;
+    }
+    dn.slice(0,150).forEach(function(x){
+      var row=document.createElement('div'); row.className='drow2';
+      var tk=document.createElement('span');
+      tk.className='dtick'; tk.textContent='\u2713'; tk.style.color='var(--c1)';
+      var tx=document.createElement('div'); tx.className='dtxt'; tx.textContent=x.t;
+      var wh=document.createElement('span'); wh.className='dwhen';
+      var dt=x.done?String(x.done).slice(0,10).split('-'):null;
+      if(dt){var dd=new Date(+dt[0],+dt[1]-1,+dt[2]);wh.textContent=dd.getDate()+' '+MONTHS[dd.getMonth()].slice(0,3)}
+      row.appendChild(tk); row.appendChild(tx); row.appendChild(wh);
+      box.appendChild(row);
+    });
+  }
+  document.getElementById('openFixes').addEventListener('click',function(){showTab('fixes')});
+  document.getElementById('fixBack').addEventListener('click',function(){showTab('today')});
+  document.getElementById('fixDoneToggle').addEventListener('click',function(){
+    fixDoneOpen=!fixDoneOpen; renderFixDone();
+  });
+  document.getElementById('fixAdd').addEventListener('click',function(){
+    var i=document.getElementById('fixInput');
+    addFix(i.value); i.value=''; i.focus();
+  });
+  document.getElementById('fixInput').addEventListener('keydown',function(e){
+    if(e.key==='Enter'){e.preventDefault();var i=this;addFix(i.value);i.value=''}
+  });
+
+  // ---- decisions ----
+  // Seven screens, one question each. The order matters: each step is meant to
+  // be blind to the next, so options get written before anyone judges them and
+  // consequences get written before anyone rates how likely they are.
+  //
+  // Reshape sits before the judging on purpose. When the options are things you
+  // are inventing rather than choosing between, the first draft is never the
+  // best version, and scoring a draft you would have changed is wasted work.
+  //
+  // The point of the whole thing is the look back. A decision journal nobody
+  // returns to is an archive, not a way of getting better at guessing.
+  var DSTEP=['Frame','Criteria','Options','Reshape','Consequences','Judge','Resolve'];
+  var ODDS=[{l:'Very unlikely',v:10},{l:'Unlikely',v:25},{l:'Even',v:50},{l:'Likely',v:75},{l:'Near certain',v:90}];
+  var COST=[{l:'A day or less',v:'day'},{l:'About a week',v:'week'},
+            {l:'A few weeks',v:'weeks'},{l:'Months I cannot get back',v:'months'}];
+  var LOOKW=['Went badly','Not great','Mixed','Went well','Went very well'];
+  var MAXOPT=12, MAXCARRY=5;
+  var dcEdit=null, dcStep=0, dcRev=null, dcShowDone=false, dcHelp=false, dcBack=false;
+
+  function fixDec(d){
+    if(!Array.isArray(d.outs))d.outs=[];
+    if(!Array.isArray(d.opts))d.opts=[];
+    d.outs.forEach(function(o){
+      if(typeof o.t!=='string')o.t='';
+      if(typeof o.why!=='string')o.why='';
+    });
+    d.opts.forEach(function(o,i){
+      if(typeof o.t!=='string')o.t='';
+      if(typeof o.up!=='string')o.up='';
+      if(typeof o.down!=='string')o.down='';
+      if(typeof o.shape!=='string')o.shape='';
+      if(typeof o.p!=='number')o.p=0;
+      if(typeof o.keep!=='boolean')o.keep=(i<MAXCARRY);
+    });
+    if(!d.t10||typeof d.t10!=='object')d.t10={m:'',mo:'',y:''};
+    ['m','mo','y'].forEach(function(f){if(typeof d.t10[f]!=='string')d.t10[f]=''});
+    // older records used undo (easily/with effort/not really); map to cost
+    if(typeof d.cost!=='string'){
+      d.cost = (d.undo==='easy')?'day':((d.undo==='hard')?'weeks':((d.undo==='no')?'months':''));
+    }
+    ['q','box','pre','mit','ooch','dec','act','rev','rev2','pass','fail','trip','made','started'].forEach(function(f){
+      if(typeof d[f]!=='string')d[f]='';
+    });
+    if(typeof d.conf!=='number')d.conf=0;
+    if(typeof d.step!=='number')d.step=0;
+    if(d.step>6)d.step=6;
+    if(!d.check||typeof d.check!=='object')d.check=null;
+    if(d.look&&typeof d.look!=='object')d.look=null;
+    return d;
+  }
+  function loadDecisions(){
+    var l=read('meta:decisions');
+    if(!Array.isArray(l))return [];
+    return l.filter(function(x){return x&&typeof x==='object'&&typeof x.id==='string'}).map(fixDec);
+  }
+  function saveDecisions(l){write('meta:decisions',l.slice(0,80))}
+  function blankDecision(){
+    return {id:'d'+Date.now().toString(36),q:'',cost:'',box:'',outs:[],opts:[],pre:'',
+      t10:{m:'',mo:'',y:''},mit:'',ooch:'',dec:'',act:'',conf:0,
+      rev:'',rev2:'',pass:'',fail:'',trip:'',
+      started:stamp(),made:'',check:null,look:null,step:0};
+  }
+  function decById(id){
+    var l=loadDecisions();
+    for(var i=0;i<l.length;i++){if(l[i].id===id)return l[i]}
+    return null;
+  }
+  function setDec(id,fn,redraw){
+    var l=loadDecisions();
+    for(var i=0;i<l.length;i++){if(l[i].id===id)fn(l[i])}
+    saveDecisions(l);
+    if(redraw!==false)renderDecide();
+  }
+  // which of the two dates is asking for attention, if either
+  function decDue(d){
+    if(!d.made)return '';
+    var t=dayKey(today);
+    if(d.rev&&!d.check&&String(d.rev)<=t)return 'check';
+    if(d.rev2&&!d.look&&String(d.rev2)<=t)return 'look';
+    if(!d.rev2&&d.rev&&d.check&&!d.look&&String(d.rev)<=t)return 'look';
+    return '';
+  }
+  function decDays(d){
+    if(!d.made)return 0;
+    var p=String(d.made).slice(0,10).split('-');
+    if(p.length<3)return 0;
+    var dt=new Date(+p[0],+p[1]-1,+p[2]);
+    if(isNaN(dt.getTime()))return 0;
+    return Math.max(0,Math.round((midnight(today)-midnight(dt))/86400000));
+  }
+  function dcDate(k){
+    var p=String(k||'').split('-');
+    if(p.length<3)return '';
+    var d=new Date(+p[0],+p[1]-1,+p[2]);
+    if(isNaN(d.getTime()))return '';
+    return d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3);
+  }
+  function oddsWord(v){
+    for(var i=0;i<ODDS.length;i++){if(ODDS[i].v===v)return ODDS[i].l.toLowerCase()}
+    return '';
+  }
+  function carried(d){return d.opts.filter(function(o){return o.keep})}
+  function topWant(d){
+    var t=(d.outs[0]&&d.outs[0].t||'').trim();
+    return t;
+  }
+
+  // ---- small builders, so every step screen looks the same ----
+  function dcTitle(box,title,hint){
+    var h=document.createElement('h2'); h.className='dch2'; h.textContent=title;
+    box.appendChild(h);
+    if(hint){var p=document.createElement('p'); p.className='dchint'; p.textContent=hint; box.appendChild(p)}
+  }
+  function dcArea(box,val,ph,save,small){
+    var t=document.createElement('textarea');
+    t.className='dcta'; t.rows=1; t.value=val||''; t.placeholder=ph||'';
+    t.setAttribute('autocomplete','off');
+    if(small)t.style.minHeight='44px';
+    var db=mkDebounce();
+    t.addEventListener('input',function(){grow(t);var v=t.value;db(function(){save(v)})});
+    box.appendChild(t);
+    autoField(t,true);
+    grow(t);
+    return t;
+  }
+  function dcLine(box,val,ph,save){
+    var i=document.createElement('input');
+    i.type='text'; i.className='dcin'; i.value=val||''; i.placeholder=ph||'';
+    i.setAttribute('autocomplete','off');
+    var db=mkDebounce();
+    i.addEventListener('input',function(){var v=i.value;db(function(){save(v)})});
+    box.appendChild(i);
+    return i;
+  }
+  function dcLabel(box,txt){
+    var l=document.createElement('div'); l.className='dclab'; l.textContent=txt;
+    box.appendChild(l);
+  }
+  function dcHint(box,txt){
+    var p=document.createElement('p'); p.className='dchint'; p.textContent=txt;
+    box.appendChild(p);
+  }
+  function dcChips(box,items,isOn,pick){
+    var row=document.createElement('div'); row.className='rwchips';
+    items.forEach(function(it){
+      var b=document.createElement('button');
+      b.type='button'; b.textContent=it.l;
+      if(isOn(it))b.className='on';
+      b.addEventListener('click',function(){pick(it)});
+      row.appendChild(b);
+    });
+    box.appendChild(row);
+  }
+  function dcCard(box,label,text){
+    var card=document.createElement('div'); card.className='dcopt';
+    var nm=document.createElement('div'); nm.className='dcoptn';
+    nm.textContent=label+'.  '+((text||'').trim()||'Untitled option');
+    card.appendChild(nm);
+    box.appendChild(card);
+    return card;
+  }
+  function dcNone(box,txt){
+    var e=document.createElement('p'); e.className='lempty'; e.textContent=txt;
+    box.appendChild(e);
+  }
+
+  // ---- the seven screens ----
+  function stepFrame(box,d){
+    dcTitle(box,'What are you deciding?',
+      'Write it as a question you could answer by picking something. If there is a bigger question behind it, write that one instead, as long as it still has answers you could choose between. A goal is not a decision.');
+    dcArea(box,d.q,'e.g. Which one do I test first?',function(v){
+      setDec(d.id,function(o){o.q=v.slice(0,300)},false);
+    });
+
+    // a quiet nudge when what has been typed reads like a goal rather than a choice
+    var qt=(d.q||'').trim().toLowerCase();
+    if(qt.length>12&&/^(how do i|how can i|how to|what is the best way)/.test(qt)){
+      var n=document.createElement('p'); n.className='dcnudge';
+      n.textContent='That reads like a goal rather than a decision. Could you answer it by picking something? If not, it probably belongs in the next screen.';
+      box.appendChild(n);
+    }
+
+    var hb=document.createElement('button');
+    hb.type='button'; hb.className='dchelp';
+    hb.textContent=dcHelp?'Hide the checks':'Not sure it is the right question?';
+    hb.addEventListener('click',function(){dcHelp=!dcHelp;renderDecide()});
+    box.appendChild(hb);
+    if(dcHelp){
+      var hw=document.createElement('div'); hw.className='dcgate';
+      [['Ask why it matters, twice.','Which idea should I pursue, why does that matter, because I need the money, why does that matter, because it buys me time. Two rungs up is usually the right height. Three is too far.'],
+       ['Could you answer it by picking something?','If not, it is a goal. Goals belong in the next screen as criteria.'],
+       ['What would you still have to decide if this question vanished?','If something bigger is left standing, you were working on the wrong one. It also catches the safe question standing in for the one you are avoiding.']
+      ].forEach(function(p){
+        var t=document.createElement('b'); t.textContent=p[0];
+        var s=document.createElement('span'); s.textContent=' '+p[1];
+        var line=document.createElement('p'); line.appendChild(t); line.appendChild(s);
+        hw.appendChild(line);
+      });
+      box.appendChild(hw);
+    }
+
+    dcLabel(box,'If this goes wrong, what does it cost to find out and back out?');
+    dcChips(box,COST,
+      function(it){return d.cost===it.v},
+      function(it){setDec(d.id,function(o){o.cost=it.v})});
+    dcHint(box,'Not whether you can undo it. Plenty of decisions are easy to reverse and still cost you months before you find out you should.');
+
+    if(d.cost==='day'){
+      var g=document.createElement('div'); g.className='dcgate';
+      g.appendChild(document.createTextNode(
+        'Cheap to be wrong. An hour of thinking about it probably costs more than getting it wrong. Pick one and move on.'));
+      var b=document.createElement('button');
+      b.type='button'; b.textContent='Just log it and skip to the end';
+      b.addEventListener('click',function(){dcStep=6;saveStep(d.id,6);renderDecide()});
+      g.appendChild(b);
+      box.appendChild(g);
+    }
+
+    dcLabel(box,'How long are you giving yourself to decide?');
+    dcChips(box,[{l:'10 minutes',v:'10m'},{l:'An hour',v:'1h'},{l:'Sleep on it',v:'1d'},{l:'A week',v:'1w'}],
+      function(it){return d.box===it.v},
+      function(it){setDec(d.id,function(o){o.box=it.v})});
+    dcHint(box,'A limit on the deciding, not on the doing. Without one, thinking becomes the way you avoid choosing.');
+  }
+
+  function stepCriteria(box,d){
+    dcTitle(box,'What do you want?',
+      'Start from what you want, not what you are afraid of. Then put them in order. Not which ones matter, but which one the others give way to when they clash.');
+    d.outs.forEach(function(o,i){
+      var row=document.createElement('div'); row.className='dcitem'+(i===0?' first':'');
+      var n=document.createElement('span'); n.className='n'; n.textContent=String(i+1);
+      var col=document.createElement('div'); col.className='col';
+      dcArea(col,o.t,'What you want',function(v){
+        setDec(d.id,function(x){if(x.outs[i])x.outs[i].t=v.slice(0,160)},false);
+      },true);
+      var w=document.createElement('input');
+      w.type='text'; w.className='dcsub'; w.value=o.why||''; w.placeholder='Why does this matter?';
+      w.setAttribute('autocomplete','off');
+      var db=mkDebounce();
+      w.addEventListener('input',function(){
+        var v=w.value;
+        db(function(){setDec(d.id,function(x){if(x.outs[i])x.outs[i].why=v.slice(0,160)},false)});
+      });
+      col.appendChild(w);
+      var up=document.createElement('button');
+      up.type='button'; up.className='up'; up.innerHTML='&#9650;';
+      up.setAttribute('aria-label','Move up');
+      if(i===0)up.style.visibility='hidden';
+      up.addEventListener('click',function(){
+        setDec(d.id,function(x){var a=x.outs.splice(i,1)[0];x.outs.splice(i-1,0,a)});
+      });
+      var rm=document.createElement('button');
+      rm.type='button'; rm.className='rm'; rm.innerHTML='&times;';
+      rm.setAttribute('aria-label','Remove this one');
+      rm.addEventListener('click',function(){setDec(d.id,function(x){x.outs.splice(i,1)})});
+      row.appendChild(n); row.appendChild(col); row.appendChild(up); row.appendChild(rm);
+      box.appendChild(row);
+    });
+    var add=document.createElement('button');
+    add.type='button'; add.className='dcadd'; add.style.marginTop='10px';
+    add.textContent='+ Add one';
+    add.addEventListener('click',function(){
+      setDec(d.id,function(x){if(x.outs.length<8)x.outs.push({t:'',why:''})});
+    });
+    box.appendChild(add);
+    if(d.outs.length>1)dcHint(box,'The arrow moves one up. Number one is what everything else gives way to, and it is usually what settles the decision.');
+  }
+
+  function stepOptions(box,d){
+    dcTitle(box,'What are the options?',
+      'Write them all down, including the ones you do not like. Telling yourself there is only one option is what makes a decision feel like a trap.');
+    if(dcBack){
+      var w=document.createElement('div'); w.className='dcgate';
+      w.textContent='Back here because none of them cleared the bar. That usually means the list is wrong rather than you needing to pick harder. Add something new, or change one you already have.';
+      box.appendChild(w);
+    }
+    var kept=carried(d).length;
+    d.opts.forEach(function(o,i){
+      var row=document.createElement('div'); row.className='dcitem'+(o.keep?'':' parked');
+      var n=document.createElement('span'); n.className='n'; n.textContent=String.fromCharCode(65+i);
+      var col=document.createElement('div'); col.className='col';
+      dcArea(col,o.t,'An option',function(v){
+        setDec(d.id,function(x){if(x.opts[i])x.opts[i].t=v.slice(0,160)},false);
+      },true);
+      var k=document.createElement('button');
+      k.type='button'; k.className='keep'+(o.keep?' on':'');
+      k.textContent=o.keep?'Carried':'Parked';
+      k.setAttribute('aria-label','Carry this option into the later steps');
+      k.addEventListener('click',function(){
+        setDec(d.id,function(x){
+          if(!x.opts[i])return;
+          if(!x.opts[i].keep&&carried(x).length>=MAXCARRY){note('Five is as many as you can weigh properly');return}
+          x.opts[i].keep=!x.opts[i].keep;
+        });
+      });
+      col.appendChild(k);
+      var rm=document.createElement('button');
+      rm.type='button'; rm.className='rm'; rm.innerHTML='&times;';
+      rm.setAttribute('aria-label','Remove this option');
+      rm.addEventListener('click',function(){setDec(d.id,function(x){x.opts.splice(i,1)})});
+      row.appendChild(n); row.appendChild(col); row.appendChild(rm);
+      box.appendChild(row);
+    });
+    var add=document.createElement('button');
+    add.type='button'; add.className='dcadd'; add.style.marginTop='10px';
+    add.textContent='+ Add an option';
+    add.addEventListener('click',function(){addOpt(d.id,'')});
+    box.appendChild(add);
+
+    if(d.opts.length>MAXCARRY){
+      dcHint(box,'Carry forward the ones worth real thought and park the rest. Parked ones stay on the list, they just do not clutter the next four screens. '+kept+' of '+d.opts.length+' carried.');
+    }
+
+    dcLabel(box,'The ones people forget');
+    dcChips(box,[
+      {l:'Do nothing for now',v:'Do nothing for now'},
+      {l:'A bit of both',v:'A bit of both'},
+      {l:'Decide on a set date',v:'Decide on a set date instead'}
+    ],function(){return false},function(it){addOpt(d.id,it.v)});
+    dcHint(box,'And one more worth asking: if none of the options above were allowed, what would you do? That answer usually belongs on the list.');
+  }
+  function addOpt(id,text){
+    setDec(id,function(x){
+      if(x.opts.length>=MAXOPT){note('That is as many as a decision can hold');return}
+      x.opts.push({t:text,up:'',down:'',p:0,shape:'',keep:carried(x).length<MAXCARRY});
+    });
+  }
+
+  function stepReshape(box,d){
+    dcTitle(box,'Can you make any of them better?',
+      'First drafts are never the best version. Change one structural thing and see what happens to it.');
+    var k=carried(d);
+    if(!k.length){
+      dcNone(box,'Nothing carried forward yet. Go back a step and write some options.');
+      return;
+    }
+    dcHint(box,'Four things worth changing: who pays, who does the work, what is free, and what repeats. Changing who pays is usually the one that turns a clever idea into a business.');
+    d.opts.forEach(function(o,i){
+      if(!o.keep)return;
+      var card=dcCard(box,String.fromCharCode(65+i),o.t);
+      dcArea(card,o.shape,'A better version of this would...',function(v){
+        setDec(d.id,function(x){if(x.opts[i])x.opts[i].shape=v.slice(0,400)},false);
+      },true);
+    });
+    dcHint(box,'Leave it blank if the option is already the right shape. Skipping this is fine when you are choosing between things that already exist rather than inventing them.');
+  }
+
+  function stepConsequences(box,d){
+    dcTitle(box,'What happens either way?','The upside and the downside of each one, as best you know.');
+    var k=carried(d);
+    if(!k.length){
+      dcNone(box,'Nothing carried forward yet. Go back and write some options first.');
+    }
+    d.opts.forEach(function(o,i){
+      if(!o.keep)return;
+      var card=dcCard(box,String.fromCharCode(65+i),(o.shape||'').trim()||o.t);
+      dcArea(card,o.up,'Upside',function(v){
+        setDec(d.id,function(x){if(x.opts[i])x.opts[i].up=v.slice(0,400)},false);
+      },true);
+      dcArea(card,o.down,'Downside',function(v){
+        setDec(d.id,function(x){if(x.opts[i])x.opts[i].down=v.slice(0,400)},false);
+      },true);
+    });
+    dcLabel(box,'Premortem');
+    dcHint(box,'It is a year from now and this went badly. What happened? Writing it as something that already happened gets more out of you than listing what might go wrong.');
+    dcArea(box,d.pre,'It went wrong because...',function(v){
+      setDec(d.id,function(o){o.pre=v.slice(0,600)},false);
+    });
+  }
+
+  function stepJudge(box,d){
+    var want=topWant(d);
+    dcTitle(box,'How likely is it, really?',
+      want?('Measured against what you put first: '+want)
+          :'A disaster you are sure about and a disaster that will almost certainly never happen feel identical until you put a number on them.');
+    var k=carried(d);
+    if(!k.length){
+      dcNone(box,'Nothing carried forward yet. Go back and write some options first.');
+    }
+    d.opts.forEach(function(o,i){
+      if(!o.keep)return;
+      var card=dcCard(box,String.fromCharCode(65+i),(o.shape||'').trim()||o.t);
+      var h=document.createElement('div'); h.className='dchint'; h.style.margin='0 0 8px';
+      h.textContent=want?('Chance this gets you '+want.charAt(0).toLowerCase()+want.slice(1)):'Chance this works out';
+      card.appendChild(h);
+      dcChips(card,ODDS,
+        function(it){return o.p===it.v},
+        function(it){setDec(d.id,function(x){if(x.opts[i])x.opts[i].p=(x.opts[i].p===it.v)?0:it.v})});
+    });
+
+    if(k.length){
+      var nb=document.createElement('button');
+      nb.type='button'; nb.className='dcadd'; nb.style.marginTop='14px';
+      nb.textContent='None of these clear the bar';
+      nb.addEventListener('click',function(){
+        dcBack=true; dcStep=2; saveStep(d.id,2); renderDecide();
+        window.scrollTo({top:0});
+      });
+      box.appendChild(nb);
+      dcHint(box,'If nothing is good enough, the list is usually what is wrong, not your nerve. That sends you back to the options.');
+    }
+
+    dcLabel(box,'Ten, ten, ten');
+    dcHint(box,'How will you feel about this in ten minutes, ten months and ten years? This one is for decisions with heat in them, where short term feeling might choose for you. Plenty of decisions have none, and skipping it is the right answer then.');
+    dcArea(box,d.t10.m,'In ten minutes...',function(v){setDec(d.id,function(o){o.t10.m=v.slice(0,200)},false)},true);
+    dcArea(box,d.t10.mo,'In ten months...',function(v){setDec(d.id,function(o){o.t10.mo=v.slice(0,200)},false)},true);
+    dcArea(box,d.t10.y,'In ten years...',function(v){setDec(d.id,function(o){o.t10.y=v.slice(0,200)},false)},true);
+
+    dcLabel(box,'Cut the downside');
+    dcHint(box,'Take a piece of one option and mix it with another, or find the version with less to lose.');
+    dcArea(box,d.mit,'How to reduce what could go wrong...',function(v){
+      setDec(d.id,function(o){o.mit=v.slice(0,600)},false);
+    },true);
+  }
+
+  function stepResolve(box,d){
+    dcTitle(box,'Decide it.','One sentence, then the first thing you will actually do.');
+    dcArea(box,d.dec,'I am going to...',function(v){
+      setDec(d.id,function(o){o.dec=v.slice(0,300)},false);
+    });
+
+    dcLabel(box,'The smallest test');
+    dcHint(box,'Could you try it small before committing properly? A cheap test beats a confident guess, and a test is something you can put on a day.');
+    dcArea(box,d.ooch,'The smallest version I could try is...',function(v){
+      setDec(d.id,function(o){o.ooch=v.slice(0,400)},false);
+    },true);
+
+    dcLabel(box,'First action');
+    dcLine(box,d.act,'The very next step',function(v){
+      setDec(d.id,function(o){o.act=v.slice(0,160)},false);
+    });
+    if((d.ooch||'').trim()&&!(d.act||'').trim()){
+      var u=document.createElement('button');
+      u.type='button'; u.className='dcadd'; u.style.margin='9px 0 0';
+      u.textContent='Use the smallest test as the first action';
+      u.addEventListener('click',function(){
+        setDec(d.id,function(o){o.act=String(o.ooch||'').slice(0,160)});
+      });
+      box.appendChild(u);
+    }
+
+    dcLabel(box,'What counts as it working?');
+    dcHint(box,'Write it so someone else could tell. Numbers if you have them.');
+    dcArea(box,d.pass,'It worked if...',function(v){
+      setDec(d.id,function(o){o.pass=v.slice(0,500)},false);
+    },true);
+
+    dcLabel(box,'What would make you stop?');
+    dcHint(box,'The hardest one and the most useful. In six weeks you will be able to argue your way out of anything, so write the conditions now while you can still think clearly.');
+    dcArea(box,d.fail,'I stop if...',function(v){
+      setDec(d.id,function(o){o.fail=v.slice(0,500)},false);
+    },true);
+
+    dcLabel(box,'What would make you think again sooner?');
+    dcArea(box,d.trip,'I will look again early if...',function(v){
+      setDec(d.id,function(o){o.trip=v.slice(0,300)},false);
+    },true);
+
+    dcLabel(box,'How sure are you?');
+    dcChips(box,ODDS,
+      function(it){return d.conf===it.v},
+      function(it){setDec(d.id,function(o){o.conf=(o.conf===it.v)?0:it.v})});
+    dcHint(box,'A guess, and worth making anyway. The look back puts this next to what actually happened, which is the only way the guessing gets better.');
+
+    dcLabel(box,'Two dates');
+    var rb=document.createElement('button');
+    rb.type='button'; rb.className='dcadd'; rb.style.marginBottom='8px';
+    rb.textContent=d.rev?('Checkpoint on '+dcDate(d.rev)):'Checkpoint: an early look';
+    rb.addEventListener('click',function(){
+      askDate('An early look. Is it going the way you expected?',shift(today,14),rb,function(dt){
+        setDec(d.id,function(o){o.rev=dayKey(dt)});
+      },true);
+    });
+    box.appendChild(rb);
+    var rb2=document.createElement('button');
+    rb2.type='button'; rb2.className='dcadd'; rb2.style.marginBottom='0';
+    rb2.textContent=d.rev2?('Look back on '+dcDate(d.rev2)):'Look back: did it actually work?';
+    rb2.addEventListener('click',function(){
+      askDate('When will you know whether it worked?',shift(today,90),rb2,function(dt){
+        setDec(d.id,function(o){o.rev2=dayKey(dt)});
+      },true);
+    });
+    box.appendChild(rb2);
+    dcHint(box,'The checkpoint catches it early. The look back is the one that teaches you something, so put it where you will actually know the answer.');
+
+    var sv=document.createElement('div'); sv.className='dcsaved';
+    var msg=document.createElement('p');
+    msg.textContent=d.made
+      ? ('Decided '+dcDate(String(d.made).slice(0,10))+(d.rev2?(', looking back on '+dcDate(d.rev2)):', no look back date set yet'))
+      : 'Nothing is locked in until you save it. Saving stamps the time, so what you thought at the time stays honest.';
+    sv.appendChild(msg);
+    var pr=document.createElement('div'); pr.className='prow2';
+    if(!d.made){
+      var sb=document.createElement('button');
+      sb.type='button'; sb.textContent='Save the decision';
+      sb.addEventListener('click',function(){
+        var cur=decById(d.id)||d;
+        if(!(cur.dec||'').trim()){note('Write the decision in a sentence first');return}
+        setDec(d.id,function(o){o.made=stamp()});
+        note('Decision saved');
+      });
+      pr.appendChild(sb);
+    }
+    var t1=document.createElement('button');
+    t1.type='button'; t1.textContent='Make it tomorrow’s one thing';
+    t1.addEventListener('click',function(){decToDay(d,shift(today,1),true)});
+    var t2=document.createElement('button');
+    t2.type='button'; t2.textContent='Park it in Later';
+    t2.addEventListener('click',function(){
+      var a=((decById(d.id)||d).act||'').trim();
+      if(!a){note('Write the first action first');return}
+      addLater(a); note('Parked in Later');
+    });
+    pr.appendChild(t1); pr.appendChild(t2);
+    sv.appendChild(pr);
+    box.appendChild(sv);
+  }
+  function decToDay(d,when,asGoal){
+    var a=((decById(d.id)||d).act||'').trim();
+    if(!a){note('Write the first action first');return}
+    var r=placeTodo(a,when,asGoal,false,false,'');
+    if(r.ok){note('Set as the one thing for '+dayLabel(when));renderDecide();return}
+    ask(dayLabel(when).charAt(0).toUpperCase()+dayLabel(when).slice(1)+' already has "'+
+        String(r.existing||'').slice(0,40)+'" as its one thing.',[
+      {label:'Add it as a task instead',run:function(){
+        var r2=placeTodo(a,when,false,false,true,'');
+        note(r2.ok?('Added to '+dayLabel(when)):'That day is full');
+      }},
+      {label:'Replace it',danger:true,run:function(){
+        placeTodo(a,when,true,true,false,'');
+        note('Set as the one thing for '+dayLabel(when));
+      }},
+      {label:'Cancel'}
+    ]);
+  }
+
+  var STEPFN=[stepFrame,stepCriteria,stepOptions,stepReshape,stepConsequences,stepJudge,stepResolve];
+  function saveStep(id,n){setDec(id,function(o){o.step=n},false)}
+  function tidyDecision(id){
+    var d=decById(id);
+    if(!d)return;
+    var any=(d.q||'').trim()||(d.dec||'').trim()||d.outs.length||d.opts.length;
+    if(!any)saveDecisions(loadDecisions().filter(function(x){return x.id!==id}));
+  }
+
+  function drawSteps(box,d){
+    if(!d){dcEdit=null;renderDecide();return}
+    if(dcStep<0||dcStep>6)dcStep=0;
+    var dots=document.createElement('div'); dots.className='dcdots';
+    for(var i=0;i<7;i++){
+      (function(n){
+        var ii=document.createElement('i');
+        ii.className=(n===dcStep)?'now':(n<dcStep?'on':'');
+        ii.setAttribute('role','button');
+        ii.setAttribute('aria-label',DSTEP[n]);
+        ii.addEventListener('click',function(){dcStep=n;saveStep(d.id,n);renderDecide()});
+        dots.appendChild(ii);
+      })(i);
+    }
+    box.appendChild(dots);
+
+    var lab=document.createElement('div'); lab.className='dcstep';
+    lab.textContent='Step '+(dcStep+1)+' of 7  ·  '+DSTEP[dcStep];
+    box.appendChild(lab);
+
+    STEPFN[dcStep](box,d);
+
+    var nav=document.createElement('div'); nav.className='dcnav';
+    var back=document.createElement('button');
+    back.type='button'; back.textContent=(dcStep===0)?'Close':'Back';
+    back.addEventListener('click',function(){
+      if(dcStep===0){tidyDecision(d.id);dcEdit=null;dcHelp=false;dcBack=false;renderDecide();return}
+      dcStep--; saveStep(d.id,dcStep); renderDecide();
+      window.scrollTo({top:0});
+    });
+    var next=document.createElement('button');
+    next.type='button'; next.className='next';
+    next.textContent=(dcStep===6)?'Done for now':'Next';
+    next.addEventListener('click',function(){
+      if(dcStep===6){tidyDecision(d.id);dcEdit=null;dcHelp=false;dcBack=false;renderDecide();window.scrollTo({top:0});return}
+      if(dcStep===2)dcBack=false;
+      dcStep++; saveStep(d.id,dcStep); renderDecide();
+      window.scrollTo({top:0});
+    });
+    nav.appendChild(back); nav.appendChild(next);
+    box.appendChild(nav);
+  }
+
+  function drawReview(box,d){
+    if(!d){dcRev=null;renderDecide();return}
+    var mode=decDue(d);
+    var isCheck=(mode==='check');
+    dcTitle(box,isCheck?'Early checkpoint':'Looking back',(d.q||'').trim()||'This decision');
+
+    var card=document.createElement('div'); card.className='dcopt';
+    function line(label,val){
+      if(!String(val||'').trim())return;
+      var l=document.createElement('div'); l.className='dclab'; l.style.margin='10px 0 3px';
+      l.textContent=label;
+      var v=document.createElement('div'); v.className='dcval'; v.textContent=val;
+      card.appendChild(l); card.appendChild(v);
+    }
+    line('You decided',d.dec);
+    line('First action',d.act);
+    line('It worked if',d.pass);
+    line('You said you would stop if',d.fail);
+    if(d.conf)line('How sure you were',d.conf+'%, '+oddsWord(d.conf));
+    line('You thought it might go wrong because',d.pre);
+    line('Your early warning was',d.trip);
+    if(d.made)line('Decided',dcDate(String(d.made).slice(0,10))+', '+decDays(d)+' days ago');
+    box.appendChild(card);
+
+    if(isCheck){
+      dcLabel(box,'Is it going the way you expected?');
+      dcHint(box,'Compare it against what you wrote above, not against how you feel today. If any of the stop conditions have been met, this is the moment that matters.');
+      dcArea(box,d.check?d.check.note:'','What has actually happened so far...',function(v){
+        setDec(d.id,function(o){
+          if(!o.check||typeof o.check!=='object')o.check={note:'',at:stamp()};
+          o.check.note=v.slice(0,800);
+        },false);
+      });
+      var row=document.createElement('div'); row.className='dcnav';
+      var ok=document.createElement('button');
+      ok.type='button'; ok.className='next'; ok.textContent='On track, carry on';
+      ok.addEventListener('click',function(){
+        setDec(d.id,function(o){
+          if(!o.check||typeof o.check!=='object')o.check={note:'',at:''};
+          o.check.at=stamp();
+        });
+        dcRev=null; renderDecide(); note('Checkpoint logged');
+      });
+      var stop=document.createElement('button');
+      stop.type='button'; stop.textContent='A stop condition was met';
+      stop.style.borderColor='var(--c3)'; stop.style.color='var(--c3)';
+      stop.addEventListener('click',function(){
+        setDec(d.id,function(o){
+          if(!o.check||typeof o.check!=='object')o.check={note:'',at:''};
+          o.check.at=stamp();
+          if(!o.look||typeof o.look!=='object')o.look={how:0,note:'',at:stamp()};
+        });
+        note('Go to the look back and write what happened');
+      });
+      row.appendChild(stop); row.appendChild(ok);
+      box.appendChild(row);
+      var cl=document.createElement('button');
+      cl.type='button'; cl.className='dcadd'; cl.style.margin='10px 0 0';
+      cl.textContent='Close without logging it';
+      cl.addEventListener('click',function(){dcRev=null;renderDecide()});
+      box.appendChild(cl);
+      return;
+    }
+
+    dcLabel(box,'How did it actually go?');
+    var cur=d.look?d.look.how:0;
+    dcChips(box,LOOKW.map(function(w,i){return {l:w,v:i+1}}),
+      function(it){return cur===it.v},
+      function(it){
+        setDec(d.id,function(o){
+          if(!o.look||typeof o.look!=='object')o.look={how:0,note:'',at:''};
+          o.look.how=it.v; o.look.at=stamp();
+        });
+      });
+
+    dcArea(box,d.look?d.look.note:'','What actually happened, and what you would do differently...',function(v){
+      setDec(d.id,function(o){
+        if(!o.look||typeof o.look!=='object')o.look={how:0,note:'',at:stamp()};
+        o.look.note=v.slice(0,800);
+      },false);
+    });
+
+    if(d.look&&d.look.how&&d.conf){
+      var sure=d.conf>=75, good=d.look.how>=4;
+      var c=document.createElement('p'); c.className='dchint'; c.style.marginTop='14px';
+      c.textContent='You were '+d.conf+'% sure and it '+LOOKW[d.look.how-1].toLowerCase()+'. '+
+        (good===sure
+          ? 'Your read was about right.'
+          : (sure?'You were more confident than it deserved.':'You were less confident than it deserved.'));
+      box.appendChild(c);
+    }
+
+    var nav=document.createElement('div'); nav.className='dcnav';
+    var del=document.createElement('button');
+    del.type='button'; del.textContent='Delete';
+    del.style.borderColor='var(--c3)'; del.style.color='var(--c3)';
+    del.addEventListener('click',function(){
+      ask('Delete this decision and everything written in it?',[
+        {label:'Delete',danger:true,run:function(){
+          saveDecisions(loadDecisions().filter(function(x){return x.id!==d.id}));
+          dcRev=null; renderDecide();
+        }},
+        {label:'Cancel'}
+      ],nav);
+    });
+    var ed=document.createElement('button');
+    ed.type='button'; ed.textContent='See the thinking';
+    ed.addEventListener('click',function(){dcRev=null;dcEdit=d.id;dcStep=0;renderDecide();window.scrollTo({top:0})});
+    var cl2=document.createElement('button');
+    cl2.type='button'; cl2.className='next'; cl2.textContent='Close';
+    cl2.addEventListener('click',function(){dcRev=null;renderDecide();window.scrollTo({top:0})});
+    nav.appendChild(del); nav.appendChild(ed); nav.appendChild(cl2);
+    box.appendChild(nav);
+  }
+
+  function decRow(d,cls){
+    var row=document.createElement('div');
+    row.className='dcrow'+(cls?(' '+cls):'');
+    var mid=document.createElement('div'); mid.className='dcmid';
+    var q=document.createElement('div'); q.className='dcq';
+    q.textContent=(d.q||'').trim()||'Untitled decision';
+    var m=document.createElement('div'); m.className='dcmeta';
+    var due=decDue(d);
+    if(due==='check'){
+      m.textContent='Checkpoint due'+((d.dec||'').trim()?('  ·  '+d.dec):'');
+    } else if(due==='look'){
+      m.textContent='Decided '+decDays(d)+' days ago'+((d.dec||'').trim()?('  ·  '+d.dec):'');
+    } else if(!d.made){
+      var st=Math.min(Math.max(d.step||0,0),6);
+      m.textContent='Step '+(st+1)+' of 7, '+DSTEP[st].toLowerCase();
+    } else if(d.look&&d.look.how){
+      m.textContent=LOOKW[d.look.how-1]+(d.conf?('  ·  you were '+d.conf+'% sure'):'');
+    } else {
+      m.textContent=((d.dec||'').trim()||'Decided')+(d.rev2?('  ·  look back '+dcDate(d.rev2)):'');
+    }
+    var badge=document.createElement('span');
+    badge.className='dcstate'+(cls?(' '+cls):'');
+    badge.textContent=due?(due==='check'?'Check':'Review'):(!d.made?'Open':((d.look&&d.look.how)?'Closed':'Decided'));
+    mid.appendChild(q); mid.appendChild(m);
+    row.appendChild(mid); row.appendChild(badge);
+    row.addEventListener('click',function(){
+      if(!d.made){dcEdit=d.id;dcStep=Math.min(Math.max(d.step||0,0),6)}
+      else {dcRev=d.id}
+      renderDecide();
+      window.scrollTo({top:0});
+    });
+    return row;
+  }
+
+  function drawDecList(box,list){
+    var add=document.createElement('button');
+    add.type='button'; add.className='dcadd';
+    add.textContent='+ Something to think through';
+    add.addEventListener('click',function(){
+      var l=loadDecisions(), fresh=blankDecision();
+      l.unshift(fresh); saveDecisions(l);
+      dcEdit=fresh.id; dcStep=0; dcHelp=false; dcBack=false; renderDecide();
+      window.scrollTo({top:0});
+    });
+    box.appendChild(add);
+
+    if(!list.length){
+      dcNone(box,'Nothing here yet. This is for the choices worth slowing down for. Anything cheap to get wrong, just decide and move on.');
+      return;
+    }
+    var dueL=[], openL=[], doneL=[];
+    list.forEach(function(d){
+      if(decDue(d))dueL.push(d);
+      else if(!d.made)openL.push(d);
+      else doneL.push(d);
+    });
+    function section(title,arr,cls){
+      if(!arr.length)return;
+      dcLabel(box,title);
+      arr.forEach(function(d){box.appendChild(decRow(d,cls))});
+    }
+    section('Waiting on you',dueL,'due');
+    section('Still thinking',openL,'open');
+    if(doneL.length){
+      var sec=document.createElement('div'); sec.className='dinsec';
+      var hd=document.createElement('button');
+      hd.type='button'; hd.className='dinsec-h';
+      hd.innerHTML='Decided '+doneL.length+' <span>&#9662;</span>';
+      hd.addEventListener('click',function(){dcShowDone=!dcShowDone;renderDecide()});
+      var bd=document.createElement('div'); bd.className='dinbody'+(dcShowDone?' on':'');
+      doneL.forEach(function(d){bd.appendChild(decRow(d,''))});
+      sec.appendChild(hd); sec.appendChild(bd);
+      box.appendChild(sec);
+    }
+  }
+
+  function renderDecide(){
+    var box=document.getElementById('decBody');
+    if(!box)return;
+    var list=loadDecisions();
+    var waiting=0, due=0;
+    list.forEach(function(d){ if(decDue(d))due++; else if(!d.made)waiting++ });
+    var cnt=document.getElementById('decCount');
+    if(cnt)cnt.innerHTML='<b>'+(waiting+due)+'</b><small>'+(due?'To look at':'Open')+'</small>';
+    var ol=document.getElementById('tabDecideBtn');
+    if(ol)ol.textContent=(waiting+due)?('Decisions '+(waiting+due)):'Decisions';
+    menuAlert();
+    box.innerHTML='';
+    if(dcRev){drawReview(box,decById(dcRev));renderDecBanner();return}
+    if(dcEdit){drawSteps(box,decById(dcEdit));renderDecBanner();return}
+    drawDecList(box,list);
+    renderDecBanner();
+  }
+
+  function renderDecBanner(){
+    var b=document.getElementById('decBanner');
+    if(!b)return;
+    var n=0;
+    loadDecisions().forEach(function(d){if(decDue(d))n++});
+    if(!n){b.className='banner';b.onclick=null;return}
+    b.innerHTML='<span>'+(n===1?'A decision is waiting on you.':n+' decisions are waiting on you.')+
+      '</span> Tap to see how they are going.';
+    b.className='banner on';
+    b.onclick=function(){dcEdit=null;dcRev=null;showTab('decide')};
+  }
+
+  document.getElementById('tabDecideBtn').addEventListener('click',function(){
+    dcEdit=null; dcRev=null; showTab('decide');
+  });
+  document.getElementById('decBack').addEventListener('click',function(){
+    if(dcRev){dcRev=null;renderDecide();return}
+    if(dcEdit){tidyDecision(dcEdit);dcEdit=null;dcHelp=false;dcBack=false;renderDecide();return}
+    showTab('today');
   });
 
   // ---- habits ----
@@ -2897,6 +4109,35 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     {id:'gooddeed',name:'Good deed',cad:'weekly'},
     {id:'newthing',name:'Try something new',cad:'fortnightly'}
   ];
+  // The tick history lives in the hab: records keyed by habit id, so removing a
+  // habit never destroyed any of it. What was lost was the definition, which
+  // left the history orphaned and invisible. Keeping the definition here means
+  // putting one back restores everything.
+  function loadHabArchive(){
+    var l=read('meta:habitsArchive');
+    return Array.isArray(l)?l.filter(function(x){return x&&typeof x.id==='string'}):[];
+  }
+  function saveHabArchive(l){write('meta:habitsArchive',l.slice(0,60))}
+  function archiveHabit(h){
+    var a=loadHabArchive().filter(function(x){return x.id!==h.id});
+    a.unshift(h);
+    saveHabArchive(a);
+    saveHabits(loadHabits().filter(function(x){return x.id!==h.id}));
+    hOpen=null; renderHabits();
+    toast('Archived '+h.name,'Undo',function(){restoreHabit(h.id,true)});
+  }
+  function restoreHabit(id,quiet){
+    var a=loadHabArchive(), back=null;
+    a=a.filter(function(x){ if(x.id===id){back=x;return false} return true });
+    if(!back)return;
+    saveHabArchive(a);
+    var l=loadHabits();
+    var dup=false;
+    l.forEach(function(x){if(x.id===back.id)dup=true});
+    if(!dup)l.push(back);
+    saveHabits(l); renderHabits();
+    note(quiet?'Put back':(back.name+' is back, history and all'));
+  }
   function loadHabits(){
     var h=read('meta:habits'), changed=false;
     if(!Array.isArray(h)||!h.length){write('meta:habits',HAB_DEFAULT);return HAB_DEFAULT.slice()}
@@ -3312,11 +4553,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       rm.type='button'; rm.className='danger'; rm.textContent='Remove';
       rm.addEventListener('click',function(e){
         e.stopPropagation();
-        ask('Remove "'+h.name+'"? Its history stays saved, it just stops showing here.',[
-          {label:'Remove it',danger:true,run:function(){
-            var l=loadHabits().filter(function(x){return x.id!==h.id});
-            saveHabits(l); hOpen=null; renderHabits();
-          }},
+        ask('Archive "'+h.name+'"? It stops showing here. Every tick stays saved, and putting it back brings the history with it.',[
+          {label:'Archive it',danger:true,run:function(){archiveHabit(h)}},
           {label:'Cancel'}
         ],det);
       });
@@ -3386,7 +4624,44 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     }
   }
 
+  var habArcOpen=false;
+  function renderHabArchive(){
+    var sec=document.getElementById('habArcSec');
+    if(!sec)return;
+    var a=loadHabArchive();
+    if(!a.length){sec.style.display='none';return}
+    sec.style.display='';
+    document.getElementById('habArcToggle').innerHTML='Archived '+a.length+' <span>&#9662;</span>';
+    document.getElementById('habArcBody').className='dinbody'+(habArcOpen?' on':'');
+    var box=document.getElementById('habArcList');
+    box.innerHTML='';
+    a.forEach(function(h){
+      var row=document.createElement('div'); row.className='drow2';
+      var ic=document.createElement('span');
+      ic.className='dtick'; ic.textContent=habIcon(h); ic.style.color='var(--muted)';
+      var tx=document.createElement('div'); tx.className='dtxt'; tx.textContent=h.name;
+      var bk=document.createElement('button');
+      bk.type='button'; bk.className='lgo'; bk.textContent='Put back';
+      bk.addEventListener('click',function(e){e.stopPropagation();restoreHabit(h.id)});
+      var rm=document.createElement('button');
+      rm.type='button'; rm.className='ldel'; rm.innerHTML='&times;';
+      rm.setAttribute('aria-label','Delete for good');
+      rm.addEventListener('click',function(e){
+        e.stopPropagation();
+        ask('Delete "'+h.name+'" for good? Its ticks stay in storage but nothing will ever show them again.',[
+          {label:'Delete for good',danger:true,run:function(){
+            saveHabArchive(loadHabArchive().filter(function(x){return x.id!==h.id}));
+            renderHabits(); note('Gone');
+          }},
+          {label:'Cancel'}
+        ],row);
+      });
+      row.appendChild(ic); row.appendChild(tx); row.appendChild(bk); row.appendChild(rm);
+      box.appendChild(row);
+    });
+  }
   function renderHabits(){
+    renderHabArchive();
     var box=document.getElementById('habitList');
     box.innerHTML='';
     var isToday=(dayKey(hsel)===tKey);
@@ -3594,9 +4869,9 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   },true);
 
   function showTab(which){
-    var ids={today:'viewToday',habits:'viewHabits',later:'viewLater',dinner:'viewDinner',reward:'viewRewards'};
-    var btns={today:'tabTodayBtn',habits:'tabHabitsBtn',dinner:'tabDinnerBtn',reward:'tabRewardBtn'};
-    var lit=(which==='later')?'today':which;
+    var ids={today:'viewToday',habits:'viewHabits',later:'viewLater',decide:'viewDecide',fixes:'viewFixes',dinner:'viewDinner',reward:'viewRewards'};
+    var btns={today:'tabTodayBtn',habits:'tabHabitsBtn',dinner:'tabDinnerBtn',reward:'tabRewardBtn',decide:'tabDecideBtn'};
+    var lit=(which==='later'||which==='fixes')?'today':which;
     Object.keys(ids).forEach(function(k){
       document.getElementById(ids[k]).className='view'+(k===which?'':' off');
     });
@@ -3605,13 +4880,53 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     });
     if(which==='habits')renderHabits();
     if(which==='later')renderLater();
+    if(which==='decide')renderDecide();
+    if(which==='fixes')renderFixes();
     if(which==='dinner')renderDinner();
     if(which==='reward')renderRewards();
+    if(which==='today')renderRings();
+    if(typeof setMenu==='function')setMenu(false);
+    var mb=document.getElementById('moreBtn');
+    if(mb)mb.className='morebtn'+(MENUVIEW[which]?' on':'');
+    if(typeof menuAlert==='function')menuAlert();
     // a view that was hidden may hold boxes that never got measured
     refit(document.getElementById(ids[which]));
     stagger(document.getElementById(ids[which]));
     window.scrollTo({top:0});
   }
+  // Today and Habits stay as tabs. Everything else lives behind the three
+  // lines, with a dot on them when one of those pages wants attention, so you
+  // can see there is something waiting without opening it.
+  var MENUVIEW={dinner:1,reward:1,decide:1};
+  var menuOpen=false;
+  function setMenu(on){
+    menuOpen=!!on;
+    var m=document.getElementById('moreMenu');
+    var b=document.getElementById('moreBtn');
+    if(m)m.className='moremenu'+(menuOpen?' on':'');
+    if(b)b.setAttribute('aria-expanded',menuOpen?'true':'false');
+  }
+  function menuAlert(){
+    var b=document.getElementById('moreBtn');
+    if(!b)return;
+    var n=0;
+    try{
+      rwSnapshot().forEach(function(x){if(x.ok)n++});
+      loadDecisions().forEach(function(d){if(decDue(d))n++});
+    }catch(e){}
+    var on=b.className.indexOf(' on')>-1;
+    b.className='morebtn'+(on?' on':'')+(n?' alert':'');
+  }
+  document.getElementById('moreBtn').addEventListener('click',function(e){
+    e.stopPropagation(); setMenu(!menuOpen);
+  });
+  document.addEventListener('click',function(e){
+    if(!menuOpen)return;
+    try{
+      if(e.target.closest&&(e.target.closest('#moreMenu')||e.target.closest('#moreBtn')))return;
+    }catch(err){}
+    setMenu(false);
+  });
   document.getElementById('tabTodayBtn').addEventListener('click',function(){showTab('today')});
   document.getElementById('tabHabitsBtn').addEventListener('click',function(){showTab('habits')});
   document.getElementById('openLater').addEventListener('click',function(){showTab('later')});
@@ -3623,21 +4938,24 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   // close gaps in the three steps after one is moved or removed
   function compactSteps(rec){
     if(!rec.times||typeof rec.times!=='object')rec.times={};
-    var items=[], i;
-    for(i=0;i<CORE;i++){
-      if(rec.todos[i]&&rec.todos[i].t.trim())items.push({t:rec.todos[i].t,d:rec.todos[i].d,
-        moved:rec.todos[i].moved||'',lc:rec.todos[i].lc||'',time:rec.times['s'+i]});
+    // Everything that has text, in order, core slots first. The first three
+    // land in the core, so clearing a core step pulls the first bonus up into
+    // the gap instead of leaving a hole with a bonus stranded underneath it.
+    var all=[], i;
+    for(i=0;i<rec.todos.length;i++){
+      var t=rec.todos[i];
+      if(t&&String(t.t||'').trim()){
+        all.push({t:t.t,d:!!t.d,moved:t.moved||'',lc:t.lc||'',time:rec.times['s'+i]});
+      }
     }
-    var bonus=rec.todos.slice(CORE);
-    var bonusTimes=bonus.map(function(x,j){return rec.times['s'+(CORE+j)]});
-    var core=[];
-    for(i=0;i<CORE;i++){
-      core.push(items[i]?{t:items[i].t,d:items[i].d,moved:items[i].moved,lc:items[i].lc||''}:{t:'',d:false,moved:''});
+    var out=[], want=Math.min(Math.max(CORE,all.length),MAXTODOS);
+    for(i=0;i<want;i++){
+      out.push(all[i]?{t:all[i].t,d:all[i].d,moved:all[i].moved,lc:all[i].lc}
+                     :{t:'',d:false,moved:''});
     }
-    rec.todos=core.concat(bonus);
+    rec.todos=out;
     Object.keys(rec.times).forEach(function(k){if(/^s\d+$/.test(k))delete rec.times[k]});
-    items.forEach(function(it,idx){if(it.time)rec.times['s'+idx]=it.time});
-    bonusTimes.forEach(function(t,j){if(t)rec.times['s'+(CORE+j)]=t});
+    all.forEach(function(x,idx){if(x.time&&idx<out.length)rec.times['s'+idx]=x.time});
   }
   // drop bonus rows left empty, so none linger after a mistap
   function tidyBonus(rec){
@@ -3671,10 +4989,16 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     // movedTo: mark it incomplete here and show where it went.
     // Without it the item is removed outright, which is what delete wants.
     function dropSource(movedTo){
+      // Moving a task off a day that has not finished yet is re-planning: the
+      // slot empties, the gaps close, and the day can still clear on what is
+      // left. Moving one off a day that has already passed is catching up on
+      // something missed, so it stays struck through and that day stays
+      // incomplete. Same action, and the day it leaves decides which it is.
+      var past=(sel<today);
       if(isGoal){
         data.goal=''; data.goalDone=false;
         if(data.times){delete data.times.goal;delete data.times.set}
-      } else if(movedTo){
+      } else if(movedTo&&past){
         data.todos[idx].d=false;
         data.todos[idx].moved=movedTo;
         if(data.times)delete data.times['s'+idx];
@@ -4260,7 +5584,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     });
     allKeys('week:').forEach(function(k){
       var w=loadWk(k), where=[];
-      [['Weekly goal',w.goal],['What worked',w.worked],['Got in the way',w.blocked],['One change',w.change],['Next week',w.next]].forEach(function(p){
+      [['Weekly goal',w.goal],['The week',w.wnote],['What worked',w.worked],['Got in the way',w.blocked],['One change',w.change],['Next week',w.next]].forEach(function(p){
         if(p[1]&&p[1].toLowerCase().indexOf(q)>-1)where.push({t:p[0],x:p[1]});
       });
       if(where.length)hits.push({k:k,week:true,w:where});
@@ -4509,6 +5833,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       shrink(si);
     }
     weeklyGoal.value=wdata.goal;
+    qWeekNote.value=wdata.wnote;
     qWorked.value=wdata.worked; qBlocked.value=wdata.blocked;
     qChange.value=wdata.change; qNext.value=wdata.next;
     autogrow();
@@ -4594,11 +5919,25 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       msg=s+' of '+r+' done'+(isToday?' today. ':' that day. ')+(r-s)+' to go for the streak.';
     }
     statusEl.className=cls; statusText.textContent=msg;
-    document.getElementById('streakNum').textContent=streak();
+    var cur=streak();
+    document.getElementById('streakNum').textContent=cur;
+    var bb=document.getElementById('bests'), bs=streakBest();
+    if(bb){
+      if(!bs.best){ bb.textContent=''; bb.className='bests'; }
+      else if(cur>=bs.best&&cur>1){
+        bb.innerHTML='Best run yet. Previous was <b>'+bs.prev+'</b> '+(bs.prev===1?'day':'days');
+        bb.className='bests now';
+      } else {
+        bb.innerHTML='Best <b>'+bs.best+'</b> '+(bs.best===1?'day':'days')+
+          (bs.prev?(' \u00b7 then <b>'+bs.prev+'</b>'):'');
+        bb.className='bests';
+      }
+    }
 
     renderQuote();
     renderExtras();
     renderWeek();
+    renderRings();
     renderYnote();
     renderCarry();
     renderParked();
@@ -4606,6 +5945,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     renderMonth();
     renderReview(thisWk);
     renderBanner();
+    renderDecBanner();
   }
 
   function renderReview(thisWk){
@@ -4707,7 +6047,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(!was&&wdata.goalDone&&wdata.goal.trim())celebrate('week');
   });
 
-  [[qWorked,'worked'],[qBlocked,'blocked'],[qChange,'change']].forEach(function(p){
+  [[qWeekNote,'wnote'],[qWorked,'worked'],[qBlocked,'blocked'],[qChange,'change']].forEach(function(p){
     p[0].addEventListener('input',function(){grow(p[0]);wdata[p[1]]=p[0].value;dbRev(persistWk)});
   });
   qNext.addEventListener('input',function(){wdata.next=qNext.value;dbRev(persistWk)});
@@ -4807,6 +6147,20 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       });
       if(bits.length)out+=k+'\n'+bits.join('\n')+'\n\n';
     });
+
+    var dzz=loadDecisions();
+    if(dzz.length){
+      out+='=== DECISIONS ===\n\n';
+      dzz.forEach(function(x){
+        out+=((x.q||'').trim()||'Untitled')+'\n';
+        if(x.dec)out+='  decided: '+x.dec+'\n';
+        if(x.made)out+='  on '+String(x.made).slice(0,16).replace('T',' ')+(x.conf?(', '+x.conf+'% sure'):'')+'\n';
+        if(x.act)out+='  first action: '+x.act+'\n';
+        if(x.rev)out+='  review: '+x.rev+'\n';
+        if(x.look&&x.look.how)out+='  looked back: '+LOOKW[x.look.how-1]+(x.look.note?('  ('+x.look.note+')'):'')+'\n';
+        out+='\n';
+      });
+    }
 
     var note=document.getElementById('footNote');
     try{
@@ -4934,7 +6288,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     }catch(e){}
     return out.sort();
   }
-  function wkUsed(w){return !!(w.goal.trim()||w.next.trim()||reviewDone(w))}
+  function wkUsed(w){return !!(w.goal.trim()||w.goalDone||w.next.trim()||reviewDone(w))}
 
   function collect(){
     var pack={app:'onething',version:2,saved:new Date().toISOString(),days:{},weeks:{},habits:{},habitDefs:null,common:null};
@@ -4951,6 +6305,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var lt=read('meta:later'); if(Array.isArray(lt))pack.later=lt;
     var ld=read('meta:laterDone'); if(Array.isArray(ld))pack.laterDone=ld;
     var rw=read('meta:rewards'); if(Array.isArray(rw))pack.rewards=rw;
+    var dcs=read('meta:decisions'); if(Array.isArray(dcs))pack.decisions=dcs;
+    var ha=read('meta:habitsArchive'); if(Array.isArray(ha))pack.habitsArchive=ha;
+    var fx=read('meta:fixes'); if(Array.isArray(fx))pack.fixes=fx;
+    var fd=read('meta:fixesDone'); if(Array.isArray(fd))pack.fixesDone=fd;
     var ds=read('meta:dishes'); if(Array.isArray(ds))pack.dishes=ds;
     var dr=read('meta:dinnerRules'); if(dr)pack.dinnerRules=dr;
     var dc=read('meta:dinnerCfg'); if(dc)pack.dinnerCfg=dc;
@@ -5049,7 +6407,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   }
   function mergeWeek(cur,bak){
     var n=0;
-    ['goal','worked','blocked','change','next'].forEach(function(f){
+    ['goal','wnote','worked','blocked','change','next'].forEach(function(f){
       if(!String(cur[f]||'').trim()&&bak[f]&&String(bak[f]).trim()){cur[f]=bak[f];n++}
     });
     if(!cur.goalDone&&bak.goalDone)cur.goalDone=true;
@@ -5139,6 +6497,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     other+=mergeMetaList('meta:habits',pack.habitDefs);
     other+=mergeMetaList('meta:dishes',pack.dishes);
     other+=mergeMetaList('meta:rewards',pack.rewards);
+    other+=mergeMetaList('meta:decisions',pack.decisions);
+    other+=mergeMetaList('meta:habitsArchive',pack.habitsArchive);
+    other+=mergeMetaList('meta:fixes',pack.fixes);
+    other+=mergeMetaList('meta:fixesDone',pack.fixesDone);
 
     if(Array.isArray(pack.common)){
       var cc=read('meta:common');
@@ -5248,6 +6610,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       if(hc)holds.push(hc+(hc===1?' habit':' habits'));
       var sc2=Array.isArray(pack.dishes)?pack.dishes.length:0;
       if(sc2)holds.push(sc2+(sc2===1?' dish':' dishes'));
+      var zc=Array.isArray(pack.decisions)?pack.decisions.length:0;
+      if(zc)holds.push(zc+(zc===1?' decision':' decisions'));
       ask('Saved '+when+'. It holds '+(holds.length?holds.join(', '):'nothing')+'. How should it go in?',[
         {label:'Put back anything missing',run:function(){applyRestore(pack,'merge')}},
         {label:'Replace everything',danger:true,run:function(){
@@ -5314,6 +6678,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   renderBkBanner();
   resetNote();
   renderLater();
+  renderDecide();
+  renderFixes();
   renderRewards();
   stagger(document.getElementById('viewToday'));
   window.addEventListener('resize',autogrow);

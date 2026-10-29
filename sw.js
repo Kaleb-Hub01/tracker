@@ -9,7 +9,7 @@
 // stylesheet and the page falls back to the system font.
 //
 // Bump CACHE whenever index.html changes.
-var CACHE='onething-v81';
+var CACHE='onething-v89';
 var FONT_HOSTS=['fonts.googleapis.com','fonts.gstatic.com'];
 
 self.addEventListener('install',function(e){
