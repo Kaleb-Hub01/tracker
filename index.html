@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v90, 29 Oct 2026
+<!-- v91, 29 Oct 2026
      offline loading fixed (fonts no longer block rendering)
      steps, weekly goal and Later items expand when tapped
      undo when ticking or deleting in Later
@@ -927,7 +927,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='90', BUILT='29 Oct 2026';
+  var VERSION='91', BUILT='29 Oct 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -2843,7 +2843,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     try{
       loadRewards().forEach(function(r){
         var st=evalReward(r);
-        if(st.claimed||st.past)return;          // done with, nothing left to show
+        if(st.claimed)return;                   // taken, nothing left to do
+        if(st.past&&!st.ok)return;              // missed, and the period has gone
         out.push({id:r.id,name:r.name,pct:st.pct,value:st.value,target:st.target,ok:st.ok});
       });
     }catch(e){}
