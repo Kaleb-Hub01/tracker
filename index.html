@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v91, 29 Oct 2026
+<!-- v92, 29 Oct 2026
      offline loading fixed (fonts no longer block rendering)
      steps, weekly goal and Later items expand when tapped
      undo when ticking or deleting in Later
@@ -93,8 +93,9 @@ body{
 .jump button{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:4px 11px;border-radius:20px;cursor:pointer;flex:none}
 .jump button.off{visibility:hidden}
 .rwrings{display:none}
-.rwrings.on{display:flex;gap:10px;margin:0 0 20px;padding:0 2px}
-.rwrg{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.rwrings.on{display:flex;gap:9px;justify-content:flex-start;margin:-5px 0 14px;padding:0;overflow-x:auto;scrollbar-width:none}
+.rwrings.on::-webkit-scrollbar{display:none}
+.rwrg{width:50px;flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent}
 .rwrg svg{display:block;flex:none}
 .rwrg .trk{fill:none;stroke:var(--line);stroke-width:3.5}
 .rwrg .arc{fill:none;stroke:var(--c2);stroke-width:3.5;stroke-linecap:round;transition:stroke-dashoffset .45s ease}
@@ -644,6 +645,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
   <div class="view" id="viewToday">
 
+  <div class="rwrings" id="rwRings"></div>
+
   <div class="top">
     <h1 class="date" id="dateLine">Today<span id="subLine"></span></h1>
     <div class="streak"><b id="streakNum">0</b><small>Day Streak</small></div>
@@ -660,8 +663,6 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     <button type="button" class="jumpbtn" id="dateJump">Jump to a day</button>
     <button type="button" id="todayBtn">Back to today</button>
   </div>
-
-  <div class="rwrings" id="rwRings"></div>
 
   <div class="weekly" id="weeklyBox">
     <div class="wg">
@@ -927,7 +928,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='91', BUILT='29 Oct 2026';
+  var VERSION='92', BUILT='29 Oct 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
