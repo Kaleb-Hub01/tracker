@@ -6,7 +6,7 @@ shopping list, rewards tied to conditions the app can judge, and a place to thin
 a decision through and come back to it later. Hosted free on GitHub Pages, used
 from the iPhone home screen, works offline.
 
-Current version: 98. The version and build date show at the bottom of the app,
+Current version: 99. The version and build date show at the bottom of the app,
 which is how you check whether an upload has reached your phone.
 
 ## Files
@@ -45,7 +45,10 @@ others, and disappears entirely when there are no rewards left to track. The
 consistency figure and history. They are listed by how often they are due
 (every day first, then by times a week, then weekly, then fortnightly), with
 paused habits last. Habits due equally often keep the order you drag them into,
-on every day. Dragging one out of its group holds for that day only.
+on every day. Dragging one out of its group holds for that day only. Opening a
+habit shows one sheet: tap the icon or name to change them, then plain questions
+for how often, the smallest version that counts, and a break. A new habit asks
+its name and how often on one screen.
 
 Ratings, for the day and the week, are out of 10 as a row of numbered buttons.
 They were out of 5 up to v96; on first opening v97 every old rating is doubled
@@ -56,7 +59,8 @@ shopping list.
 
 **Rewards** holds prizes attached to conditions, with progress bars, a claim
 button and a list of everything claimed. Progress also shows as rings on the
-Today page.
+Today page. A reward is set up one question at a time (the prize, what earns it,
+how often, how many), and changing one goes through the same questions.
 
 **App ideas** is a list of changes to ask for in this app, reached by a small
 underlined link under the version number so it stays out of the way. It works
@@ -73,7 +77,10 @@ month after keeping and the list order does not change.
 **Goals**, in the menu, holds a few goals, each a number to move by a date, a
 list of milestones, or both. Any milestone can be put on a day with its date
 button, which adds it to that day as a step (or a bonus task when the three are
-full).
+full). A goal is set up one question at a time and nothing is saved until the
+last step. Up or down is worked out from the starting number and the target, and
+the bar starts at the starting number. A number goal has an Update button on its
+card for logging where you are now.
 
 **Decisions**, in the menu, walks one decision through seven screens (frame, criteria, options, reshape,
 consequences, judge, resolve) and brings it back on two dates you set.

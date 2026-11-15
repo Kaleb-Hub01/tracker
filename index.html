@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<!-- v98, 15 Nov 2026
-     day and week ratings are out of 10, as numbered buttons; old ratings doubled
-     habits sort by how often they are due, paused ones last
-     Sunday review boxes collapse to one line when not being typed in
-     keeping month-old Later items no longer moves them to the top
-     App ideas can be shared in one go
+<!-- v99, 15 Nov 2026
+     goals and rewards are set up one question at a time, nothing saved until the end
+     goal direction is worked out from the numbers; goal cards get an Update button
+     opening a habit shows one sheet of plain questions; drag sets the order
+     a new habit asks its name and how often on one screen
 -->
 <html lang="en">
 <head>
@@ -189,6 +188,32 @@ body{
 .rwchips{display:flex;flex-wrap:wrap;gap:6px}
 .rwchips button{border:1px solid var(--line);background:transparent;color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:20px;cursor:pointer}
 .rwchips button.on{border-color:var(--c2);color:var(--c2);background:color-mix(in oklab,var(--c2) 12%,transparent)}
+/* guided setup (goals, rewards) and the habit edit sheet, v99 */
+.sfchoice{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:8px;font-family:inherit;color:var(--ink);cursor:pointer}
+.sfchoice b{display:block;font-size:15px;font-weight:600}
+.sfchoice span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.sfchoice.on{border-color:var(--c2);background:color-mix(in oklab,var(--c2) 9%,var(--surface))}
+.sfchoice:disabled{opacity:.5;cursor:default}
+.sfnums{display:flex;gap:8px}
+.sfnums label{flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--muted)}
+.sfnums input{margin-top:4px}
+.sfsay{font-size:13px;line-height:1.45;margin-top:12px;padding:10px 12px;border-radius:11px;background:var(--c1soft);color:var(--ink)}
+.sfsay:empty{display:none}
+.dcnav .next:disabled{opacity:.45;cursor:default}
+.glupd{margin-left:auto;flex:none;align-self:center;border:1px solid var(--c1);background:transparent;color:var(--c1);font-family:inherit;font-size:12.5px;font-weight:600;padding:5px 13px;border-radius:20px;cursor:pointer}
+.glupdrow{display:flex;gap:8px;align-items:center;margin-top:10px}
+.glupdrow input{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:16px;border-radius:9px;padding:8px 11px}
+.glupdrow button{flex:none;border:1px solid var(--c1);background:transparent;color:var(--c1);font-family:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:20px;cursor:pointer}
+.hshead{display:flex;align-items:center;gap:10px;margin-top:10px}
+.hsicon{flex:none;width:44px;height:44px;border-radius:11px;border:1px solid var(--line);background:var(--bg);font-size:22px;line-height:1;cursor:pointer;padding:0}
+.hsname{flex:1;min-width:0;border:0;border-bottom:1px dashed var(--line);background:transparent;color:var(--ink);font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:20px;font-weight:600;padding:3px 0;border-radius:0}
+.hsrow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font-family:inherit;font-size:15px;padding:12px 0;cursor:pointer;text-align:left}
+.hsrow span{flex:none;max-width:55%;color:var(--c2);font-weight:600;font-size:13.5px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hsrow span::after{content:" \203A";color:var(--muted)}
+.hsopen{padding:0 0 12px}
+.hsopen .habnote{margin-top:0}
+.hsdanger{display:block;width:100%;margin-top:6px;border:1px solid var(--c4);background:transparent;color:var(--c4);font-family:inherit;font-size:13px;font-weight:600;padding:10px;border-radius:11px;cursor:pointer}
+.hnew{background:var(--surface);border:1px solid var(--c2);border-radius:12px;padding:14px 13px;margin-bottom:8px}
 .dcadd{width:100%;border:1px dashed var(--line);background:transparent;color:var(--c2);font-family:inherit;font-size:13px;font-weight:600;padding:12px;border-radius:12px;cursor:pointer;margin-bottom:12px}
 .dcadd:active{transform:scale(.98)}
 .dcrow{display:flex;align-items:flex-start;gap:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c2);border-radius:12px;padding:11px 12px;margin-bottom:7px;cursor:pointer}
@@ -984,7 +1009,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='98', BUILT='15 Nov 2026';
+  var VERSION='99', BUILT='15 Nov 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -3060,6 +3085,9 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var box=document.getElementById('rwList');
     if(!box)return;
     box.innerHTML='';
+    var ra=document.getElementById('rwAdd');
+    if(ra)ra.style.display=rwDraft?'none':'';
+    if(rwDraft){drawRewardFlow(box);return}
     var list=loadRewards(), earnedNow=0;
 
     if(!list.length){
@@ -3117,87 +3145,19 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         det.className='rwdetail';
         det.setAttribute('data-open','1');
 
-        var ni=document.createElement('input');
-        ni.type='text'; ni.value=r.name; ni.placeholder='The prize';
-        var dbn=mkDebounce();
-        ni.addEventListener('click',function(e){e.stopPropagation()});
-        ni.addEventListener('input',function(){
-          var v=ni.value;
-          dbn(function(){setReward(r.id,function(o){o.name=v.slice(0,60)})});
-        });
-        det.appendChild(ni);
-
-        // says in words what the chips below add up to, and changes as they change
+        // v99: the chips are gone. The reward is said in words, and changing it
+        // goes through the same questions as making it.
         var exp=document.createElement('div');
         exp.className='rwexp';
         exp.textContent='Earn this when you '+rewardRule(r)+'.';
         det.appendChild(exp);
-
-        function chipRow(label,items,isOn,pick){
-          var lab=document.createElement('div');
-          lab.className='rwlab'; lab.textContent=label;
-          det.appendChild(lab);
-          var row=document.createElement('div');
-          row.className='rwchips';
-          items.forEach(function(it){
-            var b=document.createElement('button');
-            b.type='button'; b.textContent=it.label;
-            if(isOn(it))b.className='on';
-            b.addEventListener('click',function(e){e.stopPropagation();pick(it)});
-            row.appendChild(b);
-          });
-          det.appendChild(row);
-        }
-
-        chipRow('How often',[
-          {label:'Weekly',v:'week'},{label:'Monthly',v:'month'},{label:'Milestone',v:'once'}
-        ],function(it){return r.scope===it.v},function(it){
-          setReward(r.id,function(o){
-            o.scope=it.v;
-            var ms=metricsFor(it.v);
-            if(ms.indexOf(o.metric)<0)o.metric=ms[0];
-            o.target=RMET[o.metric].def[it.v]||1;
-            // a pinned period only makes sense for a week or a month, and it
-            // re-pins to now so switching does not leave it stuck in the past
-            o.pin=(it.v==='once'||!o.pin)?'':dayKey(today);
-          });
+        var chg=document.createElement('button');
+        chg.type='button'; chg.className='dchelp'; chg.textContent='Change it';
+        chg.addEventListener('click',function(e){
+          e.stopPropagation();
+          rwDraft=rwDraftFrom(r); rwOpen=null; renderRewards(); window.scrollTo({top:0});
         });
-
-        if(r.scope!=='once'){
-          var unit=r.scope==='week'?'week':'month';
-          chipRow('Repeats',[
-            {label:'Every '+unit,v:''},{label:'Just this '+unit,v:'1'}
-          ],function(it){return (r.pin?'1':'')===it.v},function(it){
-            setReward(r.id,function(o){
-              o.pin=it.v?dayKey(today):'';
-            });
-          });
-        }
-
-        chipRow('What counts',metricsFor(r.scope).map(function(k){return {label:RMET[k].label,v:k}}),
-          function(it){return r.metric===it.v},
-          function(it){
-            setReward(r.id,function(o){
-              o.metric=it.v;
-              o.target=RMET[it.v].def[o.scope]||1;
-              if(it.v==='habit'){var hs=loadHabits(); o.habitId=hs.length?hs[0].id:''}
-            });
-          });
-
-        if(r.metric==='habit'){
-          var hl=loadHabits();
-          if(hl.length){
-            chipRow('Which habit',hl.map(function(h){return {label:h.name,v:h.id}}),
-              function(it){return r.habitId===it.v},
-              function(it){setReward(r.id,function(o){o.habitId=it.v})});
-          }
-        }
-
-        var tl=(RMET[r.metric]&&RMET[r.metric].t[r.scope])||[1];
-        var tlab=r.metric==='allHabits'?'How high':(r.metric==='avgRating'?'What average':'How many');
-        chipRow(tlab,tl.map(function(n){return {label:String(n)+(r.metric==='allHabits'?'%':''),v:n}}),
-          function(it){return r.target===it.v},
-          function(it){setReward(r.id,function(o){o.target=it.v})});
+        det.appendChild(chg);
 
         var times=r.claims?Object.keys(r.claims).length:0;
         if(times){
@@ -3277,16 +3237,182 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     });
   }
 
-  document.getElementById('rwAdd').addEventListener('click',function(){
-    askText('What is the prize?','e.g. takeaway night',function(v){
-      v=(v||'').trim(); if(!v)return;
-      var id='r'+Date.now().toString(36);
-      var l=loadRewards();
-      l.push({id:id,name:v.slice(0,60),scope:'week',metric:'daysCleared',target:5,habitId:'',pin:'',claims:{}});
-      saveRewards(l);
-      rwOpen=id;
-      renderRewards();
+  // ---- guided reward setup (v99) ----
+  // Same pattern as goals: a draft in memory, saved only at the last step.
+  // per is 'week', 'week1' (just this week), 'month' or 'month1'.
+  var rwDraft=null;
+  var RNICE={daysCleared:'Clear a number of days',bigDays:'Have big days',allHabits:'Keep up every habit',
+    habit:'Do one habit',avgRating:'Rate my days well',dinnersCooked:'Cook planned dinners',
+    weeklyGoal:'Hit the weekly goal',streak:'Reach a streak',totalBig:'Big days, all time',
+    totalCleared:'Cleared days, all time'};
+  function rwDraftFrom(r){
+    return {id:r.id,step:0,name:r.name,metric:r.metric,habitId:r.habitId||'',target:r.target||1,
+      per:r.scope==='once'?'week':((r.scope==='month'?'month':'week')+(r.pin?'1':''))};
+  }
+  function rwOnce(m){return RMET[m]&&RMET[m].scopes[0]==='once'}
+  function rwScope(d){return rwOnce(d.metric)?'once':(d.per.indexOf('month')===0?'month':'week')}
+  function rwTargets(d){return (RMET[d.metric]&&RMET[d.metric].t[rwScope(d)])||[1]}
+  function rwFix(d){
+    // keep the number valid for whatever is picked now
+    if(!d.metric)return;
+    var tl=rwTargets(d);
+    if(tl.indexOf(d.target)<0)d.target=RMET[d.metric].def[rwScope(d)]||tl[0];
+  }
+  function rwAsRule(d){
+    return {metric:d.metric,scope:rwScope(d),target:d.target,habitId:d.habitId,
+      pin:(!rwOnce(d.metric)&&d.per.slice(-1)==='1')?dayKey(today):''};
+  }
+  function rwFlowSteps(d){
+    var s=['name','what'];
+    if(d.metric==='habit')s.push('habit');
+    if(d.metric&&!rwOnce(d.metric))s.push('often');
+    if(d.metric&&rwTargets(d).length>1)s.push('many');
+    return s;
+  }
+  function rwCloseFlow(){rwDraft=null;renderRewards();window.scrollTo({top:0})}
+  function drawRewardFlow(box){
+    var d=rwDraft, steps=rwFlowSteps(d);
+    if(d.step>=steps.length)d.step=steps.length-1;
+    var k=steps[d.step];
+    var dots=document.createElement('div'); dots.className='dcdots';
+    steps.forEach(function(s,n){
+      var ii=document.createElement('i');
+      ii.className=(n===d.step)?'now':(n<d.step?'on':'');
+      if(n<d.step)ii.addEventListener('click',function(){d.step=n;renderRewards()});
+      dots.appendChild(ii);
     });
+    box.appendChild(dots);
+    var lab=document.createElement('div'); lab.className='dcstep';
+    lab.textContent=(d.id?'Changing a reward':'New reward')+'  ·  Step '+(d.step+1)+' of '+steps.length;
+    box.appendChild(lab);
+
+    var next=document.createElement('button');
+    next.type='button'; next.className='next';
+    function ok(){
+      if(k==='name')return !!d.name.trim();
+      if(k==='what')return !!d.metric&&(d.metric!=='habit'||loadHabits().length>0);
+      if(k==='habit')return !!habById(d.habitId);
+      return true;
+    }
+    function check(){next.disabled=!ok()}
+    function choice(title,sub,on,pick,off){
+      var b=document.createElement('button');
+      b.type='button'; b.className='sfchoice'+(on?' on':'');
+      b.innerHTML='<b></b><span></span>';
+      b.firstChild.textContent=title; b.lastChild.textContent=sub;
+      if(off)b.disabled=true;
+      b.addEventListener('click',pick);
+      box.appendChild(b);
+    }
+
+    if(k==='name'){
+      dcTitle(box,'What is the prize?','Something you actually want. Small is fine.');
+      var ni=document.createElement('input');
+      ni.type='text'; ni.className='dcin'; ni.value=d.name; ni.maxLength=60;
+      ni.placeholder='e.g. Takeaway night'; ni.setAttribute('autocomplete','off');
+      ni.addEventListener('input',function(){d.name=ni.value;check()});
+      ni.addEventListener('keydown',function(e){if(e.key==='Enter'&&!next.disabled){e.preventDefault();next.click()}});
+      box.appendChild(ni);
+      if(!d.name)setTimeout(function(){ni.focus()},0);
+    }
+    else if(k==='what'){
+      dcTitle(box,'What earns it?');
+      var hs=loadHabits();
+      Object.keys(RMET).forEach(function(m){
+        var once=rwOnce(m);
+        var ex={metric:m,scope:once?'once':'week',target:RMET[m].def[once?'once':'week'],
+          habitId:hs.length?hs[0].id:'',pin:''};
+        var noHab=(m==='habit'&&!hs.length);
+        choice(RNICE[m]||RMET[m].label,noHab?'Add a habit first':('e.g. '+rewardRule(ex)+(once?' (a one-off milestone)':'')),
+          d.metric===m,function(){
+            d.metric=m;
+            if(m==='habit'&&!habById(d.habitId))d.habitId=hs.length?hs[0].id:'';
+            rwFix(d); renderRewards();
+          },noHab);
+      });
+    }
+    else if(k==='habit'){
+      dcTitle(box,'Which habit?');
+      loadHabits().forEach(function(h){
+        choice(habIcon(h)+'  '+h.name,'',d.habitId===h.id,function(){d.habitId=h.id;renderRewards()});
+      });
+    }
+    else if(k==='often'){
+      dcTitle(box,'How often?');
+      [['week','Every week','Starts fresh each Monday.'],
+       ['week1','Just this week','A one-off for this week only.'],
+       ['month','Every month','Starts fresh on the 1st.'],
+       ['month1','Just this month','A one-off for this month only.']].forEach(function(c){
+        choice(c[1],c[2],d.per===c[0],function(){d.per=c[0];rwFix(d);renderRewards()});
+      });
+    }
+    else if(k==='many'){
+      dcTitle(box,d.metric==='allHabits'?'How high?':(d.metric==='avgRating'?'What average, out of 10?':'How many?'));
+      dcChips(box,rwTargets(d).map(function(n){return {l:String(n)+(d.metric==='allHabits'?'%':''),v:n}}),
+        function(it){return d.target===it.v},function(it){d.target=it.v;renderRewards()});
+    }
+    if(d.metric&&k!=='name'){
+      var say=document.createElement('div'); say.className='sfsay';
+      say.textContent='Earn '+(d.name.trim()||'this')+' when you '+rewardRule(rwAsRule(d))+'.';
+      box.appendChild(say);
+    }
+
+    var nav=document.createElement('div'); nav.className='dcnav';
+    var back=document.createElement('button');
+    back.type='button'; back.textContent=d.step===0?'Cancel':'Back';
+    back.addEventListener('click',function(){
+      if(d.step>0){d.step--;renderRewards();window.scrollTo({top:0});return}
+      if(!d.id&&d.name.trim()){
+        ask('Leave without saving this reward?',[
+          {label:'Leave it',danger:true,run:rwCloseFlow},
+          {label:'Keep going'}
+        ],box);
+        return;
+      }
+      rwCloseFlow();
+    });
+    var last=d.step===steps.length-1&&!!d.metric;
+    next.textContent=last?(d.id?'Save changes':'Save reward'):'Next';
+    next.addEventListener('click',function(){
+      if(!ok())return;
+      if(!last){d.step++;renderRewards();window.scrollTo({top:0});return}
+      saveRewardDraft(d);
+    });
+    check();
+    nav.appendChild(back); nav.appendChild(next);
+    box.appendChild(nav);
+  }
+  function saveRewardDraft(d){
+    var scope=rwScope(d), pinned=scope!=='once'&&d.per.slice(-1)==='1';
+    function apply(o){
+      var moved=o.scope!==scope;
+      o.name=d.name.trim().slice(0,60);
+      o.scope=scope; o.metric=d.metric; o.target=d.target;
+      o.habitId=d.metric==='habit'?d.habitId:'';
+      // a one-off is pinned to the week or month it was set in; a change of
+      // week/month re-pins it to now so it is not left stuck in the past
+      if(!pinned)o.pin='';
+      else if(!o.pin||moved)o.pin=dayKey(today);
+    }
+    var id=d.id;
+    rwDraft=null;
+    if(id){
+      rwOpen=id;
+      setReward(id,apply);   // claims are left alone
+      note('Reward changed');
+    } else {
+      var r={id:'r'+Date.now().toString(36),claims:{},pin:''};
+      apply(r);
+      var l=loadRewards(); l.push(r); saveRewards(l);
+      rwOpen=null; renderRewards(); render();
+      note('Reward saved');
+    }
+    window.scrollTo({top:0});
+  }
+  document.getElementById('rwAdd').addEventListener('click',function(){
+    rwOpen=null;
+    rwDraft={step:0,name:'',metric:'',habitId:'',target:1,per:'week'};
+    renderRewards(); window.scrollTo({top:0});
   });
   document.getElementById('habArcToggle').addEventListener('click',function(){
     habArcOpen=!habArcOpen; renderHabArchive();
@@ -4499,6 +4625,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   }
 
   var hsel=midnight(new Date()), hOpen=null, hShowAll=false;
+  var hQ='', hNew=null;   // v99: open question row in the edit sheet; draft new habit
 
   function habToggle(h,level){
     if(hsel>today)return;
@@ -4639,7 +4766,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     }
     row.appendChild(b);
     row.addEventListener('click',function(){
-      hOpen=(hOpen===h.id)?null:h.id;
+      hOpen=(hOpen===h.id)?null:h.id; hQ='';
       renderHabits();
     });
     item.appendChild(row);
@@ -4649,18 +4776,37 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var det=document.createElement('div');
       det.className='hdetail on';
 
-      if(h.cad==='days'){
-        var dr=document.createElement('div');
-        dr.className='daypick';
-        [1,2,3,4,5,6,0].forEach(function(dw){
-          var db2=document.createElement('button');
-          db2.type='button'; db2.textContent=DLET[dw];
-          if(Array.isArray(h.days)&&h.days.indexOf(dw)>-1)db2.className='on';
-          db2.addEventListener('click',function(){toggleDay(h,dw)});
-          dr.appendChild(db2);
-        });
-        det.appendChild(dr);
+      // tap the icon or the name to change them (v99)
+      var hd=document.createElement('div'); hd.className='hshead';
+      var icb=document.createElement('button');
+      icb.type='button'; icb.className='hsicon'; icb.textContent=habIcon(h);
+      icb.setAttribute('aria-label','Change icon');
+      icb.addEventListener('click',function(e){
+        e.stopPropagation();
+        askText('Paste any emoji to use as this habit’s icon.','⭐',function(v){
+          v=(v||'').trim(); if(!v)return;
+          var l=loadHabits();
+          for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].icon=Array.from(v)[0]}
+          saveHabits(l); renderHabits();
+        },habIcon(h));
+      });
+      var nmi=document.createElement('input');
+      nmi.type='text'; nmi.className='hsname'; nmi.value=h.name; nmi.maxLength=28;
+      nmi.setAttribute('aria-label','Habit name'); nmi.setAttribute('autocomplete','off');
+      var dbh=mkDebounce();
+      function takeName(){
+        var v=nmi.value.trim().slice(0,28);
+        if(!v)return;   // a blank name is never saved; the old one stays
+        var l=loadHabits();
+        for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].name=v}
+        saveHabits(l);
+        var shown=row.querySelector('.hname'); if(shown)shown.textContent=v;
       }
+      nmi.addEventListener('input',function(){dbh(takeName)});
+      nmi.addEventListener('blur',function(){takeName();if(!nmi.value.trim())nmi.value=h.name});
+      nmi.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();nmi.blur()}});
+      hd.appendChild(icb); hd.appendChild(nmi);
+      det.appendChild(hd);
 
       var nt=document.createElement('input');
       nt.type='text'; nt.className='habnote';
@@ -4705,58 +4851,82 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         (h.min&&String(h.min).trim()?('  \u00b7  minimum: '+h.min):'');
       det.appendChild(cl);
 
-      var acts=document.createElement('div');
-      acts.className='hacts';
-      [['Frequency',function(){freqMenu(h,det)}],
-       [(h.pause&&h.pause.from)?'Resume':'Pause',function(){
-          if(h.pause&&h.pause.from){
-            setPause(h,null); note(h.name+' resumed'); return;
-          }
-          ask('Pause '+h.name+'. It will not appear or affect the streak while paused.',[
-            {label:'1 week',run:function(){setPause(h,{from:tKey,to:dayKey(shift(today,6))})}},
-            {label:'2 weeks',run:function(){setPause(h,{from:tKey,to:dayKey(shift(today,13))})}},
-            {label:'Pick an end date',run:function(){
-              askDate('Paused until which day?',today,det,function(d){
-                setPause(h,{from:tKey,to:dayKey(d)});
-              },true);
-            }},
-            {label:'Until I resume it',run:function(){setPause(h,{from:tKey,to:''})}},
-            {label:'Cancel'}
-          ],det);
-        }],
-       ['Minimum',function(){
-          askText('What is the smallest version that still counts? Leave blank to remove it.','e.g. a 10 minute walk',function(v){
-            var l=loadHabits();
-            for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].min=(v||'').trim().slice(0,40)}
-            saveHabits(l); renderHabits();
-          },h.min||'');
-        }],
-       ['Rename',function(){
-          askText('Rename this habit.','',function(v){
-            v=(v||'').trim(); if(!v)return;
-            var l=loadHabits();
-            for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].name=v.slice(0,28)}
-            saveHabits(l); renderHabits();
-          },h.name);
-        }],
-       ['Icon',function(){
-          askText('Paste any emoji to use as this habit\u2019s icon.','\u2b50',function(v){
-            v=(v||'').trim(); if(!v)return;
-            var l=loadHabits();
-            for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].icon=Array.from(v)[0]}
-            saveHabits(l); renderHabits();
-          },habIcon(h));
-        }],
-       ['Move up',function(){moveHabit(h,-1)}],
-       ['Move down',function(){moveHabit(h,1)}]
-      ].forEach(function(a){
-        var bt=document.createElement('button');
-        bt.type='button'; bt.textContent=a[0];
-        bt.addEventListener('click',function(e){e.stopPropagation();a[1]()});
-        acts.appendChild(bt);
+      // v99: one edit sheet asked in plain questions (audit M12). The old
+      // Move up / Move down buttons are gone: dragging does that job.
+      function hsRow(key,q,val,body){
+        var b=document.createElement('button');
+        b.type='button'; b.className='hsrow';
+        b.appendChild(document.createTextNode(q));
+        var sp=document.createElement('span'); sp.textContent=val; b.appendChild(sp);
+        b.addEventListener('click',function(e){e.stopPropagation();hQ=(hQ===key)?'':key;renderHabits()});
+        det.appendChild(b);
+        if(hQ===key){
+          var w=document.createElement('div'); w.className='hsopen';
+          w.addEventListener('click',function(e){e.stopPropagation()});
+          body(w);
+          det.appendChild(w);
+        }
+      }
+      hsRow('freq','How often?',cadWords(h),function(w){
+        habFreqChips(w,function(it){return h.cad===it.cad&&(it.cad!=='times'||(h.n||3)===it.n)},function(it){
+          hQ=(it.cad==='days')?'freq':'';
+          setCad(h,it.cad,it.n);
+        });
+      });
+      if(h.cad==='days'){
+        var dr=document.createElement('div');
+        dr.className='daypick'; dr.style.margin='0 0 12px';
+        [1,2,3,4,5,6,0].forEach(function(dw){
+          var db2=document.createElement('button');
+          db2.type='button'; db2.textContent=DLET[dw];
+          db2.setAttribute('aria-label',DAYS[dw]);
+          if(Array.isArray(h.days)&&h.days.indexOf(dw)>-1)db2.className='on';
+          db2.addEventListener('click',function(){toggleDay(h,dw)});
+          dr.appendChild(db2);
+        });
+        det.appendChild(dr);
+      }
+      hsRow('min','Smallest version that still counts?',(h.min&&String(h.min).trim())||'None',function(w){
+        var mi=document.createElement('input');
+        mi.type='text'; mi.className='habnote'; mi.maxLength=40; mi.value=h.min||'';
+        mi.placeholder='e.g. a 10 minute walk (blank for none)';
+        var dbm=mkDebounce();
+        function takeMin(){
+          var v=mi.value.trim().slice(0,40);
+          var l=loadHabits();
+          for(var i=0;i<l.length;i++){if(l[i].id===h.id)l[i].min=v}
+          saveHabits(l);
+        }
+        mi.addEventListener('input',function(){dbm(takeMin)});
+        mi.addEventListener('blur',takeMin);
+        mi.addEventListener('keydown',function(e){
+          if(e.key!=='Enter')return;
+          e.preventDefault(); takeMin(); hQ=''; renderHabits();
+        });
+        w.appendChild(mi);
+        setTimeout(function(){mi.focus()},0);
+      });
+      var isP=!!(h.pause&&h.pause.from);
+      hsRow('pause','Need a break?',isP?rwCap(pauseLabel(h)):'Pause it',function(w){
+        if(isP){
+          dcChips(w,[{l:'Resume it now'}],function(){return false},function(){
+            hQ=''; setPause(h,null); note(h.name+' resumed');
+          });
+          return;
+        }
+        dcHint(w,'While paused it does not show or affect your streak.');
+        function pz(p){hQ='';setPause(h,p)}
+        dcChips(w,[{l:'1 week',v:1},{l:'2 weeks',v:2},{l:'Pick an end date',v:'pick'},{l:'Until I resume it',v:0}],
+          function(){return false},function(it){
+            if(it.v==='pick'){
+              askDate('Paused until which day?',today,det,function(d){pz({from:tKey,to:dayKey(d)})},true);
+              return;
+            }
+            pz({from:tKey,to:it.v?dayKey(shift(today,it.v*7-1)):''});
+          });
       });
       var rm=document.createElement('button');
-      rm.type='button'; rm.className='danger'; rm.textContent='Remove';
+      rm.type='button'; rm.className='hsdanger'; rm.textContent='Archive habit';
       rm.addEventListener('click',function(e){
         e.stopPropagation();
         ask('Archive "'+h.name+'"? It stops showing here. Every tick stays saved, and putting it back brings the history with it.',[
@@ -4764,8 +4934,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           {label:'Cancel'}
         ],det);
       });
-      acts.appendChild(rm);
-      det.appendChild(acts);
+      det.appendChild(rm);
       item.appendChild(det);
     }
     return item;
@@ -4959,6 +5128,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       box.appendChild(e);
     }
     shown.forEach(function(h){box.appendChild(habRow(h))});
+    if(hNew)box.appendChild(drawNewHabit());
     document.getElementById('habShowAll').textContent=hShowAll?'Show due only':'Show all';
     habWeekStrip();
     dragSetup(box);
@@ -5016,6 +5186,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       it.addEventListener('pointerdown',function(e){
         if(e.target.closest(cfg.grip))return;
         if(e.target.closest('button')&&!e.target.closest('.hrow'))return;
+        if(e.target.closest('input,textarea'))return;   // pressing in a text box is not a drag
         dragStartY=e.clientY;
         clearTimeout(dragTimer);
         dragTimer=setTimeout(function(){startDrag(e,it,cfg)},450);
@@ -5095,16 +5266,82 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   document.addEventListener('pointerup',endDrag);
   document.addEventListener('pointercancel',endDrag);
 
-  document.getElementById('habAdd').addEventListener('click',function(){
-    askText('Name the habit you want to build.','e.g. Walk after dinner',function(v){
-      v=(v||'').trim(); if(!v)return;
-      var id='h'+Date.now().toString(36);
-      var l=loadHabits();
-      l.push({id:id,name:v.slice(0,28),cad:'daily'});
-      saveHabits(l);
-      hOpen=id; renderHabits();
-      freqMenu({id:id,name:v},document.getElementById('habitList'));
+  // ---- habit sheet helpers (v99) ----
+  var HFREQ=[{l:'Every day',cad:'daily'},{l:'Certain days',cad:'days'},
+    {l:'2 a week',cad:'times',n:2},{l:'3 a week',cad:'times',n:3},{l:'4 a week',cad:'times',n:4},
+    {l:'5 a week',cad:'times',n:5},{l:'Weekly',cad:'weekly'},{l:'Fortnightly',cad:'fortnightly'}];
+  function habFreqChips(box,isOn,pick){dcChips(box,HFREQ,isOn,pick)}
+  function cadWords(h){
+    if(h.cad==='daily')return 'Every day';
+    if(h.cad==='days'){
+      var ds=Array.isArray(h.days)?h.days:[];
+      var w=[1,2,3,4,5,6,0].filter(function(x){return ds.indexOf(x)>-1}).map(function(x){return DAYS[x].slice(0,3)});
+      return w.length?w.join(', '):'Certain days';
+    }
+    if(h.cad==='times')return (h.n||3)+' times a week';
+    if(h.cad==='weekly')return 'Once a week';
+    if(h.cad==='fortnightly')return 'Once a fortnight';
+    return 'Every day';
+  }
+  // new habit: name and how often on one screen, saved only on "Add habit"
+  function drawNewHabit(){
+    var w=document.createElement('div'); w.className='hnew'; w.id='habNewSheet';
+    var st=document.createElement('div'); st.className='dcstep'; st.textContent='New habit';
+    w.appendChild(st);
+    dcTitle(w,'What habit do you want to build?');
+    var ni=document.createElement('input');
+    ni.type='text'; ni.className='dcin'; ni.maxLength=28; ni.value=hNew.name;
+    ni.placeholder='e.g. Walk after dinner'; ni.setAttribute('autocomplete','off');
+    w.appendChild(ni);
+    dcLabel(w,'How often?');
+    habFreqChips(w,function(it){return hNew.cad===it.cad&&(it.cad!=='times'||hNew.n===it.n)},function(it){
+      hNew.cad=it.cad; hNew.n=it.n||3;
+      if(it.cad==='days'&&!hNew.days.length)hNew.days=[hsel.getDay()];
+      renderHabits();
     });
+    if(hNew.cad==='days'){
+      var dr=document.createElement('div'); dr.className='daypick';
+      [1,2,3,4,5,6,0].forEach(function(dw){
+        var b=document.createElement('button');
+        b.type='button'; b.textContent=DLET[dw]; b.setAttribute('aria-label',DAYS[dw]);
+        if(hNew.days.indexOf(dw)>-1)b.className='on';
+        b.addEventListener('click',function(){
+          var i=hNew.days.indexOf(dw);
+          if(i>-1){if(hNew.days.length>1)hNew.days.splice(i,1)}else hNew.days.push(dw);
+          renderHabits();
+        });
+        dr.appendChild(b);
+      });
+      w.appendChild(dr);
+    }
+    var nav=document.createElement('div'); nav.className='dcnav';
+    var cancel=document.createElement('button'); cancel.type='button'; cancel.textContent='Cancel';
+    cancel.addEventListener('click',function(){hNew=null;renderHabits()});
+    var add=document.createElement('button'); add.type='button'; add.className='next'; add.textContent='Add habit';
+    add.disabled=!hNew.name.trim();
+    ni.addEventListener('input',function(){hNew.name=ni.value;add.disabled=!ni.value.trim()});
+    ni.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();ni.blur()}});
+    add.addEventListener('click',function(){
+      var v=hNew.name.trim().slice(0,28); if(!v)return;
+      var h={id:'h'+Date.now().toString(36),name:v,cad:hNew.cad};
+      if(hNew.cad==='times')h.n=hNew.n;
+      if(hNew.cad==='days')h.days=hNew.days.slice();
+      var l=loadHabits(); l.push(h); saveHabits(l);
+      hNew=null; hOpen=null; renderHabits();
+      note(v+' added');
+    });
+    nav.appendChild(cancel); nav.appendChild(add);
+    w.appendChild(nav);
+    return w;
+  }
+  document.getElementById('habAdd').addEventListener('click',function(){
+    if(!hNew)hNew={name:'',cad:'daily',n:3,days:[]};
+    hOpen=null; renderHabits();
+    var sh=document.getElementById('habNewSheet');
+    if(sh){
+      sh.scrollIntoView({block:'center'});
+      var i=sh.querySelector('input'); if(i)i.focus();
+    }
   });
   document.getElementById('habShowAll').addEventListener('click',function(){
     hShowAll=!hShowAll; renderHabits();
@@ -5411,6 +5648,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var mb=document.getElementById('tabGoalsBtn');
     if(mb)mb.textContent=late?('Goals '+late):'Goals';
 
+    var ga=document.getElementById('glAdd');
+    if(ga)ga.style.display=glDraft?'none':'';
+    if(glDraft){drawGoalFlow(box);return}
+
     if(!list.length){
       var e=document.createElement('p');
       e.className='lempty';
@@ -5453,6 +5694,33 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       sub.textContent=(g.ms.length===1?'milestone':'milestones');
     }
     line.appendChild(big); line.appendChild(sub);
+    if(goalBase(g).num&&!g.done){
+      // quick way to log where you are now, without opening the goal
+      var ub=document.createElement('button');
+      ub.type='button'; ub.className='glupd'; ub.textContent='Update';
+      ub.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(card.querySelector('.glupdrow'))return;
+        var row=document.createElement('div'); row.className='glupdrow';
+        row.addEventListener('click',function(ev){ev.stopPropagation()});
+        var inp=document.createElement('input');
+        inp.type='number'; inp.setAttribute('inputmode','decimal');
+        inp.value=g.now; inp.setAttribute('aria-label','Where you are now');
+        var sv=document.createElement('button'); sv.type='button'; sv.textContent='Save';
+        function take(){
+          var n=parseFloat(inp.value);
+          if(!isFinite(n)){note('Type a number first');return}
+          setGoal(g.id,function(o){o.now=n});
+          note('Updated');
+        }
+        sv.addEventListener('click',take);
+        inp.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();take()}});
+        row.appendChild(inp); row.appendChild(sv);
+        card.appendChild(row);
+        inp.focus(); inp.select();
+      });
+      line.appendChild(ub);
+    }
     card.appendChild(line);
 
     var bar=document.createElement('div'); bar.className='glbar';
@@ -5525,92 +5793,23 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     det.setAttribute('data-open','1');
     det.addEventListener('click',function(e){e.stopPropagation()});
 
-    function textField(val,ph,max,set){
-      var i=document.createElement('input');
-      i.type='text'; i.value=val; i.placeholder=ph;
-      var db=mkDebounce();
-      function take(){
-        setGoalQuiet(g.id,function(o){set(o,i.value.slice(0,max))});
-        paintGoal(g.id);
-      }
-      i.addEventListener('input',function(){db(take)});
-      i.addEventListener('blur',take);
-      det.appendChild(i);
-    }
-    textField(g.name,'What is the goal?',70,function(o,v){o.name=v||'Untitled goal'});
-    textField(g.why,'Why it matters (optional)',90,function(o,v){o.why=v});
-
     function lab(t){
       var l=document.createElement('div'); l.className='rwlab'; l.textContent=t;
       det.appendChild(l);
     }
-    function chips(items,isOn,pick){
-      var row=document.createElement('div'); row.className='rwchips';
-      items.forEach(function(it){
-        var b=document.createElement('button');
-        b.type='button'; b.textContent=it.label;
-        if(isOn(it))b.className='on';
-        b.addEventListener('click',function(e){e.stopPropagation();pick(it)});
-        row.appendChild(b);
-      });
-      det.appendChild(row);
-    }
 
-    lab('Measured in');
-    chips(['plain','aud','hrs','pct'].map(function(k){return {label:GFMT[k].l,v:k}}),
-      function(it){return g.fmt===it.v},
-      function(it){setGoal(g.id,function(o){o.fmt=it.v})});
-
-    lab('Aiming');
-    chips([{label:'Higher is better',v:'up'},{label:'Lower is better',v:'down'}],
-      function(it){return g.dir===it.v},
-      function(it){setGoal(g.id,function(o){
-        o.dir=it.v;
-        // a falling goal needs somewhere to fall from, or the bar has no span.
-        // going back up, that starting figure is meaningless, so it is cleared.
-        if(it.v==='down'&&o.start<=o.target)o.start=Math.max(o.now,o.target+1);
-        if(it.v==='up')o.start=0;
-      })});
-
-    lab('The numbers');
-    var row=document.createElement('div'); row.className='glrow';
-    function numField(val,ph,set){
-      var wrap=document.createElement('label');
-      var s=document.createElement('small'); s.textContent=ph;
-      var i=document.createElement('input');
-      i.type='number'; i.setAttribute('inputmode','decimal'); i.value=val;
-      var db=mkDebounce();
-      function take(){
-        var n=parseFloat(i.value);
-        setGoalQuiet(g.id,function(o){set(o,isFinite(n)?n:0)});
-        paintGoal(g.id);
-      }
-      i.addEventListener('click',function(e){e.stopPropagation()});
-      i.addEventListener('input',function(){db(take)});
-      i.addEventListener('blur',take);
-      wrap.appendChild(s); wrap.appendChild(i);
-      row.appendChild(wrap);
-    }
-    if(g.dir==='down')numField(g.start,'Started at',function(o,v){o.start=v});
-    numField(g.now,'Now',function(o,v){o.now=v});
-    numField(g.target,'Target',function(o,v){o.target=v});
-    det.appendChild(row);
-
-    lab('Due');
-    var dd=parseDay(g.due);
-    var dbtn=document.createElement('button');
-    dbtn.type='button'; dbtn.className='gldate';
-    dbtn.textContent=dd?(dd.getDate()+' '+MONTHS[dd.getMonth()]+' '+dd.getFullYear()):'Pick a date';
-    dbtn.addEventListener('click',function(e){
+    // v99: the settings form is gone. The goal is said back in words, and
+    // changing it goes through the same questions as making it.
+    var say=document.createElement('div'); say.className='rwexp';
+    say.textContent=goalSentence(g);
+    det.appendChild(say);
+    var chg=document.createElement('button');
+    chg.type='button'; chg.className='dchelp'; chg.textContent='Change the goal';
+    chg.addEventListener('click',function(e){
       e.stopPropagation();
-      askDate('When does this have to be true?',dd||today,null,function(d){
-        setGoal(g.id,function(o){
-          o.due=dayKey(d);
-          if(!o.set)o.set=dayKey(today);
-        });
-      });
+      glDraft=goalDraftFrom(g); renderGoals(); window.scrollTo({top:0});
     });
-    det.appendChild(dbtn);
+    det.appendChild(chg);
 
     lab('Milestones');
     var ms=document.createElement('div'); ms.className='glms';
@@ -5708,12 +5907,229 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     box.appendChild(det);
   }
 
+  // ---- guided goal setup (v99) ----
+  // A draft lives in memory only; nothing is saved until the last step, so a
+  // half-made goal never shows up as "New goal" on the list.
+  var glDraft=null;
+  function goalSentence(g){
+    var b=goalBase(g), dd=parseDay(g.due), out;
+    if(b.num)out=(g.dir==='down'?'Down':'Up')+' from '+fmtVal(g,b.st)+' to '+fmtVal(g,g.target);
+    else out=g.ms.length+' '+(g.ms.length===1?'milestone':'milestones')+' to tick off';
+    out+=dd?(', by '+dd.getDate()+' '+MONTHS[dd.getMonth()]+' '+dd.getFullYear()+'.'):', no date set.';
+    return out;
+  }
+  function goalDraftFrom(g){
+    var b=goalBase(g), hasMs=g.ms.length>0;
+    return {id:g.id,step:0,name:g.name,why:g.why||'',fmt:g.fmt||'plain',
+      kind:b.num?(hasMs?'both':'num'):(hasMs?'steps':'num'),
+      start:b.num?String(b.st):'',now:b.num?String(g.now):'',target:b.num?String(g.target):'',
+      due:g.due||'',dueSet:true,msText:''};
+  }
+  function glFlowSteps(d){
+    var s=['name','kind'];
+    if(d.kind!=='steps')s.push('nums');
+    if(d.kind!=='num'&&!d.id)s.push('ms');   // an existing goal's milestones are edited on the goal itself
+    s.push('due','why');
+    return s;
+  }
+  function glNums(d){
+    var st=parseFloat(d.id?d.start:d.now), nw=parseFloat(d.now), tg=parseFloat(d.target);
+    return {st:st,now:nw,tg:tg,ok:isFinite(st)&&isFinite(nw)&&isFinite(tg)&&st!==tg};
+  }
+  function glMsLines(d){
+    return String(d.msText||'').split('\n').map(function(x){return x.trim()}).filter(Boolean);
+  }
+  function glStepOk(d,k){
+    if(k==='name')return !!d.name.trim();
+    if(k==='kind')return !!d.kind;
+    if(k==='nums')return glNums(d).ok;
+    if(k==='ms')return d.kind!=='steps'||glMsLines(d).length>0;
+    if(k==='due')return !!d.dueSet;
+    return true;
+  }
+  function glDirLine(d){
+    var n=glNums(d), f={fmt:d.fmt};
+    if(!isFinite(n.st)||!isFinite(n.tg))return '';
+    if(n.st===n.tg)return 'Those are the same number. Where do you want to get to?';
+    return (n.tg<n.st?'Going down':'Going up')+' from '+fmtVal(f,n.st)+' to '+fmtVal(f,n.tg)+
+      '. The bar starts at '+fmtVal(f,n.st)+' and fills as you get closer.';
+  }
+  function glCloseFlow(){glDraft=null;renderGoals();menuAlert();window.scrollTo({top:0})}
+  function drawGoalFlow(box){
+    var d=glDraft, steps=glFlowSteps(d);
+    if(d.step>=steps.length)d.step=steps.length-1;
+    var k=steps[d.step];
+    var dots=document.createElement('div'); dots.className='dcdots';
+    steps.forEach(function(s,n){
+      var ii=document.createElement('i');
+      ii.className=(n===d.step)?'now':(n<d.step?'on':'');
+      if(n<d.step)ii.addEventListener('click',function(){d.step=n;renderGoals()});
+      dots.appendChild(ii);
+    });
+    box.appendChild(dots);
+    var lab=document.createElement('div'); lab.className='dcstep';
+    lab.textContent=(d.id?'Changing a goal':'New goal')+'  ·  Step '+(d.step+1)+' of '+steps.length;
+    box.appendChild(lab);
+
+    var next=document.createElement('button');
+    next.type='button'; next.className='next';
+    function check(){next.disabled=!glStepOk(d,k)}
+
+    if(k==='name'){
+      dcTitle(box,'What do you want to achieve?','Say it the way you would say it to a friend.');
+      var ni=document.createElement('input');
+      ni.type='text'; ni.className='dcin'; ni.value=d.name; ni.maxLength=70;
+      ni.placeholder='e.g. Get down to 85 kg'; ni.setAttribute('autocomplete','off');
+      ni.addEventListener('input',function(){d.name=ni.value;check()});
+      ni.addEventListener('keydown',function(e){if(e.key==='Enter'&&!next.disabled){e.preventDefault();next.click()}});
+      box.appendChild(ni);
+      if(!d.name)setTimeout(function(){ni.focus()},0);
+    }
+    else if(k==='kind'){
+      dcTitle(box,'How will you know you got there?');
+      [['num','A number','Like a weight, a savings total or hours.'],
+       ['steps','A list of steps','Milestones you tick off, in any order.'],
+       ['both','Both','A number to move, with milestones on the way.']].forEach(function(c){
+        var b=document.createElement('button');
+        b.type='button'; b.className='sfchoice'+(d.kind===c[0]?' on':'');
+        b.innerHTML='<b>'+c[1]+'</b><span>'+c[2]+'</span>';
+        b.addEventListener('click',function(){d.kind=c[0];renderGoals()});
+        box.appendChild(b);
+      });
+      if(d.id&&d.kind==='steps'){
+        var gg=loadGoals().filter(function(x){return x.id===d.id})[0];
+        if(gg&&goalBase(gg).num)dcHint(box,'Saving as a list of steps clears the numbers from this goal.');
+      }
+    }
+    else if(k==='nums'){
+      dcTitle(box,'Where are you now, and where do you want to be?',
+        d.id?'Change any of the three. Up or down is worked out for you.':'Up or down is worked out for you.');
+      var row=document.createElement('div'); row.className='sfnums';
+      var say=document.createElement('div'); say.className='sfsay';
+      function field(label,key,ph){
+        var w=document.createElement('label'); w.textContent=label;
+        var i=document.createElement('input');
+        i.type='number'; i.className='dcin'; i.setAttribute('inputmode','decimal');
+        i.value=d[key]; i.placeholder=ph;
+        i.addEventListener('input',function(){d[key]=i.value;say.textContent=glDirLine(d);check()});
+        w.appendChild(i); row.appendChild(w);
+      }
+      if(d.id)field('Started at','start','92');
+      field('Now','now','92');
+      field('Aiming for','target','85');
+      box.appendChild(row);
+      dcLabel(box,'Measured in');
+      dcChips(box,['plain','aud','hrs','pct'].map(function(x){return {l:GFMT[x].l,v:x}}),
+        function(it){return d.fmt===it.v},function(it){d.fmt=it.v;renderGoals()});
+      say.textContent=glDirLine(d);
+      box.appendChild(say);
+    }
+    else if(k==='ms'){
+      dcTitle(box,'What are the steps?','One per line. You can add more later.');
+      var t=document.createElement('textarea');
+      t.className='dcta'; t.rows=4; t.value=d.msText||'';
+      t.placeholder='Book a trainer\nCook at home 5 nights\nWeigh in every Sunday';
+      t.style.minHeight='110px';
+      t.addEventListener('input',function(){d.msText=t.value;check()});
+      box.appendChild(t);
+      if(d.kind==='both')dcHint(box,'Optional for a number goal. Leave it empty to skip.');
+    }
+    else if(k==='due'){
+      dcTitle(box,'By when?','A date keeps it honest. No date is fine too.');
+      var y=today.getFullYear(), m=today.getMonth();
+      var opts=[
+        {l:'End of this month',v:dayKey(new Date(y,m+1,0))},
+        {l:'In 3 months',v:dayKey(new Date(y,m+3,today.getDate()))},
+        {l:'End of the year',v:dayKey(new Date(y,11,31))},
+        {l:'Pick a date',v:'pick'},
+        {l:'No date',v:''}
+      ];
+      dcChips(box,opts,function(it){
+        if(!d.dueSet)return false;
+        if(it.v==='pick')return d.due&&!opts.some(function(o){return o.v===d.due&&o.v!=='pick'});
+        return d.due===it.v;
+      },function(it){
+        if(it.v==='pick'){
+          askDate('When does this have to be true?',parseDay(d.due)||today,null,function(dt){
+            d.due=dayKey(dt); d.dueSet=true; renderGoals();
+          });
+          return;
+        }
+        d.due=it.v; d.dueSet=true; renderGoals();
+      });
+      var dd=parseDay(d.due);
+      if(d.dueSet){
+        var p=document.createElement('div'); p.className='sfsay';
+        p.textContent=dd?('Due '+DAYS[dd.getDay()]+' '+dd.getDate()+' '+MONTHS[dd.getMonth()]+' '+dd.getFullYear()+'.'):'No date. It will not show as behind or overdue.';
+        box.appendChild(p);
+      }
+    }
+    else if(k==='why'){
+      dcTitle(box,'Why does it matter?','Optional. It shows on the card when the week gets busy.');
+      var w=document.createElement('textarea');
+      w.className='dcta'; w.rows=2; w.value=d.why; w.maxLength=90;
+      w.placeholder='e.g. Keep up with the kids at the beach';
+      w.addEventListener('input',function(){d.why=w.value});
+      box.appendChild(w);
+    }
+
+    var nav=document.createElement('div'); nav.className='dcnav';
+    var back=document.createElement('button');
+    back.type='button'; back.textContent=d.step===0?'Cancel':'Back';
+    back.addEventListener('click',function(){
+      if(d.step>0){d.step--;renderGoals();window.scrollTo({top:0});return}
+      if(!d.id&&d.name.trim()){
+        ask('Leave without saving this goal?',[
+          {label:'Leave it',danger:true,run:glCloseFlow},
+          {label:'Keep going'}
+        ],box);
+        return;
+      }
+      glCloseFlow();
+    });
+    var last=d.step===steps.length-1;
+    next.textContent=last?(d.id?'Save changes':'Save goal'):'Next';
+    next.addEventListener('click',function(){
+      if(!glStepOk(d,k))return;
+      if(!last){d.step++;renderGoals();window.scrollTo({top:0});return}
+      saveGoalDraft(d);
+    });
+    check();
+    nav.appendChild(back); nav.appendChild(next);
+    box.appendChild(nav);
+  }
+  function saveGoalDraft(d){
+    var n=glNums(d), num=d.kind!=='steps'&&n.ok;
+    function apply(o){
+      o.name=d.name.trim().slice(0,70)||'Untitled goal';
+      o.why=d.why.trim().slice(0,90);
+      o.fmt=d.fmt;
+      o.due=d.due;
+      if(o.due&&!o.set)o.set=dayKey(today);
+      if(num){o.start=n.st;o.now=n.now;o.target=n.tg;o.dir=n.tg<n.st?'down':'up'}
+      else {o.start=0;o.now=0;o.target=0;o.dir='up'}
+    }
+    var id=d.id;
+    if(id){
+      glDraft=null; glOpen=id;
+      setGoal(id,apply);
+      note('Goal changed');
+    } else {
+      id='g'+Date.now().toString(36);
+      var g={id:id,ms:[],done:false,doneAt:'',set:dayKey(today)};
+      apply(g);
+      glMsLines(d).forEach(function(t,i){g.ms.push({id:msId(i),t:t.slice(0,90),d:false,day:''})});
+      var l=loadGoals(); l.unshift(g); saveGoals(l);
+      glDraft=null; glOpen=null;
+      renderGoals(); menuAlert();
+      note('Goal saved');
+    }
+    window.scrollTo({top:0});
+  }
   document.getElementById('glAdd').addEventListener('click',function(){
-    var l=loadGoals();
-    var id='g'+Date.now().toString(36);
-    l.unshift({id:id,name:'New goal',why:'',now:0,target:0,start:0,dir:'up',
-      fmt:'plain',due:'',set:dayKey(today),ms:[],done:false,doneAt:''});
-    saveGoals(l); glOpen=id; renderGoals(); menuAlert();
+    glOpen=null;
+    glDraft={step:0,name:'',why:'',fmt:'plain',kind:'',start:'',now:'',target:'',due:'',dueSet:false,msText:''};
+    renderGoals(); window.scrollTo({top:0});
   });
   document.getElementById('tabGoalsBtn').addEventListener('click',function(){showTab('goals')});
 
