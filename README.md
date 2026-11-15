@@ -39,7 +39,7 @@ tasks on top of those, a 1 to 10 day rating, a note, and a rest day toggle with
 an optional reason. The week strip and the last 30 days strip both jump to any
 day. Steps and bonus tasks reorder by dragging their number, each within its own
 list. The weekly goal and the Sunday review live here too. A row of small
-progress rings sits under the week strip, one per live reward, filled by how
+progress rings sits under the weekly goal, one per live reward, filled by how
 far along it is and teal once it is yours to claim. Tapping a ring opens that
 reward. The row shows the five closest to done, with a sixth ring counting any
 others, and disappears entirely when there are no rewards left to track. The
