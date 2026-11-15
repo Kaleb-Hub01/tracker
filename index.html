@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- v100, 15 Nov 2026
+<!-- v101, 15 Nov 2026
+     bottom bar no longer stays hidden on iPhone after the keyboard closes
      goals and rewards are set up one question at a time, nothing saved until the end
      goal direction is worked out from the numbers; goal cards get an Update button
      opening a habit shows one sheet of plain questions; drag sets the order
@@ -1100,7 +1101,7 @@ body.typing .tabbar{display:none}
 
 <script>
 (function(){
-  var VERSION='100', BUILT='15 Nov 2026';
+  var VERSION='101', BUILT='15 Nov 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -6274,12 +6275,22 @@ body.typing .tabbar{display:none}
   }
   document.getElementById('moreBtn').addEventListener('click',function(){showTab('more')});
   // The bar is fixed to the bottom, so it would ride up on top of the iPhone
-  // keyboard. Hide it while a text box has focus.
-  document.addEventListener('focusin',function(e){
-    var t=e.target;
-    if(t&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&/^(text|search|number|date|)$/.test(t.type||''))))document.body.classList.add('typing');
-  });
-  document.addEventListener('focusout',function(){document.body.classList.remove('typing')});
+  // keyboard. Hide it only while the keyboard is really on screen: iOS often
+  // leaves a text box focused after the keyboard closes (and across app
+  // reopens), so focus alone hid the bar for good in v100.
+  function isTextBox(t){
+    return !!t&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&/^(text|search|number|date|)$/.test(t.type||'')));
+  }
+  function syncTyping(){
+    var vv=window.visualViewport;
+    var kb=!!vv&&isTextBox(document.activeElement)&&(window.innerHeight-vv.height)>120;
+    document.body.classList.toggle('typing',kb);
+  }
+  if(window.visualViewport)window.visualViewport.addEventListener('resize',syncTyping);
+  document.addEventListener('focusin',function(){setTimeout(syncTyping,350)});
+  document.addEventListener('focusout',function(){setTimeout(syncTyping,50)});
+  window.addEventListener('pageshow',syncTyping);
+  document.addEventListener('visibilitychange',syncTyping);
   document.getElementById('tabTodayBtn').addEventListener('click',function(){showTab('today')});
   document.getElementById('tabHabitsBtn').addEventListener('click',function(){showTab('habits')});
   document.getElementById('openLater').addEventListener('click',function(){showTab('later')});
