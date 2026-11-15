@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<!-- v101, 15 Nov 2026
+<!-- v102, 15 Nov 2026
+     30-day chart: Open this day works again; its buttons sit on their own row
+     Later quick adds always on Today (plus See all); status and Rest day on one row
+     search moved to More; Common tasks hidden (list kept)
      bottom bar no longer stays hidden on iPhone after the keyboard closes
      goals and rewards are set up one question at a time, nothing saved until the end
      goal direction is worked out from the numbers; goal cards get an Update button
@@ -381,6 +384,8 @@ textarea.clipped{
 .msum .g{display:block;color:var(--ink);margin-top:5px}
 .msum .n{display:block;margin-top:3px;font-style:italic}
 .msum button{margin-top:9px;margin-right:7px;background:transparent;border:1px solid var(--line);color:var(--c2);font-family:inherit;font-size:12px;padding:5px 11px;border-radius:20px;cursor:pointer}
+.msum .macts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.msum .macts button{margin:0}
 
 .sharewk{margin-top:16px;width:100%;background:var(--c2soft);border:1px solid var(--c2);color:var(--c2);font-family:inherit;font-size:14px;font-weight:500;padding:10px;border-radius:10px;cursor:pointer}
 
@@ -777,6 +782,17 @@ body.typing .tabbar{display:none}
 #viewMore .fbtns button{flex:1}
 #viewMore .ver{text-align:center;margin-top:18px;font-size:12px}
 #glAdd{margin:0 0 12px}
+/* v102: status line and Rest day share one row */
+.statusrow{display:flex;align-items:center;gap:12px;margin-top:18px}
+.statusrow .status{margin-top:0;flex:1;min-width:0}
+.statusrow .restrow{margin-top:0;flex:none}
+/* v102: Later quick adds always on Today, with a link to the full list */
+.carry .carrymore{background:none;border:0;color:var(--c2);font-weight:600;min-height:44px;padding:0 6px}
+/* v102: search lives on More */
+#viewMore .search{margin:22px 0 20px}
+/* v102: Common tasks hidden for now (Kaleb never uses it). Saved list and code kept,
+   delete this rule to bring it back. */
+#common{display:none!important}
 </style>
 </head>
 <body>
@@ -858,8 +874,10 @@ body.typing .tabbar{display:none}
     <textarea id="dayNote" rows="1" placeholder="A line about how the day actually went"></textarea>
   </div>
 
-  <div class="status" id="status"><span class="pip"></span><span id="statusText"></span></div>
-  <div class="restrow"><button id="restBtn" type="button">Rest day</button></div>
+  <div class="statusrow">
+    <div class="status" id="status"><span class="pip"></span><span id="statusText"></span></div>
+    <div class="restrow"><button id="restBtn" type="button">Rest day</button></div>
+  </div>
   <div class="restwhy" id="restWhyWrap">
     <input type="text" id="restWhy" placeholder="Why? e.g. sick, travelling, planned break" autocomplete="off">
   </div>
@@ -876,11 +894,6 @@ body.typing .tabbar{display:none}
       <span><i class="restsw"></i>rest</span>
     </div>
     <div class="msum" id="mSummary"></div>
-  </div>
-
-  <div class="search">
-    <input type="search" id="searchBox" placeholder="Search Goals, Steps and Notes" autocomplete="off">
-    <div class="results" id="results"></div>
   </div>
 
   <div class="review" id="review">
@@ -1082,6 +1095,10 @@ body.typing .tabbar{display:none}
       <button type="button" class="mli" id="tabDecideBtn">Decisions</button>
       <button type="button" class="mli" id="openFixes">App ideas</button>
     </div>
+    <div class="search">
+      <input type="search" id="searchBox" placeholder="Search Goals, Steps and Notes" autocomplete="off">
+      <div class="results" id="results"></div>
+    </div>
     <div class="foot">
       <span id="footNote">No backup yet</span>
       <div class="fbtns">
@@ -1101,7 +1118,7 @@ body.typing .tabbar{display:none}
 
 <script>
 (function(){
-  var VERSION='101', BUILT='15 Nov 2026';
+  var VERSION='102', BUILT='15 Nov 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -1969,14 +1986,12 @@ body.typing .tabbar{display:none}
     });
   }
 
-  // parked items offered on the Today page when there is a free slot
+  // v102: Later items always offered on Today (today and future days). A tap
+  // fills a free step, or adds a bonus task when the three are full.
   function renderParked(){
     var el=document.getElementById('parked');
     el.innerHTML='';
     if(sel<today){el.className='carry';return}
-    var slot=-1;
-    for(var i=0;i<CORE;i++){if(!data.todos[i].t.trim()){slot=i;break}}
-    if(slot<0){el.className='carry';return}
     var l=loadLater();
     if(!l.length){el.className='carry';return}
     var lab=document.createElement('span');
@@ -1990,6 +2005,10 @@ body.typing .tabbar{display:none}
       });
       el.appendChild(b);
     });
+    var all=document.createElement('button');
+    all.type='button'; all.className='carrymore'; all.innerHTML='See all &#8250;';
+    all.addEventListener('click',function(){showTab('later')});
+    el.appendChild(all);
     el.className='carry on';
   }
 
@@ -6847,14 +6866,20 @@ body.typing .tabbar{display:none}
     if(rec2.goal&&rec2.goal.trim())body+='<span class="g">'+rec2.goal.replace(/</g,'&lt;')+'</span>';
     if(rec2.note&&rec2.note.trim())body+='<span class="n">'+rec2.note.replace(/</g,'&lt;')+'</span>';
     sum.innerHTML=body;
+    var acts=document.createElement('div');
+    acts.className='macts';
+    sum.appendChild(acts);
     var op=document.createElement('button');
     op.type='button'; op.textContent='Open this day';
-    op.addEventListener('click',function(){var t=mPick;mPick=null;var q=t.split('-');select(new Date(+q[0],+q[1]-1,+q[2]));window.scrollTo({top:0,behavior:'smooth'})});
-    sum.appendChild(op);
+    // v102: keep the day from when the button was drawn; mPick can already be
+    // cleared by the time the tap lands, which made this button do nothing.
+    var pickDay=pd;
+    op.addEventListener('click',function(){mPick=null;select(pickDay);renderMonth();window.scrollTo({top:0,behavior:'smooth'})});
+    acts.appendChild(op);
     var cl=document.createElement('button');
     cl.type='button'; cl.textContent='Close';
     cl.addEventListener('click',function(){mPick=null;renderMonth()});
-    sum.appendChild(cl);
+    acts.appendChild(cl);
     sum.className='msum on';
   }
 
@@ -7008,7 +7033,7 @@ body.typing .tabbar{display:none}
         return w.t+': '+x.replace(/</g,'&lt;');
       }).join('<br>');
       b.innerHTML='<b>'+head+'</b>'+body;
-      if(target)b.addEventListener('click',function(){select(target);window.scrollTo({top:0,behavior:'smooth'})});
+      if(target)b.addEventListener('click',function(){showTab('today');select(target);window.scrollTo({top:0,behavior:'smooth'})});
       box.appendChild(b);
     });
   }
