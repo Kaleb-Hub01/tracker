@@ -6,8 +6,8 @@ shopping list, rewards tied to conditions the app can judge, and a place to thin
 a decision through and come back to it later. Hosted free on GitHub Pages, used
 from the iPhone home screen, works offline.
 
-Current version: 99. The version and build date show at the bottom of the app,
-which is how you check whether an upload has reached your phone.
+Current version: 100. The version and build date show at the bottom of the More
+page, which is how you check whether an upload has reached your phone.
 
 ## Files
 
@@ -20,15 +20,19 @@ All at the top level of the repo. Do not put them in folders.
 
 ## Getting around
 
-Two tabs across the top, Today and Habits, then a three line menu holding
-Dinners, Rewards and Decisions. Those three are used occasionally rather than
-daily, so they sit behind the menu instead of competing for space. The lines
-carry an amber dot when a reward is ready to claim or a decision is waiting, so
-you can tell there is something there without opening it. The menu closes when
-you pick something or tap anywhere else.
+A bar along the bottom with four tabs: Today, Habits, Goals and More. More is a
+page listing the Later list, Dinners, Rewards, Decisions and App ideas, with
+Backup, Restore and Export underneath and the version at the bottom. The bar
+hides while you type so it never sits on top of the keyboard.
 
-Later and App ideas are sub-pages rather than tabs. Later is reached from the
-button under the steps, App ideas from a small link under the version number.
+A pink dot on Goals means a goal is late; on More it means a reward is ready to
+claim or a decision is waiting. The week review and backup reminders show as
+small pills at the top of Today only, and the quote sits at the bottom of Today.
+
+Colours keep one meaning each: teal is done, purple is steps, part done and the
+selected day, orange is this week (the weekly goal, the dinner plan), and pink-red
+is something that needs you, is late, or deletes. Day bars are coloured by how
+the day went: teal cleared, purple part done, grey stripes for a rest day.
 
 **Today** is the daily page: one goal, three small steps, up to seven bonus
 tasks on top of those, a 1 to 10 day rating, a note, and a rest day toggle with
@@ -62,8 +66,8 @@ button and a list of everything claimed. Progress also shows as rings on the
 Today page. A reward is set up one question at a time (the prize, what earns it,
 how often, how many), and changing one goes through the same questions.
 
-**App ideas** is a list of changes to ask for in this app, reached by a small
-underlined link under the version number so it stays out of the way. It works
+**App ideas** is a list of changes to ask for in this app, reached from the More
+page. It works
 like Later, quick to add and tick, without the scheduling, because an app idea
 never needs to be given a day. Deliberately separate so it does not clutter the
 real Later list. "Share all ideas" sends the open list as a numbered `.txt`
@@ -74,7 +78,7 @@ Items in Later for over a month raise a banner. "Keep them" leaves each item's
 parked date alone and records the keep date in `k`, so the banner returns a
 month after keeping and the list order does not change.
 
-**Goals**, in the menu, holds a few goals, each a number to move by a date, a
+**Goals**, its own tab, holds a few goals, each a number to move by a date, a
 list of milestones, or both. Any milestone can be put on a day with its date
 button, which adds it to that day as a step (or a bonus task when the three are
 full). A goal is set up one question at a time and nothing is saved until the
@@ -82,7 +86,7 @@ last step. Up or down is worked out from the starting number and the target, and
 the bar starts at the starting number. A number goal has an Update button on its
 card for logging where you are now.
 
-**Decisions**, in the menu, walks one decision through seven screens (frame, criteria, options, reshape,
+**Decisions**, on the More page, walks one decision through seven screens (frame, criteria, options, reshape,
 consequences, judge, resolve) and brings it back on two dates you set.
 ## Where the data lives
 
@@ -291,7 +295,7 @@ list.
 - A restored task brings its tick time, its `lc` parked date and its `gm` milestone link with it.
 - The message after restoring counts the days put back, and only says a day had no free step slot when a task from the backup really did not fit. A bonus task may land in a different slot than it held in the backup, so its tick time is re-keyed to the new slot.
 - Backups are named by date so they never overwrite each other. Keep them in iCloud Drive, not just Downloads.
-- The banner nags after seven days. The footer shows how long since the last one.
+- The reminder shows after seven days. The More page shows how long since the last one.
 
 ## Updating the app
 
@@ -299,7 +303,7 @@ list.
 2. Upload the new `index.html` and commit.
 3. Bump `CACHE` in `sw.js` and upload that too, so old cached copies clear.
 4. Wait two or three minutes for GitHub Pages to build.
-5. Fully close the app on the phone and reopen. Check the version at the bottom.
+5. Fully close the app on the phone and reopen. Check the version at the bottom of More.
 
 If the app shows an old version with good signal, the cache is stale. Bumping the
 version in `sw.js` is the fix. It never touches saved data.
