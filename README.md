@@ -6,7 +6,7 @@ shopping list, rewards tied to conditions the app can judge, and a place to thin
 a decision through and come back to it later. Hosted free on GitHub Pages, used
 from the iPhone home screen, works offline.
 
-Current version: 88. The version and build date show at the bottom of the app,
+Current version: 96. The version and build date show at the bottom of the app,
 which is how you check whether an upload has reached your phone.
 
 ## Files
@@ -33,7 +33,8 @@ button under the steps, App ideas from a small link under the version number.
 **Today** is the daily page: one goal, three small steps, up to seven bonus
 tasks on top of those, a 1 to 5 day rating, a note, and a rest day toggle with
 an optional reason. The week strip and the last 30 days strip both jump to any
-day. The weekly goal and the Sunday review live here too. A row of small
+day. Steps and bonus tasks reorder by dragging their number, each within its own
+list. The weekly goal and the Sunday review live here too. A row of small
 progress rings sits under the week strip, one per live reward, filled by how
 far along it is and amber once it is yours to claim. Tapping a ring opens that
 reward. The row shows the five closest to done, with a sixth ring counting any
@@ -55,6 +56,11 @@ underlined link under the version number so it stays out of the way. It works
 like Later, quick to add and tick, without the scheduling, because an app idea
 never needs to be given a day. Deliberately separate so it does not clutter the
 real Later list.
+
+**Goals**, in the menu, holds a few goals, each a number to move by a date, a
+list of milestones, or both. Any milestone can be put on a day with its date
+button, which adds it to that day as a step (or a bonus task when the three are
+full).
 
 **Decisions**, in the menu, walks one decision through seven screens (frame, criteria, options, reshape,
 consequences, judge, resolve) and brings it back on two dates you set.
@@ -81,6 +87,7 @@ any server. Keys:
 - `meta:laterDone` Later items ticked off without ever being given a day
 - `meta:rewards` the rewards and their claim history
 - `meta:decisions` decisions, their working out, and the look back on each one
+- `meta:goals` goals and their milestones
 - `meta:common` saved common tasks
 - `meta:lastBackup` when you last backed up
 
@@ -91,7 +98,10 @@ A day record holds: `goal`, `goalDone`, `todos`, `rate` 0 to 5, `note`, `rest`,
 `restWhy`, and `times`, which records when each item was ticked in local time
 with the offset. `todos` starts at three items and grows to a maximum of ten.
 Each item has `t` text, `d` done, `moved`, a date if it was moved elsewhere, and
-`lc`, the day the text was first parked in the Later list, if it came from there.
+`lc`, the day the text was first parked in the Later list, if it came from there,
+and `gm`, `goalId:milestoneId` when the task was put there from a goal milestone.
+Every task is built through one function, `copyTodo`, so a field added later
+cannot be dropped by restore or by closing gaps.
 The day record's `goalLc` is the same thing for the one thing.
 The first three are the core steps; anything past those is a bonus task.
 
@@ -111,6 +121,12 @@ the time. Up to 12 options, 5 of them carried. The list is capped at 80.
 
 Records written before v83 used `undo` with values easily, with effort and not
 really. `fixDec` maps those onto `cost` on load, so old decisions keep working.
+
+A goal holds: `name`, `why`, `fmt` (plain, aud, hrs or pct), `dir` up or down,
+`start`, `now` and `target`, `due` and `set` dates, `done` and `doneAt`, and `ms`
+the milestones. Each milestone has `id`, `t`, `d` done, and `day`, the date it is
+on, or blank. Milestones from before v96 are given an id on first load and it is
+saved straight away, so it never changes after that.
 
 A reward holds: `name` the prize, `scope` week or month or once, `metric` which
 condition, `target` the number to reach, `habitId` when the condition is one
@@ -187,6 +203,24 @@ period that has ended, drops off that row and stays on the Rewards page. Working
 out a reward's value means walking day records, so the whole set is worked out
 once and held until the next save.
 
+**Goals.** A milestone put on a day and the task it becomes are linked, so
+ticking either one ticks the other. Moving the task to another day carries the
+link and the milestone's date follows it; deleting the task from the day menu, or
+making it the one thing, clears the date. Taking a milestone off a day from the
+Goals page removes its task and can be undone. One gap is accepted: clearing a
+linked task's text by hand leaves the milestone showing its date until it is
+tapped and taken off, because checking every milestone against its day on every
+draw would mean loading a day record per milestone.
+
+**Deleting.** Nothing is removed on a single tap. Every delete, remove or clear
+asks first with a red button and Cancel, and everything that can be put back
+offers Undo for a few seconds after: tasks and the one thing, goals and
+milestones, Later items, dishes, the example dishes, shopping items and both
+clear buttons, rewards, decisions and common tasks. Undo puts each thing back at
+its old place and skips anything already back, so it never doubles up. The one
+exception is deleting an archived habit for good, which asks twice and is final
+by design.
+
 **Decisions.** Seven screens, one question each, and nothing except the decision
 sentence is required. The order is deliberate: each step is meant to be blind to
 the next, so options get written before anything judges them. Reshape sits before
@@ -220,13 +254,15 @@ list.
 ## Backup and restore
 
 - **Backup** writes a `.json` holding everything. That is the file that can be restored.
-- Everything means every storage key above except `meta:lastBackup`, which is left out on purpose: restoring a stale "you last backed up on" date would be misleading. Verified by backing up all twenty stores through the app's own button, wiping storage, restoring from the file, and comparing key by key.
+- Everything means every storage key above except `meta:lastBackup`, which is left out on purpose: restoring a stale "you last backed up on" date would be misleading. Verified in v96 by backing up a store using every key through the app's own button, wiping storage, restoring from the downloaded file in both modes, and comparing the whole store key by key: identical, including milestone links, `lc` dates and tick times on day records.
 - Two filters decide what is worth writing out. A day is skipped when `empty()` says nothing is in it, and a week when `wkUsed()` says the same. A weekly goal ticked with no text written used to fall through that second filter; fixed in v87 by having `wkUsed` check `goalDone` as well.
 - **Export** writes a `.txt` for reading only, including a decisions section. It cannot be restored.
-- **Restore** offers "add missing only", which is safe, or "replace everything", which wipes the device first and asks twice.
+- **Restore** offers "Put back anything missing", which is safe, or "Replace everything", which wipes the device first and asks twice.
+- On a new phone the app saves its starter habits the first time Habits is opened. "Put back anything missing" treats a habit list that is still exactly those starters as empty and takes the backup's list instead; before v96 it kept the starters and lost edits to any habit sharing an id with one.
 - Before restoring, the dialog states the backup's save date and time and counts of days, weeks, Later items, habits and dishes, so a wrong file announces itself.
-- "Add missing only" merges item by item, not record by record. A single task deleted from a day comes back without disturbing the rest of that day.
-- A restored task brings its tick time and its `lc` parked date with it. A bonus task may land in a different slot than it held in the backup, so its tick time is re-keyed to the new slot.
+- "Put back anything missing" merges item by item, not record by record. A single task deleted from a day comes back without disturbing the rest of that day.
+- A restored task brings its tick time, its `lc` parked date and its `gm` milestone link with it.
+- The message after restoring counts the days put back, and only says a day had no free step slot when a task from the backup really did not fit. A bonus task may land in a different slot than it held in the backup, so its tick time is re-keyed to the new slot.
 - Backups are named by date so they never overwrite each other. Keep them in iCloud Drive, not just Downloads.
 - The banner nags after seven days. The footer shows how long since the last one.
 

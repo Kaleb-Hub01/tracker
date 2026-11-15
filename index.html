@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<!-- v92, 29 Oct 2026
-     offline loading fixed (fonts no longer block rendering)
-     steps, weekly goal and Later items expand when tapped
-     undo when ticking or deleting in Later
-     a moved task is marked incomplete on the day it left
-     habits can be paused
-     rest days can carry a reason
+<!-- v96, 9 Nov 2026
+     goal milestones can be put on a day, and ticking either ticks both
+     steps and bonus tasks reorder by dragging their number
+     undo after every delete that can be put back
+     restore onto a new phone no longer mixes in the starter habits
 -->
 <html lang="en">
 <head>
@@ -142,6 +140,47 @@ body{
 .rw.earned .rwbar i{background:linear-gradient(90deg,var(--c3),#FFD98A)}
 .rwclaim{width:100%;margin-top:10px;border:0;border-radius:10px;padding:11px;font-family:inherit;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--c3),#E8A33D);cursor:pointer}
 .rwclaim:active{transform:scale(.97)}
+.gl{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c1);border-radius:12px;padding:12px 13px;margin-bottom:8px;cursor:pointer}
+.gl.done{border-left-color:var(--c2);opacity:.65}
+.gl.late{border-left-color:var(--c4)}
+.gltop{display:flex;align-items:center;gap:10px}
+.glname{flex:1;min-width:0;font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.glstate{flex:none;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:3px 9px;white-space:nowrap}
+.glstate.ok{color:var(--c1);border-color:var(--c1);background:color-mix(in oklab,var(--c1) 12%,transparent)}
+.glstate.warn{color:var(--c3);border-color:var(--c3);background:color-mix(in oklab,var(--c3) 14%,transparent)}
+.glstate.late{color:var(--c4);border-color:var(--c4);background:color-mix(in oklab,var(--c4) 14%,transparent)}
+.glstate:empty,.glwhy:empty{display:none}
+.glwhy{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.glnum{display:flex;align-items:baseline;gap:7px;margin-top:6px}
+.glnum b{font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:19px;font-weight:700;letter-spacing:-0.01em;line-height:1}
+.glnum span{font-size:11.5px;color:var(--muted)}
+.glbar{height:7px;border-radius:5px;background:var(--line);margin-top:9px;position:relative}
+.glbar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--c1),var(--c2))}
+.glbar u{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:2px;background:var(--muted);opacity:.5}
+.gl.done .glbar i{background:linear-gradient(90deg,var(--c2),var(--c1))}
+.glfoot{display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:11px;color:var(--muted)}
+.gldetail{background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:4px 13px 13px;margin:-8px 0 8px}
+.gldetail input{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:16px;border-radius:9px;padding:9px 11px;margin-top:9px}
+.glrow{display:flex;gap:8px;align-items:flex-end}
+.glrow label{flex:1;min-width:0}
+.glrow small{display:block;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.gldate{width:100%;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:15px;border-radius:9px;padding:10px 11px;margin-top:9px;cursor:pointer}
+.glms{margin-top:2px}
+.glm{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--line)}
+.glm:last-child{border-bottom:0}
+.glm p{flex:1;min-width:0;margin:0;font-size:14px;line-height:1.35;overflow-wrap:break-word}
+.glm.on p{color:var(--muted);text-decoration:line-through}
+.glmt{flex:none;width:21px;height:21px;border-radius:7px;border:1.5px solid var(--line);background:transparent;cursor:pointer;position:relative;padding:0}
+.glmt.on{background:var(--c1);border-color:var(--c1)}
+.glmt.on::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.glmday{flex:none;border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:12px;line-height:1;padding:5px 8px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.glmday.on{border-color:var(--c1);color:var(--c1)}
+.glmdel{flex:none;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;padding:2px 5px;cursor:pointer}
+.glact{display:flex;gap:7px;margin-top:13px}
+.glact button{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:600;padding:9px;border-radius:9px;cursor:pointer}
+.glact button.go{border-color:var(--c1);color:var(--c1)}
+.glact button.bad{border-color:var(--c4);color:var(--c4)}
+.glact button:active{transform:scale(.97)}
 .rwdetail{background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:4px 13px 13px;margin:-8px 0 8px}
 .rwdetail input{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:16px;border-radius:9px;padding:9px 11px;margin-top:9px}
 .rwexp{font-size:12.5px;line-height:1.45;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-top:9px}
@@ -466,6 +505,8 @@ textarea.clipped{
 .hitem.dragging .hrow{box-shadow:0 8px 26px rgba(0,0,0,.22)}
 .hrow{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c1);border-radius:11px;padding:9px 11px;cursor:pointer}
 .hrow.open{border-bottom-left-radius:0;border-bottom-right-radius:0}
+.todo .num{touch-action:none;cursor:grab;padding:10px 6px;margin:-10px -6px;box-sizing:content-box;text-align:center}
+.todo.dragging{position:relative;z-index:5;background:var(--surface);border-radius:10px;box-shadow:0 8px 26px rgba(0,0,0,.22)}
 .hgrip{flex:none;color:var(--muted);font-size:15px;line-height:1;padding:3px 2px;touch-action:none;opacity:.6}
 .hicon{flex:none;font-size:17px;line-height:1}
 .hmid{flex:1;min-width:0}
@@ -636,6 +677,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     <button type="button" id="moreBtn" class="morebtn" aria-label="More" aria-expanded="false"><i></i><i></i><i></i></button>
   </div>
   <div class="moremenu" id="moreMenu">
+    <button type="button" id="tabGoalsBtn">Goals</button>
     <button type="button" id="tabDinnerBtn">Dinners</button>
     <button type="button" id="tabRewardBtn">Rewards</button>
     <button type="button" id="tabDecideBtn">Decisions</button>
@@ -909,6 +951,15 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     </div>
   </div>
 
+  <div class="view off" id="viewGoals">
+    <div class="top">
+      <h1 class="date" id="glTitle">Goals<span>A number, a date, and the steps</span></h1>
+      <div class="hdone" id="glCount"><b>0</b><small>Live</small></div>
+    </div>
+    <button class="addstep" id="glAdd" type="button">+ New goal</button>
+    <div id="glList"></div>
+  </div>
+
   <div class="foot">
     <span id="footNote">No backup yet</span>
     <div class="fbtns">
@@ -928,7 +979,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='92', BUILT='29 Oct 2026';
+  var VERSION='96', BUILT='9 Nov 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -960,12 +1011,24 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   function hhmm(s){return (typeof s==='string'&&s.length>=16)?s.slice(11,16):''}
 
   var CORE=3, MAXTODOS=10;   // three core steps, up to seven bonus on top
-  function blank(){return {goal:'',goalDone:false,goalLc:'',rate:0,rest:false,restWhy:'',note:'',tag:'',times:{},todos:[{t:'',d:false,moved:''},{t:'',d:false,moved:''},{t:'',d:false,moved:''}]}}
+  function blank(){return {goal:'',goalDone:false,goalLc:'',rate:0,rest:false,restWhy:'',note:'',tag:'',times:{},todos:[copyTodo(),copyTodo(),copyTodo()]}}
   function bonusOf(d){return d.todos.slice(CORE)}
   function bonusReq(d){var n=0;bonusOf(d).forEach(function(x){if(x.t.trim())n++});return n}
   function bonusDone(d){var n=0;bonusOf(d).forEach(function(x){if(x.t.trim()&&x.d)n++});return n}
   // a cleared day with at least one bonus ticked
   function bigDay(d){return full(d)&&bonusDone(d)>0}
+  // The one shape of a task. Every place that builds or rebuilds a task goes
+  // through this, so a new field cannot be silently dropped on restore again.
+  function copyTodo(x){
+    x=x||{};
+    return {
+      t:(typeof x.t==='string')?x.t:'',
+      d:!!x.d,
+      moved:(typeof x.moved==='string')?x.moved:'',
+      lc:(typeof x.lc==='string')?x.lc:'',
+      gm:(typeof x.gm==='string')?x.gm:''   // goal id : milestone id
+    };
+  }
   function load(k){
     var raw=read('day:'+k), d=blank();
     if(raw&&typeof raw==='object'){
@@ -985,10 +1048,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         d.todos=[];
         for(var i=0;i<want;i++){
           var r=raw.todos[i];
-          d.todos.push((r&&typeof r==='object')
-            ?{t:typeof r.t==='string'?r.t:'',d:!!r.d,moved:(typeof r.moved==='string')?r.moved:'',
-               lc:(typeof r.lc==='string')?r.lc:''}
-            :{t:'',d:false,moved:''});
+          d.todos.push(copyTodo((r&&typeof r==='object')?r:null));
         }
       }
     }
@@ -1016,7 +1076,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     for(var i=0;i<CORE;i++){if(d.todos[i].t.trim()&&d.todos[i].d)n++}
     return n;
   }
-  function full(d){return !!d.goal.trim()&&d.goalDone&&score(d)===req(d)}
+  function full(d){var r=req(d);return r>0&&score(d)===r}
   function empty(d){
     if(d.goal.trim()||d.goalDone||d.rate||d.rest||d.note.trim()||d.tag||d.restWhy.trim())return false;
     for(var i=0;i<d.todos.length;i++){if(d.todos[i].t.trim()||d.todos[i].d)return false}
@@ -1052,9 +1112,11 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       '<textarea class="steptext" rows="1" autocomplete="off" placeholder="Small step '+(i+1)+'"></textarea>'+
       '<span class="movedtag"></span>'+
       '<button class="rowmenu" type="button" aria-label="Options for step '+(i+1)+'">&#8943;</button>';
+    row.setAttribute('data-si',i);
     todosBox.appendChild(row);
   }
   var rows=todosBox.querySelectorAll('.todo');
+  dragSetup(todosBox,taskDrag('todos'));
 
   function buildDots(box,onPick){
     for(var v=1;v<=5;v++){
@@ -1441,7 +1503,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 
   // place a parked item onto a day, either as the one thing or as a step
-  function placeTodo(text,dateObj,asGoal,force,asBonus,born){
+  function placeTodo(text,dateObj,asGoal,force,asBonus,born,gm){
     var k=dayKey(dateObj), here=(k===selKey);
     var rec=here?data:load(k);
     born=born||'';
@@ -1457,11 +1519,12 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       if(slot<0){
         if(!asBonus)return {ok:false,why:'full'};
         if(rec.todos.length>=MAXTODOS)return {ok:false,why:'max'};
-        rec.todos.push({t:text,d:false,moved:'',lc:born});
+        rec.todos.push(copyTodo({t:text,lc:born,gm:gm}));
         slot=rec.todos.length-1;
       } else {
         rec.todos[slot].t=text;
         rec.todos[slot].lc=born;
+        rec.todos[slot].gm=gm||'';
       }
     }
     if(here){persist();fillFields();render()}
@@ -1577,8 +1640,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         ask(stale.length===1?'One item has been here over a month. Things that sit this long are usually things you have decided not to do.':stale.length+' items have been here over a month. Things that sit this long are usually things you have decided not to do.',[
           {label:'Clear them',danger:true,run:function(){
             var ids={}; stale.forEach(function(x){ids[x.id]=1});
-            saveLater(loadLater().filter(function(x){return !ids[x.id]}));
+            var cur=loadLater(), gone=goneFrom(cur,function(x){return !ids[x.id]});
+            saveLater(cur.filter(function(x){return !ids[x.id]}));
             renderLater();
+            undoRemove(gone.length===1?'Cleared one item':'Cleared '+gone.length+' items',gone,loadLater,saveLater,sameId,renderLater);
           }},
           {label:'Keep them',run:function(){
             var l2=loadLater();
@@ -2276,9 +2341,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     note('Added 20 example dishes');
   }
   function clearSampleDishes(){
-    saveDishes(loadDishes().filter(function(x){return !x.sample}));
+    var cur=loadDishes(), gone=goneFrom(cur,function(x){return !x.sample});
+    saveDishes(cur.filter(function(x){return !x.sample}));
     dishOpen=null; renderDinner();
-    note('Examples removed');
+    undoRemove('Examples removed',gone,loadDishes,saveDishes,sameId,renderDinner);
   }
 
   var dishOpen=null;
@@ -2433,8 +2499,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           e.stopPropagation();
           ask('Delete "'+x.name+'"? Any day already planned with it keeps the name but loses the link.',[
             {label:'Delete',danger:true,run:function(){
-              saveDishes(loadDishes().filter(function(o){return o.id!==x.id}));
+              var cur=loadDishes(), gone=goneFrom(cur,function(o){return o.id!==x.id});
+              saveDishes(cur.filter(function(o){return o.id!==x.id}));
               dishOpen=null; renderDinner();
+              undoRemove('Dish deleted',gone,loadDishes,saveDishes,sameId,renderDinner);
             }},
             {label:'Cancel'}
           ],det);
@@ -2482,6 +2550,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(!r||!Array.isArray(r.items))return [];
     return r.items;
   }
+  function sameShop(a,b){return a&&b&&a.key===b.key&&a.name===b.name}
   function saveShop(items){write(shopKey(),{items:items.slice(0,250)})}
   // strip a leading quantity so "2 onions" and "onion" land together
   function ingKey(t){
@@ -2614,7 +2683,16 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       dl.type='button'; dl.className='sdel'; dl.textContent='\u00d7';
       dl.setAttribute('aria-label','Remove');
       dl.addEventListener('click',function(){
-        var l=loadShop(); l.splice(idx,1); saveShop(l); renderShop();
+        confirmDelete('Take this off the shopping list?',function(){
+          // found again by name rather than trusting the position from the
+          // last draw, in case the list changed underneath it
+          var l=loadShop(), at=-1;
+          for(var q=0;q<l.length;q++){if(sameShop(l[q],it)){at=q;break}}
+          if(at<0)return;
+          var gone=[{item:l[at],at:at}];
+          l.splice(at,1); saveShop(l); renderShop();
+          undoRemove('Removed',gone,loadShop,saveShop,sameShop,renderShop);
+        },row,'Remove');
       });
       row.appendChild(tk); row.appendChild(mid); row.appendChild(dl);
       box.appendChild(row);
@@ -2631,12 +2709,20 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     });
   });
   document.getElementById('shopClearDone').addEventListener('click',function(){
-    saveShop(loadShop().filter(function(it){return !it.done}));
-    renderShop();
+    confirmDelete('Clear everything ticked off the shopping list?',function(){
+      var cur=loadShop(), gone=goneFrom(cur,function(it){return !it.done});
+      saveShop(cur.filter(function(it){return !it.done}));
+      renderShop();
+      undoRemove('Cleared ticked',gone,loadShop,saveShop,sameShop,renderShop);
+    },document.getElementById('shopList'),'Clear them');
   });
   document.getElementById('shopClearAll').addEventListener('click',function(){
     ask('Clear the whole shopping list?',[
-      {label:'Clear it',danger:true,run:function(){saveShop([]);renderShop()}},
+      {label:'Clear it',danger:true,run:function(){
+        var gone=goneFrom(loadShop(),function(){return false});
+        saveShop([]);renderShop();
+        undoRemove('List cleared',gone,loadShop,saveShop,sameShop,renderShop);
+      }},
       {label:'Cancel'}
     ],document.getElementById('shopList'));
   });
@@ -3069,8 +3155,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           e.stopPropagation();
           ask('Delete the reward "'+r.name+'"?',[
             {label:'Delete',danger:true,run:function(){
-              saveRewards(loadRewards().filter(function(x){return x.id!==r.id}));
+              var cur=loadRewards(), gone=goneFrom(cur,function(x){return x.id!==r.id});
+              saveRewards(cur.filter(function(x){return x.id!==r.id}));
               rwOpen=null; renderRewards();
+              undoRemove('Reward deleted',gone,loadRewards,saveRewards,sameId,function(){renderRewards();render()});
             }},
             {label:'Cancel'}
           ],det);
@@ -3233,13 +3321,15 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       dl.setAttribute('aria-label','Delete');
       dl.addEventListener('click',function(e){
         e.stopPropagation();
-        saveFixes(loadFixes().filter(function(x){return x.id!==it.id}));
-        renderFixes();
-        toast('Deleted','Undo',function(){
-          var ll=loadFixes();
-          ll.splice(Math.min(i,ll.length),0,it);
-          saveFixes(ll); renderFixes(); note('Put back');
-        });
+        confirmDelete('Delete "'+String(it.t||'').slice(0,60)+'"?',function(){
+          saveFixes(loadFixes().filter(function(x){return x.id!==it.id}));
+          renderFixes();
+          toast('Deleted','Undo',function(){
+            var ll=loadFixes();
+            ll.splice(Math.min(i,ll.length),0,it);
+            saveFixes(ll); renderFixes(); note('Put back');
+          });
+        },row);
       });
       row.appendChild(tk); row.appendChild(tx); row.appendChild(ag); row.appendChild(dl);
       box.appendChild(row);
@@ -3970,8 +4060,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     del.addEventListener('click',function(){
       ask('Delete this decision and everything written in it?',[
         {label:'Delete',danger:true,run:function(){
-          saveDecisions(loadDecisions().filter(function(x){return x.id!==d.id}));
+          var cur=loadDecisions(), gone=goneFrom(cur,function(x){return x.id!==d.id});
+          saveDecisions(cur.filter(function(x){return x.id!==d.id}));
           dcRev=null; renderDecide();
+          undoRemove('Decision deleted',gone,loadDecisions,saveDecisions,sameId,renderDecide);
         }},
         {label:'Cancel'}
       ],nav);
@@ -4732,19 +4824,32 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     ],anchor);
   }
 
-  // drag to reorder: grip drags at once, long press on the row also starts it
-  var dragEl=null, dragId=null, dragY=0, dragTimer=null, dragStartY=0;
-  function dragSetup(box){
-    var items=box.querySelectorAll('.hitem');
+  // drag to reorder: grip drags at once, long press on the row also starts it.
+  // One set of drag code for every list. A list passes its box, the selector
+  // for a row, its grip, the attribute that identifies a row, and what to do
+  // with the new order. The habit list is the default.
+  var HABIT_DRAG={box:'habitList',item:'.hitem',grip:'.hgrip',attr:'data-id',longPress:true,
+    drop:function(ids,dragId){
+      var at=ids.indexOf(dragId);
+      reorderTo(dragId, at>-1&&at+1<ids.length?ids[at+1]:null);
+      renderHabits();
+    }};
+  var dragEl=null, dragId=null, dragY=0, dragTimer=null, dragStartY=0, dragCfg=HABIT_DRAG;
+  function dragSetup(box,cfg){
+    cfg=cfg||HABIT_DRAG;
+    var items=box.querySelectorAll(cfg.item);
     Array.prototype.forEach.call(items,function(it){
-      var grip=it.querySelector('.hgrip');
-      if(grip)grip.addEventListener('pointerdown',function(e){startDrag(e,it)});
+      if(it.getAttribute('data-drag'))return;   // already wired, rows can be reused
+      it.setAttribute('data-drag','1');
+      var grip=it.querySelector(cfg.grip);
+      if(grip)grip.addEventListener('pointerdown',function(e){e.preventDefault();startDrag(e,it,cfg)});
+      if(!cfg.longPress)return;
       it.addEventListener('pointerdown',function(e){
-        if(e.target.closest('.hgrip'))return;
+        if(e.target.closest(cfg.grip))return;
         if(e.target.closest('button')&&!e.target.closest('.hrow'))return;
         dragStartY=e.clientY;
         clearTimeout(dragTimer);
-        dragTimer=setTimeout(function(){startDrag(e,it)},450);
+        dragTimer=setTimeout(function(){startDrag(e,it,cfg)},450);
       });
       it.addEventListener('pointermove',function(e){
         if(!dragEl&&Math.abs(e.clientY-dragStartY)>10)clearTimeout(dragTimer);
@@ -4753,9 +4858,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       it.addEventListener('pointercancel',function(){clearTimeout(dragTimer)});
     });
   }
-  function startDrag(e,item){
+  function startDrag(e,item,cfg){
     clearTimeout(dragTimer);
-    dragEl=item; dragId=item.getAttribute('data-id'); dragY=e.clientY;
+    dragCfg=cfg||HABIT_DRAG;
+    dragEl=item; dragId=item.getAttribute(dragCfg.attr); dragY=e.clientY;
     item.classList.add('dragging');
     document.body.style.userSelect='none';
     try{ if(navigator.vibrate)navigator.vibrate(12) }catch(x){}
@@ -4765,8 +4871,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     e.preventDefault();
     var dy=e.clientY-dragY;
     dragEl.style.transform='translateY('+dy+'px)';
-    var box=document.getElementById('habitList');
-    var items=Array.prototype.slice.call(box.querySelectorAll('.hitem'));
+    var box=document.getElementById(dragCfg.box);
+    var items=Array.prototype.slice.call(box.querySelectorAll(dragCfg.item));
     for(var i=0;i<items.length;i++){
       var it=items[i];
       if(it===dragEl)continue;
@@ -4785,12 +4891,37 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     dragEl.style.transform='';
     dragEl.classList.remove('dragging');
     document.body.style.userSelect='';
-    var box=document.getElementById('habitList');
-    var ids=Array.prototype.map.call(box.querySelectorAll('.hitem'),function(i){return i.getAttribute('data-id')});
-    var at=ids.indexOf(dragId);
-    reorderTo(dragId, at>-1&&at+1<ids.length?ids[at+1]:null);
-    dragEl=null; dragId=null;
-    renderHabits();
+    var cfg=dragCfg, id=dragId;
+    var box=document.getElementById(cfg.box);
+    var ids=Array.prototype.map.call(box.querySelectorAll(cfg.item),function(i){return i.getAttribute(cfg.attr)});
+    dragEl=null; dragId=null; dragCfg=HABIT_DRAG;
+    cfg.drop(ids,id);
+  }
+
+  // Steps and bonus tasks reorder within their own list. Moving between the
+  // two is bonus promotion's job, not this.
+  function taskDrag(boxId){
+    return {box:boxId,item:'.todo',grip:'.num',attr:'data-si',longPress:false,
+      drop:function(ids){
+        var idxList=ids.map(Number), box=document.getElementById(boxId);
+        var sorted=idxList.slice().sort(function(a,b){return a-b});
+        // put the rows back in index order whatever happens: the core rows are
+        // reused and filled by position, so leaving them in dragged order
+        // would paint each task into the wrong row
+        Array.prototype.slice.call(box.querySelectorAll('.todo'))
+          .sort(function(a,b){return a.getAttribute('data-si')-b.getAttribute('data-si')})
+          .forEach(function(r){box.appendChild(r)});
+        if(idxList.join()===sorted.join())return;   // dropped where it started
+        if(!data.times||typeof data.times!=='object')data.times={};
+        var picked=idxList.map(function(i){return data.todos[i]});
+        var times =idxList.map(function(i){return data.times['s'+i]});
+        sorted.forEach(function(slot){delete data.times['s'+slot]});
+        sorted.forEach(function(slot,k){
+          data.todos[slot]=picked[k];
+          if(times[k])data.times['s'+slot]=times[k];
+        });
+        persist(); fillFields(); render();
+      }};
   }
   document.addEventListener('pointerup',endDrag);
   document.addEventListener('pointercancel',endDrag);
@@ -4860,7 +4991,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(!t||!t.tagName)return;
     var tag=t.tagName.toUpperCase();
     if(tag!=='INPUT'&&tag!=='TEXTAREA')return;
-    if(t.id==='laterInput')return;        // its own handler adds the item
+    if(t.id==='laterInput'||t.id==='glMsInput')return;   // their own handlers add the item
     e.preventDefault();
     if(t.className&&String(t.className).indexOf('ptext')>-1){
       // the naming box in a panel: Enter means Save
@@ -4870,9 +5001,557 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     t.blur();
   },true);
 
+  // ---- Goals -------------------------------------------------------------
+  // A goal is a number to move by a date, a list of milestones, or both. With
+  // no target number set, the milestones carry the progress instead, so a goal
+  // that cannot be counted still works.
+  var GFMT={
+    plain:{l:'Plain',  f:function(n){return trimNum(n)}},
+    aud:  {l:'A$',     f:function(n){return 'A$'+trimNum(n).replace(/\B(?=(\d{3})+(?!\d))/g,',')}},
+    hrs:  {l:'Hours',  f:function(n){return trimNum(n)+' hrs'}},
+    pct:  {l:'Percent',f:function(n){return trimNum(n)+'%'}}
+  };
+  function trimNum(n){
+    var v=Math.round(Number(n)*100)/100;
+    return isFinite(v)?String(v):'0';
+  }
+  function fmtVal(g,n){return (GFMT[g.fmt]||GFMT.plain).f(n||0)}
+
+  function tidyGoal(g){
+    if(!Array.isArray(g.ms))g.ms=[];
+    g.ms=g.ms.filter(function(m){return m&&typeof m.t==='string'}).slice(0,20);
+    g.ms.forEach(function(m,i){
+      m.d=!!m.d;
+      if(typeof m.day!=='string')m.day='';
+      // a milestone needs a lasting id so a task on a day can point back at it
+      if(typeof m.id!=='string'||!m.id){m.id=msId(i);g._fixed=true}
+    });
+    ['now','target','start'].forEach(function(k){
+      if(typeof g[k]!=='number'||!isFinite(g[k]))g[k]=0;
+    });
+    if(g.dir!=='down')g.dir='up';
+    if(!GFMT[g.fmt])g.fmt='plain';
+    ['why','due','set','doneAt'].forEach(function(k){
+      if(typeof g[k]!=='string')g[k]='';
+    });
+    g.done=!!g.done;
+    return g;
+  }
+  function loadGoals(){
+    var l=read('meta:goals');
+    l=Array.isArray(l)?l.filter(function(x){return x&&typeof x.name==='string'}).map(tidyGoal):[];
+    // ids given to old milestones are written back once, so they stay the
+    // same from one load to the next instead of being made up again each time
+    var fixed=false;
+    l.forEach(function(g){if(g._fixed){fixed=true;delete g._fixed}});
+    if(fixed)saveGoals(l);
+    return l;
+  }
+  function msId(i){return 'm'+Date.now().toString(36)+(i||0)+Math.floor(Math.random()*1000)}
+  function msRef(goalId,m){return goalId+':'+m.id}
+  function msSplit(ref){
+    var c=String(ref||'').indexOf(':');
+    return c>0?{g:ref.slice(0,c),m:ref.slice(c+1)}:null;
+  }
+  function msFind(o,mid){
+    for(var i=0;i<o.ms.length;i++){if(o.ms[i].id===mid)return o.ms[i]}
+    return null;
+  }
+  // a day record, the live one when it is the day on screen
+  function dayRec(k){return k===selKey?data:load(k)}
+  function saveDayRec(k,rec){
+    if(k===selKey){persist();fillFields();render()}
+    else write('day:'+k,rec);
+  }
+  // A ticked task that came from a milestone ticks the milestone too. Quiet,
+  // because this runs from the Today page and the Goals page redraws on open.
+  function syncFromTask(rec,idx){
+    var t=rec.todos[idx], r=t&&msSplit(t.gm);
+    if(!r)return;
+    setGoalQuiet(r.g,function(o){var m=msFind(o,r.m);if(m)m.d=!!t.d});
+  }
+  // and the other way: ticking a milestone ticks its task on the planned day
+  function syncToDay(goalId,m,done){
+    if(!m.day)return;
+    var ref=msRef(goalId,m), rec=dayRec(m.day), hit=false;
+    if(!rec.times||typeof rec.times!=='object')rec.times={};
+    rec.todos.forEach(function(t,i){
+      if(t.gm!==ref)return;
+      hit=true; t.d=!!done;
+      if(done){rec.times['s'+i]=stamp()}else{delete rec.times['s'+i]}
+    });
+    if(hit)saveDayRec(m.day,rec);
+  }
+  // where a milestone task can go on a day: first free core slot, then a bonus
+  // row. -1 when the day is full.
+  function msSlot(rec){
+    for(var s=0;s<CORE;s++){if(!rec.todos[s].t.trim())return s}
+    return rec.todos.length<MAXTODOS?rec.todos.length:-1;
+  }
+  function msPlace(goalId,m,k){
+    var rec=dayRec(k), slot=msSlot(rec);
+    if(slot<0)return false;
+    if(!rec.times||typeof rec.times!=='object')rec.times={};
+    var t=copyTodo({t:m.t,d:m.d,gm:msRef(goalId,m)});
+    if(slot<rec.todos.length)rec.todos[slot]=t; else rec.todos.push(t);
+    if(m.d)rec.times['s'+slot]=stamp(); else delete rec.times['s'+slot];
+    saveDayRec(k,rec);
+    return true;
+  }
+  function msLift(goalId,m){
+    if(!m.day)return;
+    var ref=msRef(goalId,m), rec=dayRec(m.day), hit=false;
+    if(!rec.times||typeof rec.times!=='object')rec.times={};
+    for(var i=rec.todos.length-1;i>=0;i--){
+      if(rec.todos[i].gm!==ref)continue;
+      hit=true;
+      if(i>=CORE)removeBonus(rec,i);
+      else {rec.todos[i]=copyTodo();delete rec.times['s'+i]}
+    }
+    if(hit){compactSteps(rec);saveDayRec(m.day,rec)}
+  }
+  function msSetDay(goalId,mid,k){
+    setGoal(goalId,function(o){var m=msFind(o,mid);if(m)m.day=k});
+  }
+  function scheduleMs(goalId,mid,anchor){
+    var g=loadGoals().filter(function(x){return x.id===goalId})[0];
+    var m=g&&msFind(g,mid);
+    if(!m)return;
+    askDate('Which day is this milestone going on?',m.day?parseDay(m.day):today,anchor,function(d){
+      // re-read, so nothing captured before the date was picked is stale
+      var g2=loadGoals().filter(function(x){return x.id===goalId})[0];
+      var m2=g2&&msFind(g2,mid);
+      if(!m2)return;
+      var k=dayKey(d);
+      if(k===m2.day){note('It is already there');return}
+      if(msSlot(dayRec(k))<0){note('That day is already full');return}
+      msLift(goalId,m2);
+      msPlace(goalId,m2,k);
+      msSetDay(goalId,mid,k);
+      note('Added to '+dayLabel(d));
+    });
+  }
+  function unscheduleMs(goalId,mid){
+    var g=loadGoals().filter(function(x){return x.id===goalId})[0];
+    var m=g&&msFind(g,mid);
+    if(!m||!m.day)return;
+    var was=m.day;
+    msLift(goalId,m);
+    msSetDay(goalId,mid,'');
+    toast('Taken off that day','Undo',function(){
+      var g3=loadGoals().filter(function(x){return x.id===goalId})[0];
+      var m3=g3&&msFind(g3,mid);
+      if(!m3||m3.day)return;
+      if(msSlot(dayRec(was))<0){note('That day is full now');return}
+      msPlace(goalId,m3,was);
+      msSetDay(goalId,mid,was);
+      note('Put back');
+    });
+  }
+  // after a linked task is moved or removed from a day: the milestone's date
+  // follows the task if it landed as a step somewhere, and clears otherwise
+  function msFollow(ref,k){
+    var r=msSplit(ref);
+    if(!r)return;
+    var on='';
+    if(k){
+      var rec=dayRec(k);
+      if(rec.todos.some(function(t){return t.gm===ref}))on=k;
+    }
+    setGoalQuiet(r.g,function(o){var m=msFind(o,r.m);if(m)m.day=on});
+  }
+  function saveGoals(l){write('meta:goals',l.slice(0,20))}
+  // Quiet saves do not redraw, so typing is never interrupted mid word. The
+  // redraw happens on blur instead.
+  function setGoalQuiet(id,fn){
+    var l=loadGoals();
+    for(var i=0;i<l.length;i++){if(l[i].id===id)fn(l[i])}
+    saveGoals(l);
+  }
+  function setGoal(id,fn){setGoalQuiet(id,fn);renderGoals();menuAlert()}
+
+  function goalBase(g){
+    var st=g.start, tg=g.target;
+    if(g.dir==='up'&&st>=tg)st=0;   // a start above the target means nothing going up
+    var span=(g.dir==='down')?(st-tg):(tg-st);
+    return {st:st,tg:tg,span:span,num:span>0};
+  }
+  function goalPct(g){
+    if(g.done)return 100;
+    var b=goalBase(g);
+    if(b.num){
+      var got=(g.dir==='down')?(b.st-g.now):(g.now-b.st);
+      return Math.max(0,Math.min(100,Math.round(got/b.span*100)));
+    }
+    if(g.ms.length){
+      var n=0; g.ms.forEach(function(m){if(m.d)n++});
+      return Math.round(n/g.ms.length*100);
+    }
+    return 0;
+  }
+  function parseDay(x){
+    if(!x)return null;
+    var p=String(x).split('-');
+    if(p.length<3)return null;
+    var d=new Date(+p[0],+p[1]-1,+p[2]);
+    return isNaN(d.getTime())?null:midnight(d);
+  }
+  function daysApart(a,b){return Math.round((b-a)/86400000)}
+  // Where even progress would have reached by today. Drawn as a marker on the
+  // bar so being behind is visible without doing the sum yourself.
+  function goalPace(g){
+    var a=parseDay(g.set), b=parseDay(g.due);
+    if(!a||!b)return -1;
+    var total=daysApart(a,b);
+    if(total<=0)return -1;
+    return Math.max(0,Math.min(100,Math.round(daysApart(a,midnight(today))/total*100)));
+  }
+  function goalState(g){
+    if(g.done)return {k:'done',l:'Done'};
+    var b=parseDay(g.due);
+    if(b&&midnight(today)>b)return {k:'late',l:'Overdue'};
+    var pace=goalPace(g);
+    if(pace<0)return {k:'',l:''};
+    return (goalPct(g)>=pace-5)?{k:'ok',l:'On track'}:{k:'warn',l:'Behind'};
+  }
+  function goalWhen(g){
+    if(g.done)return 'Finished';
+    var b=parseDay(g.due);
+    if(!b)return 'No date set';
+    var n=daysApart(midnight(today),b);
+    if(n===0)return 'Due today';
+    if(n<0){n=Math.abs(n);return n+' '+(n===1?'day':'days')+' over'}
+    if(n<=31)return n+' '+(n===1?'day':'days')+' left';
+    var w=Math.round(n/7);
+    return w+' weeks left';
+  }
+
+  var glOpen=null;
+  function renderGoals(){
+    var box=document.getElementById('glList');
+    if(!box)return;
+    box.innerHTML='';
+    var list=loadGoals(), live=0, late=0;
+    list.forEach(function(g){
+      if(g.done)return;
+      live++;
+      if(goalState(g).k==='late')late++;
+    });
+    var c=document.getElementById('glCount');
+    if(c)c.querySelector('b').textContent=live;
+    var mb=document.getElementById('tabGoalsBtn');
+    if(mb)mb.textContent=late?('Goals '+late):'Goals';
+
+    if(!list.length){
+      var e=document.createElement('p');
+      e.className='lempty';
+      e.textContent='No goals yet. A goal is a number to move by a date, a handful of milestones, or both. Three or four is plenty.';
+      box.appendChild(e);
+      return;
+    }
+    list.slice().sort(function(a,b){
+      if(a.done!==b.done)return a.done?1:-1;
+      var x=a.due||'9999-99-99', y=b.due||'9999-99-99';
+      return x<y?-1:(x>y?1:0);
+    }).forEach(function(g){drawGoal(box,g)});
+  }
+
+  function drawGoal(box,g){
+    var pct=goalPct(g), st=goalState(g), pace=goalPace(g);
+    var card=document.createElement('div');
+    card.className='gl'+(g.done?' done':'')+(st.k==='late'?' late':'');
+    card.setAttribute('data-open', glOpen===g.id?'1':'');
+    card.setAttribute('data-gid', g.id);
+
+    var top=document.createElement('div'); top.className='gltop';
+    var nm=document.createElement('div'); nm.className='glname'; nm.textContent=g.name;
+    var bd=document.createElement('span');
+    bd.className='glstate'+(st.k?' '+st.k:''); bd.textContent=st.l;
+    top.appendChild(nm); top.appendChild(bd);
+    card.appendChild(top);
+
+    var wy=document.createElement('div'); wy.className='glwhy'; wy.textContent=g.why;
+    card.appendChild(wy);
+
+    var line=document.createElement('div'); line.className='glnum';
+    var big=document.createElement('b'), sub=document.createElement('span');
+    if(goalBase(g).num){
+      big.textContent=fmtVal(g,g.now);
+      sub.textContent=(g.dir==='down'?'down to ':'of ')+fmtVal(g,g.target);
+    } else {
+      var dn=0; g.ms.forEach(function(m){if(m.d)dn++});
+      big.textContent=dn+' of '+g.ms.length;
+      sub.textContent=(g.ms.length===1?'milestone':'milestones');
+    }
+    line.appendChild(big); line.appendChild(sub);
+    card.appendChild(line);
+
+    var bar=document.createElement('div'); bar.className='glbar';
+    var fill=document.createElement('i'); fill.style.width=pct+'%';
+    var mk=document.createElement('u');
+    mk.style.left='calc('+pace+'% - 1px)';
+    mk.style.display=(!g.done&&pace>=0&&pace<=100)?'':'none';
+    bar.appendChild(fill); bar.appendChild(mk);
+    card.appendChild(bar);
+
+    var ft=document.createElement('div'); ft.className='glfoot';
+    var a=document.createElement('span'); a.textContent=pct+'%';
+    var b2=document.createElement('span'); b2.textContent=goalWhen(g);
+    ft.appendChild(a); ft.appendChild(b2);
+    card.appendChild(ft);
+
+    card.addEventListener('click',function(){
+      glOpen=(glOpen===g.id)?null:g.id;
+      renderGoals();
+    });
+    box.appendChild(card);
+    if(glOpen===g.id)drawGoalEdit(box,g);
+  }
+
+  // Repaints one card from storage without touching the open detail panel.
+  // A full redraw here would destroy the field being typed into, which on a
+  // phone also closes the keyboard.
+  function paintGoal(id){
+    var card=document.querySelector('#glList .gl[data-gid="'+id+'"]');
+    if(!card)return;
+    var l=loadGoals(), g=null, i;
+    for(i=0;i<l.length;i++){if(l[i].id===id)g=l[i]}
+    if(!g)return;
+    var pct=goalPct(g), st=goalState(g), pace=goalPace(g);
+    card.className='gl'+(g.done?' done':'')+(st.k==='late'?' late':'');
+    var nm=card.querySelector('.glname'); if(nm)nm.textContent=g.name;
+    var wy=card.querySelector('.glwhy'); if(wy)wy.textContent=g.why;
+    var bd=card.querySelector('.glstate');
+    if(bd){bd.className='glstate'+(st.k?' '+st.k:'');bd.textContent=st.l}
+    var big=card.querySelector('.glnum b'), sub=card.querySelector('.glnum span');
+    if(big&&sub){
+      if(goalBase(g).num){
+        big.textContent=fmtVal(g,g.now);
+        sub.textContent=(g.dir==='down'?'down to ':'of ')+fmtVal(g,g.target);
+      } else {
+        var dn=0; g.ms.forEach(function(m){if(m.d)dn++});
+        big.textContent=dn+' of '+g.ms.length;
+        sub.textContent=(g.ms.length===1?'milestone':'milestones');
+      }
+    }
+    var fill=card.querySelector('.glbar i'); if(fill)fill.style.width=pct+'%';
+    var mk=card.querySelector('.glbar u');
+    if(mk){
+      mk.style.left='calc('+pace+'% - 1px)';
+      mk.style.display=(!g.done&&pace>=0&&pace<=100)?'':'none';
+    }
+    var ft=card.querySelectorAll('.glfoot span');
+    if(ft.length>1){ft[0].textContent=pct+'%';ft[1].textContent=goalWhen(g)}
+    var mb=document.getElementById('tabGoalsBtn');
+    if(mb){
+      var late=0;
+      l.forEach(function(x){if(!x.done&&goalState(x).k==='late')late++});
+      mb.textContent=late?('Goals '+late):'Goals';
+    }
+  }
+
+  function drawGoalEdit(box,g){
+    var det=document.createElement('div');
+    det.className='gldetail';
+    det.setAttribute('data-open','1');
+    det.addEventListener('click',function(e){e.stopPropagation()});
+
+    function textField(val,ph,max,set){
+      var i=document.createElement('input');
+      i.type='text'; i.value=val; i.placeholder=ph;
+      var db=mkDebounce();
+      function take(){
+        setGoalQuiet(g.id,function(o){set(o,i.value.slice(0,max))});
+        paintGoal(g.id);
+      }
+      i.addEventListener('input',function(){db(take)});
+      i.addEventListener('blur',take);
+      det.appendChild(i);
+    }
+    textField(g.name,'What is the goal?',70,function(o,v){o.name=v||'Untitled goal'});
+    textField(g.why,'Why it matters (optional)',90,function(o,v){o.why=v});
+
+    function lab(t){
+      var l=document.createElement('div'); l.className='rwlab'; l.textContent=t;
+      det.appendChild(l);
+    }
+    function chips(items,isOn,pick){
+      var row=document.createElement('div'); row.className='rwchips';
+      items.forEach(function(it){
+        var b=document.createElement('button');
+        b.type='button'; b.textContent=it.label;
+        if(isOn(it))b.className='on';
+        b.addEventListener('click',function(e){e.stopPropagation();pick(it)});
+        row.appendChild(b);
+      });
+      det.appendChild(row);
+    }
+
+    lab('Measured in');
+    chips(['plain','aud','hrs','pct'].map(function(k){return {label:GFMT[k].l,v:k}}),
+      function(it){return g.fmt===it.v},
+      function(it){setGoal(g.id,function(o){o.fmt=it.v})});
+
+    lab('Aiming');
+    chips([{label:'Higher is better',v:'up'},{label:'Lower is better',v:'down'}],
+      function(it){return g.dir===it.v},
+      function(it){setGoal(g.id,function(o){
+        o.dir=it.v;
+        // a falling goal needs somewhere to fall from, or the bar has no span.
+        // going back up, that starting figure is meaningless, so it is cleared.
+        if(it.v==='down'&&o.start<=o.target)o.start=Math.max(o.now,o.target+1);
+        if(it.v==='up')o.start=0;
+      })});
+
+    lab('The numbers');
+    var row=document.createElement('div'); row.className='glrow';
+    function numField(val,ph,set){
+      var wrap=document.createElement('label');
+      var s=document.createElement('small'); s.textContent=ph;
+      var i=document.createElement('input');
+      i.type='number'; i.setAttribute('inputmode','decimal'); i.value=val;
+      var db=mkDebounce();
+      function take(){
+        var n=parseFloat(i.value);
+        setGoalQuiet(g.id,function(o){set(o,isFinite(n)?n:0)});
+        paintGoal(g.id);
+      }
+      i.addEventListener('click',function(e){e.stopPropagation()});
+      i.addEventListener('input',function(){db(take)});
+      i.addEventListener('blur',take);
+      wrap.appendChild(s); wrap.appendChild(i);
+      row.appendChild(wrap);
+    }
+    if(g.dir==='down')numField(g.start,'Started at',function(o,v){o.start=v});
+    numField(g.now,'Now',function(o,v){o.now=v});
+    numField(g.target,'Target',function(o,v){o.target=v});
+    det.appendChild(row);
+
+    lab('Due');
+    var dd=parseDay(g.due);
+    var dbtn=document.createElement('button');
+    dbtn.type='button'; dbtn.className='gldate';
+    dbtn.textContent=dd?(dd.getDate()+' '+MONTHS[dd.getMonth()]+' '+dd.getFullYear()):'Pick a date';
+    dbtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      askDate('When does this have to be true?',dd||today,null,function(d){
+        setGoal(g.id,function(o){
+          o.due=dayKey(d);
+          if(!o.set)o.set=dayKey(today);
+        });
+      });
+    });
+    det.appendChild(dbtn);
+
+    lab('Milestones');
+    var ms=document.createElement('div'); ms.className='glms';
+    g.ms.forEach(function(m,i){
+      var r=document.createElement('div'); r.className='glm'+(m.d?' on':'');
+      var tk=document.createElement('button');
+      tk.type='button'; tk.className='glmt'+(m.d?' on':'');
+      tk.setAttribute('aria-pressed',m.d?'true':'false');
+      tk.setAttribute('aria-label',m.d?'Mark not done':'Mark done');
+      tk.addEventListener('click',function(e){
+        e.stopPropagation();
+        var now=!m.d;
+        setGoal(g.id,function(o){var mm=msFind(o,m.id);if(mm)mm.d=now});
+        syncToDay(g.id,m,now);
+      });
+      var pp=document.createElement('p'); pp.textContent=m.t;
+      var dy=document.createElement('button');
+      dy.type='button'; dy.className='glmday'+(m.day?' on':'');
+      var mdd=m.day?parseDay(m.day):null;
+      dy.textContent=mdd?(mdd.getDate()+' '+MONTHS[mdd.getMonth()].slice(0,3)):'+ Day';
+      dy.setAttribute('aria-label',mdd?'Planned day, tap to change':'Put this on a day');
+      dy.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(!m.day){scheduleMs(g.id,m.id,r);return}
+        ask('This is on '+dayLabel(mdd)+'.',[
+          {label:'Another day',run:function(){scheduleMs(g.id,m.id,r)}},
+          {label:'Take it off',danger:true,run:function(){unscheduleMs(g.id,m.id)}},
+          {label:'Cancel'}
+        ],r);
+      });
+      var dl=document.createElement('button');
+      dl.type='button'; dl.className='glmdel'; dl.innerHTML='&times;';
+      dl.setAttribute('aria-label','Delete milestone');
+      dl.addEventListener('click',function(e){
+        e.stopPropagation();
+        confirmDelete('Delete "'+m.t.slice(0,60)+'"?',function(){
+          var gone={id:m.id,t:m.t,d:m.d,day:m.day};
+          setGoal(g.id,function(o){o.ms.splice(i,1)});
+          toast('Milestone deleted','Undo',function(){
+            setGoal(g.id,function(o){o.ms.splice(Math.min(i,o.ms.length),0,gone)});
+            note('Put back');
+          });
+        },r);
+      });
+      r.appendChild(tk); r.appendChild(pp); r.appendChild(dy); r.appendChild(dl);
+      ms.appendChild(r);
+    });
+    det.appendChild(ms);
+
+    var add=document.createElement('input');
+    add.type='text'; add.id='glMsInput'; add.placeholder='Add a milestone, then press enter';
+    add.addEventListener('keydown',function(e){
+      if(e.key!=='Enter')return;
+      e.preventDefault();
+      var v=add.value.trim();
+      if(!v)return;
+      add.value='';
+      setGoal(g.id,function(o){if(o.ms.length<20)o.ms.push({id:msId(o.ms.length),t:v.slice(0,90),d:false,day:''})});
+      var again=document.getElementById('glMsInput');
+      if(again)again.focus();
+    });
+    det.appendChild(add);
+
+    var act=document.createElement('div'); act.className='glact';
+    var dn=document.createElement('button');
+    dn.type='button'; dn.className=g.done?'':'go';
+    dn.textContent=g.done?'Reopen':'Mark done';
+    dn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var wasDone=g.done;
+      setGoal(g.id,function(o){o.done=!wasDone;o.doneAt=o.done?stamp():''});
+      if(!wasDone){note('Goal reached');celebrate('week')}
+    });
+    var del=document.createElement('button');
+    del.type='button'; del.className='bad'; del.textContent='Delete';
+    del.addEventListener('click',function(e){
+      e.stopPropagation();
+      var ms=g.ms.length;
+      confirmDelete('Delete "'+g.name.slice(0,60)+'"?'+(ms?(' Its '+ms+' '+(ms===1?'milestone goes':'milestones go')+' with it.'):''),function(){
+        var all=loadGoals(), idx=-1, gone=null;
+        for(var i=0;i<all.length;i++){if(all[i].id===g.id){idx=i;gone=all[i]}}
+        saveGoals(all.filter(function(x){return x.id!==g.id}));
+        glOpen=null; renderGoals(); menuAlert();
+        if(gone){
+          toast('Goal deleted','Undo',function(){
+            var l=loadGoals();
+            l.splice(Math.min(idx,l.length),0,gone);
+            saveGoals(l); renderGoals(); menuAlert(); note('Put back');
+          });
+        }
+      },det);
+    });
+    act.appendChild(dn); act.appendChild(del);
+    det.appendChild(act);
+    box.appendChild(det);
+  }
+
+  document.getElementById('glAdd').addEventListener('click',function(){
+    var l=loadGoals();
+    if(l.length>=20){note('That is plenty of goals');return}
+    var id='g'+Date.now().toString(36);
+    l.unshift({id:id,name:'New goal',why:'',now:0,target:0,start:0,dir:'up',
+      fmt:'plain',due:'',set:dayKey(today),ms:[],done:false,doneAt:''});
+    saveGoals(l); glOpen=id; renderGoals(); menuAlert();
+  });
+  document.getElementById('tabGoalsBtn').addEventListener('click',function(){showTab('goals')});
+
   function showTab(which){
-    var ids={today:'viewToday',habits:'viewHabits',later:'viewLater',decide:'viewDecide',fixes:'viewFixes',dinner:'viewDinner',reward:'viewRewards'};
-    var btns={today:'tabTodayBtn',habits:'tabHabitsBtn',dinner:'tabDinnerBtn',reward:'tabRewardBtn',decide:'tabDecideBtn'};
+    var ids={today:'viewToday',habits:'viewHabits',later:'viewLater',decide:'viewDecide',fixes:'viewFixes',dinner:'viewDinner',reward:'viewRewards',goals:'viewGoals'};
+    var btns={today:'tabTodayBtn',habits:'tabHabitsBtn',dinner:'tabDinnerBtn',reward:'tabRewardBtn',decide:'tabDecideBtn',goals:'tabGoalsBtn'};
     var lit=(which==='later'||which==='fixes')?'today':which;
     Object.keys(ids).forEach(function(k){
       document.getElementById(ids[k]).className='view'+(k===which?'':' off');
@@ -4886,6 +5565,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(which==='fixes')renderFixes();
     if(which==='dinner')renderDinner();
     if(which==='reward')renderRewards();
+    if(which==='goals')renderGoals();
     if(which==='today')renderRings();
     if(typeof setMenu==='function')setMenu(false);
     var mb=document.getElementById('moreBtn');
@@ -4899,7 +5579,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   // Today and Habits stay as tabs. Everything else lives behind the three
   // lines, with a dot on them when one of those pages wants attention, so you
   // can see there is something waiting without opening it.
-  var MENUVIEW={dinner:1,reward:1,decide:1};
+  var MENUVIEW={dinner:1,reward:1,decide:1,goals:1};
   var menuOpen=false;
   function setMenu(on){
     menuOpen=!!on;
@@ -4915,6 +5595,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     try{
       rwSnapshot().forEach(function(x){if(x.ok)n++});
       loadDecisions().forEach(function(d){if(decDue(d))n++});
+      loadGoals().forEach(function(g){if(!g.done&&goalState(g).k==='late')n++});
     }catch(e){}
     var on=b.className.indexOf(' on')>-1;
     b.className='morebtn'+(on?' on':'')+(n?' alert':'');
@@ -4947,13 +5628,12 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     for(i=0;i<rec.todos.length;i++){
       var t=rec.todos[i];
       if(t&&String(t.t||'').trim()){
-        all.push({t:t.t,d:!!t.d,moved:t.moved||'',lc:t.lc||'',time:rec.times['s'+i]});
+        var cp=copyTodo(t); cp.time=rec.times['s'+i]; all.push(cp);
       }
     }
     var out=[], want=Math.min(Math.max(CORE,all.length),MAXTODOS);
     for(i=0;i<want;i++){
-      out.push(all[i]?{t:all[i].t,d:all[i].d,moved:all[i].moved,lc:all[i].lc}
-                     :{t:'',d:false,moved:''});
+      out.push(copyTodo(all[i]));
     }
     rec.todos=out;
     Object.keys(rec.times).forEach(function(k){if(/^s\d+$/.test(k))delete rec.times[k]});
@@ -4986,6 +5666,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(!text.trim())return;
     // where this text was first parked, if it came from the Later list
     var born=(isGoal?data.goalLc:(data.todos[idx]||{}).lc)||'';
+    // the goal milestone this task came from, if any. It travels with a move.
+    var gmv=isGoal?'':((data.todos[idx]||{}).gm||'');
     var short=text.length>52?text.slice(0,52)+'...':text;
 
     // movedTo: mark it incomplete here and show where it went.
@@ -4997,6 +5679,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       // something missed, so it stays struck through and that day stays
       // incomplete. Same action, and the day it leaves decides which it is.
       var past=(sel<today);
+      if(gmv&&data.todos[idx])data.todos[idx].gm='';
       if(isGoal){
         data.goal=''; data.goalDone=false;
         if(data.times){delete data.times.goal;delete data.times.set}
@@ -5007,24 +5690,42 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       } else if(idx>=CORE){
         removeBonus(data,idx);
       } else {
-        data.todos[idx]={t:'',d:false,moved:''};
+        data.todos[idx]=copyTodo();
         if(data.times)delete data.times['s'+idx];
         compactSteps(data);
       }
       persist(); fillFields(); render();
+      if(gmv)msFollow(gmv,movedTo||'');
+    }
+    // undo for a delete from the day: the task, its tick time and its place
+    // come back, and a milestone link picks its date up again
+    var snapKey=selKey;
+    function daySnap(){
+      return JSON.parse(JSON.stringify({goal:data.goal,goalDone:data.goalDone,goalLc:data.goalLc,
+        todos:data.todos,times:data.times||{}}));
+    }
+    function undoDay(msg,snap){
+      toast(msg,'Undo',function(){
+        var rec=dayRec(snapKey);
+        rec.goal=snap.goal; rec.goalDone=snap.goalDone; rec.goalLc=snap.goalLc;
+        rec.todos=snap.todos.map(copyTodo); rec.times=snap.times;
+        saveDayRec(snapKey,rec);
+        if(gmv)msFollow(gmv,snapKey);
+        note('Put back');
+      });
     }
     function landOn(d,wantGoal){
       if(dayKey(d)===selKey){
         if(wantGoal===isGoal){note('It is already there');return}
         convertHere(wantGoal); return;
       }
-      var r=placeTodo(text,d,wantGoal,false,false,born);
+      var r=placeTodo(text,d,wantGoal,false,false,born,gmv);
       if(r.ok){dropSource(dayKey(d));note('Moved to '+dayLabel(d));return}
       if(r.why==='goal'){
         ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has "'+r.existing.slice(0,46)+'" as its one thing.',[
-          {label:'Replace it',danger:true,run:function(){placeTodo(text,d,true,true,false,born);dropSource(dayKey(d));note('Moved to '+dayLabel(d))}},
+          {label:'Replace it',danger:true,run:function(){placeTodo(text,d,true,true,false,born,gmv);dropSource(dayKey(d));note('Moved to '+dayLabel(d))}},
           {label:'Add as a step',run:function(){
-            var r2=placeTodo(text,d,false,false,true,born);
+            var r2=placeTodo(text,d,false,false,true,born,gmv);
             if(r2.ok){dropSource(dayKey(d));note('Moved to '+dayLabel(d))}else note('That day is full');
           }},
           {label:'Cancel'}
@@ -5032,7 +5733,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       } else {
         ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has three steps.',[
           {label:'Add it as a bonus',run:function(){
-            var r3=placeTodo(text,d,false,false,true,born);
+            var r3=placeTodo(text,d,false,false,true,born,gmv);
             if(r3.ok){dropSource(dayKey(d));note('Added as a bonus on '+dayLabel(d))}
             else note('That day is full');
           }},
@@ -5048,9 +5749,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           ask(dayLabel(sel).charAt(0).toUpperCase()+dayLabel(sel).slice(1)+' already has "'+data.goal.slice(0,44)+'" as its one thing.',[
             {label:'Replace it',danger:true,run:function(){
               data.goal=text; data.goalDone=false;
-              data.todos[idx]={t:'',d:false};
+              data.todos[idx]=copyTodo();
               if(data.times)delete data.times['s'+idx];
               compactSteps(data); persist(); fillFields(); render();
+              if(gmv)msFollow(gmv,'');
               note('Set as the one thing');
             }},
             {label:'Cancel'}
@@ -5058,9 +5760,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           return;
         }
         data.goal=text; data.goalDone=data.todos[idx].d;
-        data.todos[idx]={t:'',d:false};
+        data.todos[idx]=copyTodo();
         if(data.times)delete data.times['s'+idx];
         compactSteps(data); persist(); fillFields(); render();
+        if(gmv)msFollow(gmv,'');
         note('Set as the one thing');
       } else {
         var slot=-1;
@@ -5144,14 +5847,21 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         if(!isGoal&&data.todos[idx].moved){
           chip('Remove from this day',function(){
             closePanel();
-            dropSource();
-            note('Removed');
+            confirmDelete('Take "'+short+'" off this day?',function(){
+              var snap=daySnap();
+              dropSource();
+              undoDay('Removed',snap);
+            },anchor,'Remove');
           });
         }
         chip('Delete',function(){
           closePanel();
           ask('Delete "'+short+'"?',[
-            {label:'Delete',danger:true,run:function(){dropSource();note('Deleted')}},
+            {label:'Delete',danger:true,run:function(){
+              var snap=daySnap();
+              dropSource();
+              undoDay('Deleted',snap);
+            }},
             {label:'Cancel'}
           ],anchor);
         },true);
@@ -5189,6 +5899,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         (function(idx){
           var row=document.createElement('div');
           row.className='todo';
+          row.setAttribute('data-si',idx);
           row.innerHTML='<span class="num">'+(idx+1)+'</span>'+
             '<button class="tick sq" aria-pressed="false" aria-label="Mark bonus task done"></button>'+
             '<textarea class="steptext" rows="1" autocomplete="off" placeholder="Bonus task"></textarea>'+
@@ -5213,6 +5924,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           btn.addEventListener('click',function(){
             data.todos[idx].d=!data.todos[idx].d;
             if(data.todos[idx].d){data.times['s'+idx]=stamp()}else{delete data.times['s'+idx]}
+            syncFromTask(data,idx);
             persist(); render();
           });
           var mb=row.querySelector('.rowmenu');
@@ -5220,6 +5932,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           box.appendChild(row);
         })(i);
       }
+      dragSetup(box,taskDrag('extras'));
     }
 
     // refresh state without replacing the rows
@@ -5246,7 +5959,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
   document.getElementById('addBonus').addEventListener('click',function(){
     if(data.todos.length>=MAXTODOS){note('That is as many as a day can hold');return}
-    data.todos.push({t:'',d:false,moved:''});
+    data.todos.push(copyTodo());
     persist(); fillFields(); render();
     setTimeout(function(){
       var box=document.getElementById('extras');
@@ -5338,7 +6051,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       }
     }
     if(data.todos.length<MAXTODOS){
-      data.todos.push({t:t,d:false,moved:''});
+      data.todos.push(copyTodo({t:t}));
       persist(); fillFields(); render();
       note('Added as a bonus');
       return true;
@@ -5377,7 +6090,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       del.addEventListener('click',function(){
         ask('Remove "'+t+'" from your common tasks? This does not change any day you have already written it on.',[
           {label:'Remove it',danger:true,run:function(){
-            var l=loadCommon(); l.splice(idx,1); saveCommon(l); renderCommon();
+            var l=loadCommon(), at=l.indexOf(t);
+            if(at<0)return;
+            l.splice(at,1); saveCommon(l); renderCommon();
+            undoRemove('Removed',[{item:t,at:at}],loadCommon,saveCommon,function(a,b){return a===b},renderCommon);
           }},
           {label:'Cancel'}
         ],document.getElementById('common'));
@@ -6036,6 +6752,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var was=full(data);
       data.todos[idx].d=!data.todos[idx].d;
       if(data.todos[idx].d){data.times['s'+idx]=stamp()}else{delete data.times['s'+idx]}
+      syncFromTask(data,idx);
       persist();render();
       if(!was&&full(data)&&sel<=today)celebrate('day');
     });
@@ -6239,6 +6956,35 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     armOutside();
     setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'center'})},40);
   }
+  // EVERY delete in this app goes through here, with no exceptions. If a tap
+  // removes something the person made, it asks first. New delete buttons use
+  // this rather than acting straight away, even when an undo toast follows.
+  function confirmDelete(msg,run,anchor,label){
+    ask(msg,[
+      {label:label||'Delete',danger:true,run:run},
+      {label:'Cancel'}
+    ],anchor);
+  }
+  // Undo for anything removed from a list. gone is [{item,at}] taken before the
+  // removal. Each goes back at its old place unless it is already there, so an
+  // undo never doubles something up or wipes a change made in the meantime.
+  function goneFrom(list,keep){
+    var g=[];
+    list.forEach(function(x,i){if(!keep(x,i))g.push({item:x,at:i})});
+    return g;
+  }
+  function undoRemove(msg,gone,load,save,same,redraw){
+    if(!gone.length)return;
+    toast(msg,'Undo',function(){
+      var l=load();
+      gone.forEach(function(g){
+        if(l.some(function(x){return same(x,g.item)}))return;
+        l.splice(Math.min(g.at,l.length),0,g.item);
+      });
+      save(l); redraw(); note('Put back');
+    });
+  }
+  function sameId(a,b){return a&&b&&a.id===b.id}
   function bkText(){
     var last=read('meta:lastBackup');
     if(!last)return 'No backup yet';
@@ -6308,6 +7054,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var ld=read('meta:laterDone'); if(Array.isArray(ld))pack.laterDone=ld;
     var rw=read('meta:rewards'); if(Array.isArray(rw))pack.rewards=rw;
     var dcs=read('meta:decisions'); if(Array.isArray(dcs))pack.decisions=dcs;
+    var gls=read('meta:goals'); if(Array.isArray(gls))pack.goals=gls;
     var ha=read('meta:habitsArchive'); if(Array.isArray(ha))pack.habitsArchive=ha;
     var fx=read('meta:fixes'); if(Array.isArray(fx))pack.fixes=fx;
     var fd=read('meta:fixesDone'); if(Array.isArray(fd))pack.fixesDone=fd;
@@ -6383,7 +7130,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var slot=-1;
       for(s=0;s<CORE;s++){if(!cur.todos[s].t.trim()){slot=s;break}}
       if(slot<0)continue;
-      cur.todos[slot]={t:bt[j].t,d:!!bt[j].d,moved:bt[j].moved||'',lc:bt[j].lc||''};
+      cur.todos[slot]=copyTodo(bt[j]);
       if(bak.times&&bak.times['s'+j])cur.times['s'+slot]=bak.times['s'+j];
       have[txt.toLowerCase()]=1;
       n++;
@@ -6393,7 +7140,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var txt2=bx?String(bx.t||'').trim():'';
       if(!txt2||have[txt2.toLowerCase()])return;
       if(cur.todos.length>=MAXTODOS)return;
-      cur.todos.push({t:bx.t,d:!!bx.d,moved:bx.moved||'',lc:bx.lc||''});
+      cur.todos.push(copyTodo(bx));
       // the tick time moves with it, from its slot in the backup to its new one
       var ni=cur.todos.length-1;
       if(bak.times&&bak.times['s'+(CORE+bi)])cur.times['s'+ni]=bak.times['s'+(CORE+bi)];
@@ -6463,14 +7210,14 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var bak=pack.days[k];
       if(mode==='replace'||empty(load(k))){write('day:'+k,bak);days++;return}
       var cur=load(k);
-      var before=0;
-      for(var i=0;i<CORE;i++){if(!cur.todos[i].t.trim())before++}
-      var wantSlots=0;
-      var bt=Array.isArray(bak.todos)?bak.todos:[];
-      for(var j=0;j<bt.length&&j<CORE;j++){if(bt[j]&&String(bt[j].t||'').trim())wantSlots++}
       var n=mergeDay(cur,bak);
       if(n){write('day:'+k,cur);days++;items+=n}
-      if(wantSlots>before)noRoom++;
+      // judged after the merge: only a backup task that is still not on the
+      // day means there was no room, not one that was there all along
+      var got={};
+      cur.todos.forEach(function(t){var x=t.t.trim().toLowerCase();if(x)got[x]=1});
+      var bt=Array.isArray(bak.todos)?bak.todos:[];
+      if(bt.some(function(t){var x=t?String(t.t||'').trim().toLowerCase():'';return x&&!got[x]}))noRoom++;
     });
 
     Object.keys(pack.weeks||{}).forEach(function(k){
@@ -6488,18 +7235,24 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       write(k,cur);
     });
 
-    function mergeMetaList(key,fromPack){
+    // dflt: what the app saves by itself on a new device. A list still exactly
+    // that was never touched, so the backup replaces it rather than merging
+    // into it. Without this, opening Habits on a new phone before restoring
+    // kept the starter habits and dropped any edits to habits with the same id.
+    function mergeMetaList(key,fromPack,dflt){
       if(!Array.isArray(fromPack))return 0;
       var cur=read(key);
-      if(mode==='replace'||!Array.isArray(cur)||!cur.length){write(key,fromPack);return 0}
+      var untouched=dflt&&Array.isArray(cur)&&JSON.stringify(cur)===JSON.stringify(dflt);
+      if(mode==='replace'||!Array.isArray(cur)||!cur.length||untouched){write(key,fromPack);return 0}
       var n=mergeById(cur,fromPack);
       if(n)write(key,cur);
       return n;
     }
-    other+=mergeMetaList('meta:habits',pack.habitDefs);
+    other+=mergeMetaList('meta:habits',pack.habitDefs,HAB_DEFAULT);
     other+=mergeMetaList('meta:dishes',pack.dishes);
     other+=mergeMetaList('meta:rewards',pack.rewards);
     other+=mergeMetaList('meta:decisions',pack.decisions);
+    other+=mergeMetaList('meta:goals',pack.goals);
     other+=mergeMetaList('meta:habitsArchive',pack.habitsArchive);
     other+=mergeMetaList('meta:fixes',pack.fixes);
     other+=mergeMetaList('meta:fixesDone',pack.fixesDone);
@@ -6569,12 +7322,15 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       return;
     }
     var bits=[];
+    // days count too, or a restore onto a new phone reports almost nothing
+    // put back when it has in fact put back everything
+    if(days)bits.push(days+(days===1?' day':' days'));
     if(items)bits.push(items+(items===1?' task':' tasks'));
     if(later)bits.push(later+(later===1?' later item':' later items'));
     if(hab)bits.push(hab+(hab===1?' habit tick':' habit ticks'));
     if(other)bits.push(other+(other===1?' other item':' other items'));
     if(!bits.length){
-      note('Nothing was missing, so nothing changed');
+      note(noRoom?'Nothing went in. Some days had no free step slot for what was missing.':'Nothing was missing, so nothing changed');
     } else {
       note('Put back '+bits.join(', ')+(noRoom?'. Some days had no free step slot.':''));
     }
@@ -6662,7 +7418,28 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   }
   carryForward();
   fillFields();
+  // The day the app thinks it is gets worked out once when the page loads.
+  // Left open on a phone it can sit there past midnight, so check whenever it
+  // comes back to the foreground and move the whole app on if the date moved.
+  function rollDay(){
+    var now=midnight(new Date());
+    if(dayKey(now)===tKey)return false;
+    var wasOnToday=(selKey===tKey);
+    tidyBonus(data);
+    persist(); persistWk();        // what is open still belongs to the old day
+    today=now; tKey=dayKey(today);
+    bestCache=null;
+    if(wasOnToday){select(today)}else{render()}
+    return true;
+  }
+  setInterval(function(){
+    if(document.hidden)return;
+    var ae=document.activeElement;
+    if(ae&&(ae.tagName==='TEXTAREA'||ae.tagName==='INPUT'))return;   // not mid-sentence
+    rollDay();
+  },60000);
   function restoreUI(){
+    if(rollDay()){refit();return}
     tidyBonus(data);
     var live=load(selKey);
     if(empty(data)&&!empty(live)){data=live}
