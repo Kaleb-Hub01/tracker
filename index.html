@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v102, 15 Nov 2026
+<!-- v103, 15 Nov 2026
      30-day chart: Open this day works again; its buttons sit on their own row
      Later quick adds always on Today (plus See all); status and Rest day on one row
      search moved to More; Common tasks hidden (list kept)
@@ -1118,7 +1118,7 @@ body.typing .tabbar{display:none}
 
 <script>
 (function(){
-  var VERSION='102', BUILT='15 Nov 2026';
+  var VERSION='103', BUILT='15 Nov 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -1141,7 +1141,7 @@ body.typing .tabbar{display:none}
 
   var storageOK=true;
   function read(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){storageOK=false;return null}}
-  function write(k,v){rwCache=null;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){storageOK=false;document.getElementById('warn').style.display='block'}}
+  function write(k,v){rwCache=null;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){storageOK=false;var w=document.getElementById('warn');if(e&&(e.name==='QuotaExceededError'||e.code===22||e.code===1014))w.textContent='Saved data is full, so your latest changes are not being kept. Back up now from the More page, then clear out old Later items or ideas.';w.style.display='block'}}
 
   // ---- rating scale ----
   // Day and week ratings were out of 5 up to v96 and out of 10 from v97. Old
@@ -1167,6 +1167,8 @@ body.typing .tabbar{display:none}
     write('meta:rateScale',10);
   })();
 
+  // a tick on a day other than today saves only that day's date, no clock time (S20)
+  function tickAt(k){return k===tKey?stamp():k}
   function stamp(){
     var d=new Date(), o=-d.getTimezoneOffset(), sg=o>=0?'+':'-';
     o=Math.abs(o);
@@ -4954,7 +4956,10 @@ body.typing .tabbar{display:none}
         var tl=document.createElement('div');
         tl.className='lhint'; tl.style.margin='10px 0 0';
         var lastT=hhmm(lg[lg.length-1]);
-        tl.textContent = lg.length===1
+        // catch-up ticks on a past day carry no clock time, so show none (S20)
+        tl.textContent = !lastT
+          ? (lg.length===1?'Ticked later, as a catch-up':'Ticked later, after '+lg.length+' goes')
+          : lg.length===1
           ? ('Ticked at '+lastT)
           : ('Settled at '+lastT+', after '+lg.length+' goes  \u00b7  '+lg.map(hhmm).join(', '));
         det.appendChild(tl);
@@ -5601,7 +5606,7 @@ body.typing .tabbar{display:none}
     rec.todos.forEach(function(t,i){
       if(t.gm!==ref)return;
       hit=true; t.d=!!done;
-      if(done){rec.times['s'+i]=stamp()}else{delete rec.times['s'+i]}
+      if(done){rec.times['s'+i]=tickAt(m.day)}else{delete rec.times['s'+i]}
     });
     if(hit)saveDayRec(m.day,rec);
   }
@@ -5617,7 +5622,7 @@ body.typing .tabbar{display:none}
     if(!rec.times||typeof rec.times!=='object')rec.times={};
     var t=copyTodo({t:m.t,d:m.d,gm:msRef(goalId,m)});
     if(slot<rec.todos.length)rec.todos[slot]=t; else rec.todos.push(t);
-    if(m.d)rec.times['s'+slot]=stamp(); else delete rec.times['s'+slot];
+    if(m.d)rec.times['s'+slot]=tickAt(k); else delete rec.times['s'+slot];
     saveDayRec(k,rec);
     return true;
   }
@@ -5962,7 +5967,8 @@ body.typing .tabbar{display:none}
       dl.setAttribute('aria-label','Delete milestone');
       dl.addEventListener('click',function(e){
         e.stopPropagation();
-        confirmDelete('Delete "'+m.t.slice(0,60)+'"?',function(){
+        // S10: the task it was put on a day as stays there, so say so
+        confirmDelete('Delete "'+m.t.slice(0,60)+'"?'+(m.day?(' Its task on '+dayLabel(parseDay(m.day))+' stays on that day.'):''),function(){
           var gone={id:m.id,t:m.t,d:m.d,day:m.day};
           setGoal(g.id,function(o){o.ms.splice(i,1)});
           toast('Milestone deleted','Undo',function(){
@@ -6004,8 +6010,9 @@ body.typing .tabbar{display:none}
     del.type='button'; del.className='bad'; del.textContent='Delete';
     del.addEventListener('click',function(e){
       e.stopPropagation();
-      var ms=g.ms.length;
-      confirmDelete('Delete "'+g.name.slice(0,60)+'"?'+(ms?(' Its '+ms+' '+(ms===1?'milestone goes':'milestones go')+' with it.'):''),function(){
+      var ms=g.ms.length, onDay=g.ms.filter(function(x){return x.day}).length;
+      confirmDelete('Delete "'+g.name.slice(0,60)+'"?'+(ms?(' Its '+ms+' '+(ms===1?'milestone goes':'milestones go')+' with it.'):'')
+        +(onDay?(onDay===1?' The task it put on a day stays there.':' The '+onDay+' tasks it put on days stay there.'):''),function(){
         var all=loadGoals(), idx=-1, gone=null;
         for(var i=0;i<all.length;i++){if(all[i].id===g.id){idx=i;gone=all[i]}}
         saveGoals(all.filter(function(x){return x.id!==g.id}));
@@ -6624,7 +6631,7 @@ body.typing .tabbar{display:none}
           });
           btn.addEventListener('click',function(){
             data.todos[idx].d=!data.todos[idx].d;
-            if(data.todos[idx].d){data.times['s'+idx]=stamp()}else{delete data.times['s'+idx]}
+            if(data.todos[idx].d){data.times['s'+idx]=tickAt(selKey)}else{delete data.times['s'+idx]}
             syncFromTask(data,idx);
             persist(); render();
           });
@@ -7442,7 +7449,7 @@ body.typing .tabbar{display:none}
   goalTick.addEventListener('click',function(){
     var was=full(data);
     data.goalDone=!data.goalDone;
-    if(data.goalDone){data.times.goal=stamp()}else{delete data.times.goal}
+    if(data.goalDone){data.times.goal=tickAt(selKey)}else{delete data.times.goal}
     persist();render();
     if(!was&&full(data)&&sel<=today)celebrate('day');
   });
@@ -7459,7 +7466,7 @@ body.typing .tabbar{display:none}
     btn.addEventListener('click',function(){
       var was=full(data);
       data.todos[idx].d=!data.todos[idx].d;
-      if(data.todos[idx].d){data.times['s'+idx]=stamp()}else{delete data.times['s'+idx]}
+      if(data.todos[idx].d){data.times['s'+idx]=tickAt(selKey)}else{delete data.times['s'+idx]}
       syncFromTask(data,idx);
       persist();render();
       if(!was&&full(data)&&sel<=today)celebrate('day');
