@@ -6,7 +6,7 @@ shopping list, rewards tied to conditions the app can judge, and a place to thin
 a decision through and come back to it later. Hosted free on GitHub Pages, used
 from the iPhone home screen, works offline.
 
-Current version: 96. The version and build date show at the bottom of the app,
+Current version: 97. The version and build date show at the bottom of the app,
 which is how you check whether an upload has reached your phone.
 
 ## Files
@@ -31,7 +31,7 @@ Later and App ideas are sub-pages rather than tabs. Later is reached from the
 button under the steps, App ideas from a small link under the version number.
 
 **Today** is the daily page: one goal, three small steps, up to seven bonus
-tasks on top of those, a 1 to 5 day rating, a note, and a rest day toggle with
+tasks on top of those, a 1 to 10 day rating, a note, and a rest day toggle with
 an optional reason. The week strip and the last 30 days strip both jump to any
 day. Steps and bonus tasks reorder by dragging their number, each within its own
 list. The weekly goal and the Sunday review live here too. A row of small
@@ -42,7 +42,14 @@ others, and disappears entirely when there are no rewards left to track. The
 **Later** list is a sub-page reached from the button under the steps.
 
 **Habits** holds the practices, each with its own cadence, streak, 30 day
-consistency figure and history.
+consistency figure and history. They are listed by how often they are due
+(every day first, then by times a week, then weekly, then fortnightly), with
+paused habits last. Habits due equally often keep the order you drag them into,
+on every day. Dragging one out of its group holds for that day only.
+
+Ratings, for the day and the week, are out of 10 as a row of numbered buttons.
+They were out of 5 up to v96; on first opening v97 every old rating is doubled
+once, along with any day-rating reward target, so history still compares.
 
 **Dinners** holds the dish library, the weekly meal plan, the day rules and the
 shopping list.
@@ -55,7 +62,13 @@ Today page.
 underlined link under the version number so it stays out of the way. It works
 like Later, quick to add and tick, without the scheduling, because an app idea
 never needs to be given a day. Deliberately separate so it does not clutter the
-real Later list.
+real Later list. "Share all ideas" sends the open list as a numbered `.txt`
+file through the share sheet, or as plain text where files cannot be shared,
+or copies it.
+
+Items in Later for over a month raise a banner. "Keep them" leaves each item's
+parked date alone and records the keep date in `k`, so the banner returns a
+month after keeping and the list order does not change.
 
 **Goals**, in the menu, holds a few goals, each a number to move by a date, a
 list of milestones, or both. Any milestone can be put on a day with its date
@@ -90,11 +103,13 @@ any server. Keys:
 - `meta:goals` goals and their milestones
 - `meta:common` saved common tasks
 - `meta:lastBackup` when you last backed up
+- `meta:rateScale` set to 10 once old 5-point ratings have been doubled
+- `meta:habDayOrder` a habit order dragged out of its frequency group, for one day only
 
 The week record holds `goal`, `goalDone`, `score`, `wnote` a free write-up of the
 week, then `worked`, `blocked`, `change` and `next` from the Sunday review.
 
-A day record holds: `goal`, `goalDone`, `todos`, `rate` 0 to 5, `note`, `rest`,
+A day record holds: `goal`, `goalDone`, `todos`, `rate` 0 to 10, `note`, `rest`,
 `restWhy`, and `times`, which records when each item was ticked in local time
 with the offset. `todos` starts at three items and grows to a maximum of ten.
 Each item has `t` text, `d` done, `moved`, a date if it was moved elsewhere, and
@@ -254,7 +269,7 @@ list.
 ## Backup and restore
 
 - **Backup** writes a `.json` holding everything. That is the file that can be restored.
-- Everything means every storage key above except `meta:lastBackup`, which is left out on purpose: restoring a stale "you last backed up on" date would be misleading. Verified in v96 by backing up a store using every key through the app's own button, wiping storage, restoring from the downloaded file in both modes, and comparing the whole store key by key: identical, including milestone links, `lc` dates and tick times on day records.
+- Everything means every storage key above except three left out on purpose: `meta:lastBackup`, because restoring a stale "you last backed up on" date would be misleading; `meta:habDayOrder`, because it only ever applies to one day; and `meta:rateScale`, because the backup carries its own `rateScale`. A backup without `rateScale: 10` was made before v97 with ratings out of 5, and restore doubles its ratings on the way in. Verified in v96 by backing up a store using every key through the app's own button, wiping storage, restoring from the downloaded file in both modes, and comparing the whole store key by key: identical, including milestone links, `lc` dates and tick times on day records.
 - Two filters decide what is worth writing out. A day is skipped when `empty()` says nothing is in it, and a week when `wkUsed()` says the same. A weekly goal ticked with no text written used to fall through that second filter; fixed in v87 by having `wkUsed` check `goalDone` as well.
 - **Export** writes a `.txt` for reading only, including a decisions section. It cannot be restored.
 - **Restore** offers "Put back anything missing", which is safe, or "Replace everything", which wipes the device first and asks twice.

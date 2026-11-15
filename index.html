@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<!-- v96, 9 Nov 2026
-     goal milestones can be put on a day, and ticking either ticks both
-     steps and bonus tasks reorder by dragging their number
-     undo after every delete that can be put back
-     restore onto a new phone no longer mixes in the starter habits
+<!-- v97, 15 Nov 2026
+     day and week ratings are out of 10, as numbered buttons; old ratings doubled
+     habits sort by how often they are due, paused ones last
+     Sunday review boxes collapse to one line when not being typed in
+     keeping month-old Later items no longer moves them to the top
+     App ideas can be shared in one go
 -->
 <html lang="en">
 <head>
@@ -275,14 +276,16 @@ textarea.clipped{
 .num{font-family:"Bricolage Grotesque","Inter",sans-serif;font-size:13px;font-weight:600;color:var(--muted);width:12px;flex:none}
 .todo.done .num{color:var(--c2)}
 
-.rate{margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+.rate{margin-top:16px;display:flex;flex-direction:column;align-items:stretch;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
 .rate.off{display:none}
 .rate-label{font-size:13px;color:var(--muted)}
-.dots{display:flex;gap:3px;flex:none}
-.dots button{width:34px;height:34px;border:0;background:transparent;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;line-height:0}
-.dots button svg{width:27px;height:27px;display:block}
-.dots button svg path{fill:transparent;stroke:var(--line);stroke-width:1.6;stroke-linejoin:round}
-.dots button.on svg path{stroke:none}
+/* rating out of 10 as numbered buttons (v97, chosen from mocks over ten
+   small stars and a slider: biggest thumb targets, number visible) */
+.dots{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.dots button{height:36px;min-width:0;border:1px solid var(--line);background:transparent;border-radius:9px;cursor:pointer;padding:0;
+  font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.dots button.on{border-color:transparent;color:#fff}
+.dots button.pick{outline:2px solid var(--ink);outline-offset:1px}
 
 .notewrap{margin-top:8px}
 .notewrap.off{display:none}
@@ -564,7 +567,10 @@ textarea.clipped{
 .statbtn{display:block;width:100%;text-align:left;font-family:inherit;border:1px solid var(--c3);color:var(--ink);cursor:pointer}
 .rq{margin-bottom:14px}
 .rq label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
-.rq textarea{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:16px;border-radius:9px;padding:9px 11px;resize:none;overflow:hidden;min-height:44px;line-height:1.45}
+/* the border and padding sit on a wrapper so a collapsed box clips cleanly
+   at one line; padding on the textarea itself let the cut line show through */
+.rqbox{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:9px 11px;min-height:44px;cursor:text}
+.rq textarea{display:block;width:100%;border:0;background-color:transparent;color:var(--ink);font-family:inherit;font-size:16px;padding:0;margin:0;resize:none;overflow:hidden;line-height:1.45;outline:none}
 .review .rate{margin:0 0 18px;border-color:var(--line)}
 .nextwk{background:var(--c3soft);border-left:3px solid var(--c3);border-radius:0 10px 10px 0;padding:10px 13px}
 .nextwk label{display:block;font-size:12px;font-weight:600;color:var(--c3);margin-bottom:3px}
@@ -659,8 +665,6 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 }
 @media (max-width:380px){
   .goal-text{font-size:23px} .bar{height:44px}
-  .dots button{width:29px;height:29px}
-  .rate{flex-direction:column;align-items:flex-start;gap:9px}
 }
 </style>
 </head>
@@ -786,19 +790,19 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
     <div class="rq">
       <label for="qWeekNote">How was the week?</label>
-      <textarea id="qWeekNote" rows="3" placeholder="Anything you want to say about it, in your own words"></textarea>
+      <div class="rqbox"><textarea id="qWeekNote" rows="1" placeholder="Anything you want to say about it"></textarea></div>
     </div>
     <div class="rq">
       <label for="qWorked">What worked this week?</label>
-      <textarea id="qWorked" rows="2" placeholder="The things you want more of"></textarea>
+      <div class="rqbox"><textarea id="qWorked" rows="1" placeholder="The things you want more of"></textarea></div>
     </div>
     <div class="rq">
       <label for="qBlocked">What got in the way?</label>
-      <textarea id="qBlocked" rows="2" placeholder="Be specific, not harsh"></textarea>
+      <div class="rqbox"><textarea id="qBlocked" rows="1" placeholder="Be specific, not harsh"></textarea></div>
     </div>
     <div class="rq">
       <label for="qChange">One thing to change next week</label>
-      <textarea id="qChange" rows="2" placeholder="One only, or it won't happen"></textarea>
+      <div class="rqbox"><textarea id="qChange" rows="1" placeholder="One only, or it won't happen"></textarea></div>
     </div>
 
     <div class="nextwk">
@@ -875,6 +879,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       <button type="button" id="fixAdd">Add</button>
     </div>
     <div id="fixList"></div>
+    <button class="laterlink" id="fixShare" type="button">Share all ideas</button>
     <div class="dinsec" id="fixDoneSec">
       <button class="dinsec-h" id="fixDoneToggle" type="button">Done <span>&#9662;</span></button>
       <div id="fixDoneBody" class="dinbody">
@@ -979,7 +984,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='96', BUILT='9 Nov 2026';
+  var VERSION='97', BUILT='15 Nov 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -987,7 +992,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   var midnight=function(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate())};
   var shift=function(d,n){return new Date(d.getFullYear(),d.getMonth(),d.getDate()+n)};
   var hue=function(i){return 'color-mix(in oklab, var(--c1), var(--c2) '+(i*16)+'%)'};
-  var rateHue=function(v){return 'color-mix(in oklab, var(--c3), var(--c1) '+((v-1)*25)+'%)'};
+  var rateHue=function(v){return 'color-mix(in oklab, var(--c3), var(--c1) '+Math.round((v-1)*100/9)+'%)'};
 
   function weekKey(d){
     var t=midnight(d); t.setDate(t.getDate()-((t.getDay()+6)%7)+3);
@@ -1000,6 +1005,30 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   var storageOK=true;
   function read(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){storageOK=false;return null}}
   function write(k,v){rwCache=null;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){storageOK=false;document.getElementById('warn').style.display='block'}}
+
+  // ---- rating scale ----
+  // Day and week ratings were out of 5 up to v96 and out of 10 from v97. Old
+  // ratings are doubled once (3 of 5 becomes 6 of 10) so history and averages
+  // still compare, along with any day-rating reward target. meta:rateScale
+  // marks storage as converted. Backups from v97 carry rateScale:10; one
+  // without it is from before, and restore doubles it on the way in.
+  function rateTo10(days,weeks,rewards){
+    var dbl=function(v){return (typeof v==='number'&&v>0)?Math.min(10,Math.round(v*2)):v};
+    Object.keys(days||{}).forEach(function(k){var r=days[k];if(r&&r.rate)r.rate=dbl(r.rate)});
+    Object.keys(weeks||{}).forEach(function(k){var w=weeks[k];if(w&&w.score)w.score=dbl(w.score)});
+    (Array.isArray(rewards)?rewards:[]).forEach(function(r){if(r&&r.metric==='avgRating'&&r.target)r.target=dbl(r.target)});
+  }
+  (function(){
+    if(read('meta:rateScale')===10)return;
+    var days={}, weeks={}, rw=read('meta:rewards');
+    allKeys('day:').forEach(function(k){var r=read('day:'+k);if(r&&r.rate)days[k]=r});
+    allKeys('week:').forEach(function(k){var w=read('week:'+k);if(w&&w.score)weeks[k]=w});
+    rateTo10(days,weeks,rw);
+    Object.keys(days).forEach(function(k){write('day:'+k,days[k])});
+    Object.keys(weeks).forEach(function(k){write('week:'+k,weeks[k])});
+    if(Array.isArray(rw))write('meta:rewards',rw);
+    write('meta:rateScale',10);
+  })();
 
   function stamp(){
     var d=new Date(), o=-d.getTimezoneOffset(), sg=o>=0?'+':'-';
@@ -1041,7 +1070,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       // Later to a day and back again does not reset its age to today
       d.goalLc=(typeof raw.goalLc==='string')?raw.goalLc:'';
       d.rest=!!raw.rest;
-      d.rate=(typeof raw.rate==='number'&&raw.rate>=0&&raw.rate<=5)?raw.rate:0;
+      d.rate=(typeof raw.rate==='number'&&raw.rate>=0&&raw.rate<=10)?raw.rate:0;
       if(raw.times&&typeof raw.times==='object')d.times=raw.times;
       if(Array.isArray(raw.todos)){
         var want=Math.max(3,Math.min(raw.todos.length,MAXTODOS));
@@ -1062,7 +1091,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         if(typeof raw[f]==='string')w[f]=raw[f];
       });
       w.goalDone=!!raw.goalDone;
-      w.score=(typeof raw.score==='number'&&raw.score>=0&&raw.score<=5)?raw.score:0;
+      w.score=(typeof raw.score==='number'&&raw.score>=0&&raw.score<=10)?raw.score:0;
     }
     return w;
   }
@@ -1119,11 +1148,11 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   dragSetup(todosBox,taskDrag('todos'));
 
   function buildDots(box,onPick){
-    for(var v=1;v<=5;v++){
+    for(var v=1;v<=10;v++){
       var b=document.createElement('button');
       b.type='button';
-      b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.7l2.9 5.85 6.45.94-4.67 4.55 1.1 6.42L12 17.43l-5.78 3.03 1.1-6.42L2.65 9.49l6.45-.94z"/></svg>';
-      b.setAttribute('aria-label','Rate '+v+' out of 5');
+      b.textContent=v;
+      b.setAttribute('aria-label','Rate '+v+' out of 10');
       (function(val){b.addEventListener('click',function(){onPick(val)})})(v);
       box.appendChild(b);
     }
@@ -1132,9 +1161,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var bs=box.querySelectorAll('button');
     for(var i=0;i<bs.length;i++){
       var on=val>0&&(i+1)<=val;
-      bs[i].className=on?'on':'';
-      var p=bs[i].querySelector('path');
-      if(p)p.style.fill=on?rateHue(val):'transparent';
+      bs[i].className=(on?'on':'')+((i+1)===val?' pick':'');
+      bs[i].style.background=on?rateHue(val):'transparent';
     }
   }
   buildDots(document.getElementById('dayDots'),function(v){
@@ -1209,7 +1237,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       else if(l[i]._refit==='shrink')shrink(l[i]);
     }
   }
-  function autogrow(){grow(goalText);grow(weeklyGoal);grow(document.getElementById('dayNote'));[qWeekNote,qWorked,qBlocked,qChange].forEach(grow)}
+  function autogrow(){grow(goalText);grow(weeklyGoal);grow(document.getElementById('dayNote'));[qWeekNote,qWorked,qBlocked,qChange].forEach(shrink)}
 
   function mkDebounce(){
     var t=null;
@@ -1481,6 +1509,14 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(isNaN(d.getTime()))return 0;
     return Math.max(0,Math.round((midnight(today)-midnight(d))/86400000));
   }
+  // Days since the item was parked or last kept from the month-old reminder,
+  // whichever is later. Keep used to overwrite c with today, which moved the
+  // item to the top of the list as if parked today. Now c never changes on
+  // keep: k holds the keep date and only the reminder looks at it.
+  function staleDays(it){
+    var a=ageDays(it);
+    return it.k?Math.min(a,ageDays({c:it.k})):a;
+  }
   function ageText(n){
     if(n<1)return 'today';
     if(n<7)return n+'d';
@@ -1631,7 +1667,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(ol)ol.innerHTML=l.length?('Later list <b>'+l.length+'</b>'):'Later list';
 
     renderLaterDone();
-    var stale=l.filter(function(x){return ageDays(x)>=30});
+    var stale=l.filter(function(x){return staleDays(x)>=30});
     var sb=document.getElementById('staleBanner');
     if(stale.length){
       sb.innerHTML='<span>'+stale.length+(stale.length===1?' item has':' items have')+' sat here over a month.</span> Tap to clear or keep.';
@@ -1647,7 +1683,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           }},
           {label:'Keep them',run:function(){
             var l2=loadLater();
-            l2.forEach(function(x){if(ageDays(x)>=30)x.c=dayKey(today)});
+            l2.forEach(function(x){if(staleDays(x)>=30)x.k=dayKey(today)});
             saveLater(l2); renderLater();
           }},
           {label:'Cancel'}
@@ -1699,7 +1735,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
       var n=ageDays(it);
       var ag=document.createElement('span');
-      ag.className='lage'+(n>=30?' old':''); ag.textContent=ageText(n);
+      ag.className='lage'+(staleDays(it)>=30?' old':''); ag.textContent=ageText(n);
 
       var go=document.createElement('button');
       go.type='button'; go.className='lgo'; go.textContent=(lOpen===it.id)?'Close':'Plan';
@@ -2744,7 +2780,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     habit:{label:'One habit',scopes:['week','month'],
       t:{week:[1,2,3,4,5,6,7],month:[8,12,16,20,30]},def:{week:3,month:16}},
     avgRating:{label:'Day rating',scopes:['week','month'],
-      t:{week:[3,4,5],month:[3,4,5]},def:{week:4,month:4}},
+      t:{week:[6,7,8,9],month:[6,7,8,9]},def:{week:8,month:8}},
     dinnersCooked:{label:'Dinners cooked',scopes:['week','month'],
       t:{week:[3,4,5,6,7],month:[12,16,20,25]},def:{week:5,month:20}},
     weeklyGoal:{label:'Weekly goal',scopes:['week','month'],
@@ -2884,7 +2920,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(r.metric==='bigDays')return 'have '+t+(t===1?' big day':' big days')+when;
     if(r.metric==='allHabits')return 'keep every habit at '+t+'%'+when;
     if(r.metric==='habit'){var h=habById(r.habitId);return 'do '+(h?h.name:'one habit')+' '+t+(t===1?' time':' times')+when}
-    if(r.metric==='avgRating')return 'average '+t+' stars or better'+when;
+    if(r.metric==='avgRating')return 'average '+t+' out of 10 or better'+when;
     if(r.metric==='dinnersCooked')return 'cook '+t+' planned '+(t===1?'dinner':'dinners')+when;
     if(r.metric==='weeklyGoal')return r.scope==='week'?('tick the weekly goal off'+(r.pin?when:'')):('hit the weekly goal '+t+(t===1?' week':' weeks')+when);
     if(r.metric==='streak')return 'reach a '+t+' day streak';
@@ -3133,7 +3169,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         }
 
         var tl=(RMET[r.metric]&&RMET[r.metric].t[r.scope])||[1];
-        var tlab=r.metric==='allHabits'?'How high':(r.metric==='avgRating'?'How many stars':'How many');
+        var tlab=r.metric==='allHabits'?'How high':(r.metric==='avgRating'?'What average':'How many');
         chipRow(tlab,tl.map(function(n){return {label:String(n)+(r.metric==='allHabits'?'%':''),v:n}}),
           function(it){return r.target===it.v},
           function(it){setReward(r.id,function(o){o.target=it.v})});
@@ -3279,10 +3315,37 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       renderFixes(); note(n>1?(n+' put back'):'Put back');
     });
   }
+  // Send every open idea out in one go, as a .txt file where the phone can
+  // share files (so Save to Files works) and as plain text where it cannot.
+  // Copy to the clipboard is the last resort. Closing the share sheet
+  // (AbortError) is not a failure and says nothing.
+  function shareFixes(){
+    var l=loadFixes();
+    if(!l.length){note('No open ideas to share');return}
+    var txt='App ideas, '+dayKey(today)+'\n\n'+l.map(function(x,i){
+      return (i+1)+'. '+x.t.replace(/\s+/g,' ').trim()+(x.c?' (added '+x.c+')':'');
+    }).join('\n')+'\n';
+    var copy=function(){
+      try{
+        navigator.clipboard.writeText(txt).then(function(){note('Copied '+l.length+(l.length===1?' idea':' ideas'))},function(){note('Could not share or copy')});
+      }catch(e){note('Could not share or copy')}
+    };
+    var failed=function(e){if(!e||e.name!=='AbortError')copy()};
+    if(!navigator.share){copy();return}
+    var file=null;
+    try{ file=new File([txt],'app-ideas-'+dayKey(today)+'.txt',{type:'text/plain'}) }catch(e){}
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:'App ideas'}).catch(failed);
+    } else {
+      navigator.share({title:'App ideas',text:txt}).catch(failed);
+    }
+  }
   function renderFixes(){
     var box=document.getElementById('fixList');
     if(!box)return;
     var l=loadFixes();
+    var sh=document.getElementById('fixShare');
+    if(sh)sh.style.display=l.length?'':'none';
     var cnt=document.getElementById('fixCount');
     if(cnt)cnt.innerHTML='<b>'+l.length+'</b><small>Open</small>';
     var ol=document.getElementById('openFixes');
@@ -3365,6 +3428,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   document.getElementById('fixDoneToggle').addEventListener('click',function(){
     fixDoneOpen=!fixDoneOpen; renderFixDone();
   });
+  document.getElementById('fixShare').addEventListener('click',shareFixes);
   document.getElementById('fixAdd').addEventListener('click',function(){
     var i=document.getElementById('fixInput');
     addFix(i.value); i.value=''; i.focus();
@@ -4669,13 +4733,71 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     saveHabits(l); renderHabits();
     if(p)note(h.name+' paused');
   }
+  // ---- habit order ----
+  // Shown order: paused habits last, the rest by how many times a week they
+  // are due, most first. Habits due equally often form a group and keep his
+  // stored order, so a drag inside a group lasts for every day. A drag out of
+  // its group is a one-day exception kept in meta:habDayOrder for that day only.
+  function habRank(h,d){
+    if(paused(h,d))return -1;
+    if(h.cad==='daily')return 7;
+    if(h.cad==='days')return Array.isArray(h.days)?h.days.length:0;
+    if(h.cad==='times')return h.n||3;
+    if(h.cad==='weekly')return 1;
+    if(h.cad==='fortnightly')return 0.5;
+    return 0;
+  }
+  function habDayOrder(d){
+    var o=read('meta:habDayOrder');
+    return (o&&o.d===dayKey(d)&&Array.isArray(o.ids))?o.ids:null;
+  }
+  function orderHabits(list,d){
+    var at={}, rk={};
+    list.forEach(function(h,i){at[h.id]=i;rk[h.id]=habRank(h,d)});
+    var out=list.slice().sort(function(a,b){return (rk[b.id]-rk[a.id])||(at[a.id]-at[b.id])});
+    var day=habDayOrder(d);
+    if(day){
+      var pos={}; day.forEach(function(id,i){pos[id]=i});
+      var base={}; out.forEach(function(h,i){base[h.id]=i});
+      var p=function(h){return (h.id in pos)?pos[h.id]:1e6+base[h.id]};
+      out.sort(function(a,b){return p(a)-p(b)});
+    }
+    return out;
+  }
+  // ids: the shown order after the drag. Inside its group (the habits either
+  // side are due at least as often above and at most as often below) it is a
+  // lasting move in the stored list. Otherwise it is for this day only.
+  function habDrop(ids,dragId){
+    var l=loadHabits(), by={};
+    l.forEach(function(h){by[h.id]=h});
+    var rank=function(id){return by[id]?habRank(by[id],hsel):-2};
+    var at=ids.indexOf(dragId);
+    if(at<0||!by[dragId])return;
+    var me=rank(dragId);
+    var up=at>0?rank(ids[at-1]):Infinity, down=at+1<ids.length?rank(ids[at+1]):-Infinity;
+    if(up>=me&&me>=down){
+      var next=null, prev=null, i;
+      for(i=at+1;i<ids.length;i++){if(rank(ids[i])===me){next=ids[i];break}}
+      for(i=at-1;i>=0&&!next;i--){if(rank(ids[i])===me){prev=ids[i];break}}
+      if(next)reorderTo(dragId,next);
+      else if(prev){
+        var l2=loadHabits(), pi=-1, after=null;
+        for(i=0;i<l2.length;i++){if(l2[i].id===prev)pi=i}
+        for(i=pi+1;i<l2.length;i++){if(l2[i].id!==dragId){after=l2[i].id;break}}
+        reorderTo(dragId,after);
+      }
+      if(habDayOrder(hsel))write('meta:habDayOrder',{d:dayKey(hsel),ids:ids});
+    } else {
+      write('meta:habDayOrder',{d:dayKey(hsel),ids:ids});
+      note('Moved for this day only');
+    }
+  }
   function moveHabit(h,dir){
-    var l=loadHabits(), i=-1;
-    for(var k=0;k<l.length;k++){if(l[k].id===h.id)i=k}
-    var j=i+dir;
-    if(i<0||j<0||j>=l.length)return;
-    var tmp=l[i]; l[i]=l[j]; l[j]=tmp;
-    saveHabits(l); renderHabits();
+    var ids=Array.prototype.map.call(document.querySelectorAll('#habitList .hitem'),function(el){return el.getAttribute('data-id')});
+    var i=ids.indexOf(h.id), j=i+dir;
+    if(i<0||j<0||j>=ids.length)return;
+    ids[i]=ids[j]; ids[j]=h.id;
+    habDrop(ids,h.id); renderHabits();
   }
   function reorderTo(id,beforeId){
     var l=loadHabits(), from=-1, item=null;
@@ -4764,7 +4886,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     document.getElementById('habTodayBtn').className=isToday?'off':'';
     document.getElementById('habDateJump').textContent=hsel.getDate()+' '+MONTHS[hsel.getMonth()].slice(0,3);
 
-    var list=loadHabits();
+    var list=orderHabits(loadHabits(),hsel);
     var due=0, got=0;
     list.forEach(function(h){
       if(!countedOn(h,hsel))return;
@@ -4830,8 +4952,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   // with the new order. The habit list is the default.
   var HABIT_DRAG={box:'habitList',item:'.hitem',grip:'.hgrip',attr:'data-id',longPress:true,
     drop:function(ids,dragId){
-      var at=ids.indexOf(dragId);
-      reorderTo(dragId, at>-1&&at+1<ids.length?ids[at+1]:null);
+      habDrop(ids,dragId);
       renderHabits();
     }};
   var dragEl=null, dragId=null, dragY=0, dragTimer=null, dragStartY=0, dragCfg=HABIT_DRAG;
@@ -6159,7 +6280,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     else {
       var rq=req(rec2);
       bits.push(rq>0?(score(rec2)+' of '+rq+' done'):'nothing set');
-      if(rec2.rate)bits.push('rated '+rec2.rate+'/5');
+      if(rec2.rate)bits.push('rated '+rec2.rate+'/10');
     }
     var body='<b>'+head+'</b> '+bits.join(' &middot; ');
     if(rec2.goal&&rec2.goal.trim())body+='<span class="g">'+rec2.goal.replace(/</g,'&lt;')+'</span>';
@@ -6456,13 +6577,14 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
     if(st.avg){
       var sy=y+64;
+      // five stars on the image, each worth 2 points of the 10-point average
       for(var k=0;k<5;k++){
-        var lit=(k+0.5)<=st.avg;
+        var lit=(k+0.5)<=st.avg/2;
         star(M+22+k*62,sy,24,lit?'rgba(255,255,255,0.95)':'rgba(255,255,255,0.25)');
       }
       g.fillStyle='rgba(255,255,255,0.75)';
       g.font='500 32px Inter, Helvetica, Arial, sans-serif';
-      g.fillText(st.avg.toFixed(1)+' average day',M+350,sy+12);
+      g.fillText(st.avg.toFixed(1)+'/10 average day',M+350,sy+12);
       y=sy+36;
     }
 
@@ -6690,7 +6812,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       html+='<div class="stat"><b>None set</b><small>Weekly goal</small></div>';
     }
     html+='<div class="stat"><b>'+bestLine+'</b><small>Strongest day</small></div>';
-    if(st.avg)html+='<div class="stat"><b>'+st.avg.toFixed(1)+' of 5</b><small>Average day rating</small></div>';
+    if(st.avg)html+='<div class="stat"><b>'+st.avg.toFixed(1)+' of 10</b><small>Average day rating</small></div>';
     if(st.rest)html+='<div class="stat"><b>'+st.rest+'</b><small>Rest '+(st.rest===1?'day':'days')+'</small></div>';
     document.getElementById('stats').innerHTML=html;
     var gb=document.getElementById('wkGoalStat');
@@ -6768,6 +6890,10 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
   [[qWeekNote,'wnote'],[qWorked,'worked'],[qBlocked,'blocked'],[qChange,'change']].forEach(function(p){
     p[0].addEventListener('input',function(){grow(p[0]);wdata[p[1]]=p[0].value;dbRev(persistWk)});
+    // open up while typing, back to one line when you tap away, like every
+    // other text box (they used to stay full height all the time)
+    autoField(p[0]);
+    p[0].parentNode.addEventListener('click',function(e){if(e.target!==p[0])p[0].focus()});
   });
   qNext.addEventListener('input',function(){wdata.next=qNext.value;dbRev(persistWk)});
 
@@ -6810,7 +6936,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         if(hhmm(rec.times.set))out+='  Planned at: '+hhmm(rec.times.set)+'\n';
       }
       if(rec.tag)out+='  Type: '+rec.tag+'\n';
-      if(rec.rate)out+='  Day rating: '+rec.rate+'/5\n';
+      if(rec.rate)out+='  Day rating: '+rec.rate+'/10\n';
       if(rec.note&&rec.note.trim())out+='  Note: '+rec.note+'\n';
       out+='\n';
     });
@@ -6821,7 +6947,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       if(!w.goal.trim()&&!reviewDone(w)&&!w.next.trim())return;
       out+=k+'\n';
       if(w.goal.trim())out+='  Weekly goal: '+w.goal+(w.goalDone?'  [done]':'  [ ]')+'\n';
-      if(w.score)out+='  Week rating: '+w.score+'/5\n';
+      if(w.score)out+='  Week rating: '+w.score+'/10\n';
       if(w.worked.trim())out+='  What worked: '+w.worked+'\n';
       if(w.blocked.trim())out+='  What got in the way: '+w.blocked+'\n';
       if(w.change.trim())out+='  One change: '+w.change+'\n';
@@ -7039,7 +7165,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   function wkUsed(w){return !!(w.goal.trim()||w.goalDone||w.next.trim()||reviewDone(w))}
 
   function collect(){
-    var pack={app:'onething',version:2,saved:new Date().toISOString(),days:{},weeks:{},habits:{},habitDefs:null,common:null};
+    var pack={app:'onething',version:2,rateScale:10,saved:new Date().toISOString(),days:{},weeks:{},habits:{},habitDefs:null,common:null};
     allKeys('day:').forEach(function(k){var r=load(k);if(!empty(r))pack.days[k]=r});
     allKeys('week:').forEach(function(k){var w=loadWk(k);if(wkUsed(w))pack.weeks[k]=w});
     ['hab:','habw:','habf:'].forEach(function(pre){
@@ -7199,6 +7325,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
   function applyRestore(pack,mode){
     var days=0, items=0, later=0, hab=0, other=0, noRoom=0;
+    // a backup from before v97 rated out of 5
+    if(pack.rateScale!==10){rateTo10(pack.days,pack.weeks,pack.rewards);pack.rateScale=10}
 
     if(mode==='replace'){
       ['day:','week:','hab:','habw:','habf:','dinner:','shop:'].forEach(function(pre){
