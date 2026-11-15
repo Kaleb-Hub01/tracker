@@ -6,7 +6,7 @@ shopping list, rewards tied to conditions the app can judge, and a place to thin
 a decision through and come back to it later. Hosted free on GitHub Pages, used
 from the iPhone home screen, works offline.
 
-Current version: 97. The version and build date show at the bottom of the app,
+Current version: 98. The version and build date show at the bottom of the app,
 which is how you check whether an upload has reached your phone.
 
 ## Files
@@ -132,7 +132,7 @@ ten/ten/ten answers, `mit` how to cut the downside, `ooch` the smallest test, th
 `fail` the conditions, `trip` the early warning, `rev` the checkpoint date and
 `rev2` the look back date, `started` and `made` as timestamps, `step` where you
 were up to, `check` the checkpoint note, and `look` with `how` 1 to 5, a note and
-the time. Up to 12 options, 5 of them carried. The list is capped at 80.
+the time. Up to 12 options, 5 of them carried. The list has no cap.
 
 Records written before v83 used `undo` with values easily, with effort and not
 really. `fixDec` maps those onto `cost` on load, so old decisions keep working.
@@ -197,11 +197,14 @@ entirely: no streak break, no streak gain, and left out of the consistency
 figure. Every tick is logged, so repeated goes at the same habit in one day show
 as "settled at 00:10, after 3 goes".
 
-**Dinners.** The generator fills unlocked, unskipped days, avoiding repeats
+**Dinners.** The generator fills unlocked, unskipped days from today on, and
+never changes a past day or one marked cooked. From Sunday the page opens on the
+coming week. It avoids repeats
 within the cooldown and never repeating inside one week. Quality targets steer
 it: "at most" is a hard limit, "at least" a strong preference. It reports when it
-has had to bend the rules. Skip applies to one date; lock plus skip makes it
-every week. Rough guide for how many dishes you need: dinners per week times
+has had to bend the rules. Skip asks whether it is just this date or every week
+on that weekday. A skipped date keeps its dish hidden, so cooking that day again
+brings it back, and lock keeps the cooked mark. Rough guide for how many dishes you need: dinners per week times
 cooldown weeks, plus some slack.
 
 **Rewards.** Each reward is a prize plus one condition the app can already judge
@@ -234,7 +237,9 @@ milestones, Later items, dishes, the example dishes, shopping items and both
 clear buttons, rewards, decisions and common tasks. Undo puts each thing back at
 its old place and skips anything already back, so it never doubles up. The one
 exception is deleting an archived habit for good, which asks twice and is final
-by design.
+by design. Replacing a day's one thing sends the old one to Later. Clearing a
+Later item's text puts the old text back rather than deleting it. Lists have no
+size caps, so nothing old drops off the end.
 
 **Decisions.** Seven screens, one question each, and nothing except the decision
 sentence is required. The order is deliberate: each step is meant to be blind to
@@ -272,7 +277,7 @@ list.
 - Everything means every storage key above except three left out on purpose: `meta:lastBackup`, because restoring a stale "you last backed up on" date would be misleading; `meta:habDayOrder`, because it only ever applies to one day; and `meta:rateScale`, because the backup carries its own `rateScale`. A backup without `rateScale: 10` was made before v97 with ratings out of 5, and restore doubles its ratings on the way in. Verified in v96 by backing up a store using every key through the app's own button, wiping storage, restoring from the downloaded file in both modes, and comparing the whole store key by key: identical, including milestone links, `lc` dates and tick times on day records.
 - Two filters decide what is worth writing out. A day is skipped when `empty()` says nothing is in it, and a week when `wkUsed()` says the same. A weekly goal ticked with no text written used to fall through that second filter; fixed in v87 by having `wkUsed` check `goalDone` as well.
 - **Export** writes a `.txt` for reading only, including a decisions section. It cannot be restored.
-- **Restore** offers "Put back anything missing", which is safe, or "Replace everything", which wipes the device first and asks twice.
+- **Restore** offers "Put back anything missing", which is safe, or "Replace everything", which wipes the device first and asks twice. Replace keeps a copy of what was there in memory and offers Undo straight after.
 - On a new phone the app saves its starter habits the first time Habits is opened. "Put back anything missing" treats a habit list that is still exactly those starters as empty and takes the backup's list instead; before v96 it kept the starters and lost edits to any habit sharing an id with one.
 - Before restoring, the dialog states the backup's save date and time and counts of days, weeks, Later items, habits and dishes, so a wrong file announces itself.
 - "Put back anything missing" merges item by item, not record by record. A single task deleted from a day comes back without disturbing the rest of that day.

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v97, 15 Nov 2026
+<!-- v98, 15 Nov 2026
      day and week ratings are out of 10, as numbered buttons; old ratings doubled
      habits sort by how often they are due, paused ones last
      Sunday review boxes collapse to one line when not being typed in
@@ -984,7 +984,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
 <script>
 (function(){
-  var VERSION='97', BUILT='15 Nov 2026';
+  var VERSION='98', BUILT='15 Nov 2026';
   var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var pad=function(n){return String(n).padStart(2,'0')};
@@ -1239,10 +1239,23 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   }
   function autogrow(){grow(goalText);grow(weeklyGoal);grow(document.getElementById('dayNote'));[qWeekNote,qWorked,qBlocked,qChange].forEach(shrink)}
 
+  // Every waiting save is listed, so leaving the app or redrawing a screen
+  // can write it straight away instead of losing the last few keystrokes.
+  var pendingSaves=[];
   function mkDebounce(){
-    var t=null;
-    return function(fn){clearTimeout(t);t=setTimeout(fn,250)};
+    var t=null, f=null;
+    function run(){
+      clearTimeout(t); t=null;
+      var k=pendingSaves.indexOf(run); if(k>-1)pendingSaves.splice(k,1);
+      var g=f; f=null; if(g)g();
+    }
+    return function(fn){
+      clearTimeout(t); f=fn;
+      if(pendingSaves.indexOf(run)<0)pendingSaves.push(run);
+      t=setTimeout(run,250);
+    };
   }
+  function flushSaves(){pendingSaves.slice().forEach(function(r){r()})}
   var dbDay=mkDebounce(), dbWk=mkDebounce(), dbRev=mkDebounce();
   function persist(){bestCache=null;write('day:'+selKey,data)}
   function persistWk(){write('week:'+wkKey,wdata)}
@@ -1501,7 +1514,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(!Array.isArray(l))return [];
     return l.filter(function(x){return x&&typeof x.t==='string'});
   }
-  function saveLater(l){write('meta:later',l.slice(0,200))}
+  function saveLater(l){write('meta:later',l)}
   function ageDays(it){
     if(!it.c)return 0;
     var p2=String(it.c).slice(0,10).split('-');
@@ -1545,6 +1558,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     born=born||'';
     if(asGoal){
       if(rec.goal.trim()&&!force)return {ok:false,why:'goal',existing:rec.goal};
+      if(rec.goal.trim()&&rec.goal.trim()!==text.trim())addLater(rec.goal);   // replaced, never lost
       rec.goal=text;
       rec.goalLc=born;
       if(!rec.times||typeof rec.times!=='object')rec.times={};
@@ -1573,6 +1587,9 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     return DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3);
   }
   function schedule(it,d,asGoal,anchor){
+    flushSaves();
+    var fresh=loadLater().filter(function(x){return x.id===it.id})[0];
+    if(fresh)it=fresh;
     var r=placeTodo(it.t,d,asGoal,false,false,it.c||'');
     if(r.ok){
       removeLater(it.id);
@@ -1581,7 +1598,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     }
     if(r.why==='goal'){
       ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has "'+r.existing.slice(0,50)+'" as its one thing.',[
-        {label:'Replace it',danger:true,run:function(){
+        {label:'Replace, old one to Later',run:function(){
           placeTodo(it.t,d,true,true,false,it.c||''); removeLater(it.id);
           note('One thing set for '+dayLabel(d));
         }},
@@ -1638,7 +1655,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var l=read('meta:laterDone');
     return Array.isArray(l)?l.filter(function(x){return x&&typeof x.t==='string'}):[];
   }
-  function saveLaterDone(l){write('meta:laterDone',l.slice(0,400))}
+  function saveLaterDone(l){write('meta:laterDone',l)}
   function logLaterDone(it){
     var l=loadLaterDone();
     l.unshift({id:it.id,t:it.t,c:it.c||'',done:stamp()});
@@ -1719,10 +1736,12 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       setTimeout(function(){shrink(tx)},0);
       autoField(tx);
       tx.setAttribute('aria-label','Edit this item');
-      var dbt=mkDebounce();
+      var dbt=mkDebounce(), lastText=it.t;
       tx.addEventListener('click',function(e){e.stopPropagation()});
       tx.addEventListener('input',function(){
         var v=tx.value;
+        if(!v.trim())return;          // a blank box never saves; the old text comes back on blur
+        lastText=v;
         dbt(function(){
           var l2=loadLater();
           for(var z=0;z<l2.length;z++){if(l2[z].id===it.id)l2[z].t=v.slice(0,160)}
@@ -1730,7 +1749,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         });
       });
       tx.addEventListener('blur',function(){
-        if(!tx.value.trim())removeLater(it.id);
+        if(!tx.value.trim()){tx.value=lastText;shrink(tx);note('Kept it. Use \u00d7 to delete')}
       });
 
       var n=ageDays(it);
@@ -1915,7 +1934,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(!Array.isArray(d))return [];
     return d.filter(function(x){return x&&typeof x.name==='string'});
   }
-  function saveDishes(l){write('meta:dishes',l.slice(0,300))}
+  function saveDishes(l){write('meta:dishes',l)}
   function loadRules(){
     var r=read('meta:dinnerRules');
     if(!r||typeof r!=='object')r={};
@@ -1956,7 +1975,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         var k=localStorage.key(i);
         if(!k||k.indexOf('dinner:')!==0)continue;
         var r=read(k);
-        if(!r||r.id!==dishId)continue;
+        if(!r||r.id!==dishId||r.skip)continue;
         var p2=k.slice(7).split('-');
         var dd=new Date(+p2[0],+p2[1]-1,+p2[2]);
         if(typeof dow==='number'&&dd.getDay()!==dow)continue;
@@ -1981,7 +2000,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         var k=localStorage.key(i);
         if(!k||k.indexOf('dinner:')!==0)continue;
         var r=read(k);
-        if(!r||r.id!==id)continue;
+        if(!r||r.id!==id||r.skip)continue;
         var p2=k.slice(7).split('-');
         var dd=new Date(+p2[0],+p2[1]-1,+p2[2]);
         if(before&&dayKey(dd)===dayKey(before))continue;
@@ -2009,7 +2028,9 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     return true;
   }
 
-  var dinWeek=weekStart(new Date());
+  // Sunday is planning day, so from Sunday the page opens on the coming week
+  function dinStart(){var n=new Date(), w=weekStart(n);return n.getDay()===0?shift(w,7):w}
+  var dinWeek=dinStart();
 
   function qualsOf(dish){return Array.isArray(dish.qual)?dish.qual:[]}
   // would adding this dish push a "at most" target over?
@@ -2051,7 +2072,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     // days you locked already count towards the targets
     for(var j=0;j<7;j++){
       var ld=shift(dinWeek,j), lp=planFor(ld);
-      if(lp.locked&&lp.id){
+      if((lp.locked||lp.cooked||midnight(ld)<today)&&lp.id&&!lp.skip){
         usedThisWeek[lp.id]=1;
         var ldish=dishById(lp.id);
         if(ldish)addCounts(ldish,counts);
@@ -2060,7 +2081,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
     for(var i=0;i<7;i++){
       var d=shift(dinWeek,i), rule=rules[d.getDay()], cur=planFor(d);
-      if(dayOff(d,rule,cur)){ if(!cur.locked)setPlan(d,{id:'',locked:false,skip:cur.skip}); continue }
+      if(midnight(d)<today||cur.cooked){ continue }   // past or cooked: what happened stays
+      if(dayOff(d,rule,cur)){ continue }
       if(cur.locked){ continue }
 
       var pool=dishes.filter(function(x){
@@ -2142,7 +2164,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   function pickDishFor(d,anchor){
     var dishes=loadDishes();
     if(!dishes.length){note('Add some dishes first');return}
-    var choices=dishes.slice(0,40).map(function(x){
+    var choices=dishes.map(function(x){
       return {label:x.name,run:function(){var q=planFor(d);setPlan(d,{id:x.id,locked:q.locked,skip:false});renderDinner()}};
     });
     choices.push({label:'Cancel'});
@@ -2174,7 +2196,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         var meta=document.createElement('div');
         meta.className='dmeta';
         var bits=[];
-        if(off){bits.push(pl.locked?'lock plus skip sets every week':'tap the circle to cook again')}
+        if(off){bits.push('tap the circle to cook again')}
         else if(dish){bits.push(dish.effort);bits.push(dish.time);if(dish.tags&&dish.tags.length)bits.push(dish.tags.join(', '))}
         else {
           bits.push('wants '+(rule.effort==='any'?'anything':rule.effort));
@@ -2206,7 +2228,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         lk.type='button'; lk.textContent=pl.locked?'\ud83d\udd12':'\ud83d\udd13';
         lk.className=pl.locked?'on':'';
         lk.setAttribute('aria-label','Lock this day');
-        lk.addEventListener('click',function(){setPlan(d,{id:pl.id,locked:!pl.locked});renderDinner()});
+        lk.addEventListener('click',function(){var c=planFor(d);setPlan(d,{id:c.id,locked:!c.locked,skip:c.skip,cooked:c.cooked});renderDinner()});
         var rr=document.createElement('button');
         rr.type='button'; rr.innerHTML='&#8635;';
         rr.setAttribute('aria-label','Reroll this day');
@@ -2219,23 +2241,28 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           var rs=loadRules(), cur2=planFor(d);
           if(rs[d.getDay()].skip){
             rs[d.getDay()].skip=false; saveRules(rs);
-            setPlan(d,{id:cur2.id,locked:cur2.locked,skip:false});
+            setPlan(d,{id:cur2.id,locked:cur2.locked,skip:false,cooked:cur2.cooked});
             renderDinner(); note(DAYS[d.getDay()]+'s back on');
             return;
           }
           if(cur2.skip){
-            setPlan(d,{id:cur2.id,locked:cur2.locked,skip:false});
+            setPlan(d,{id:cur2.id,locked:cur2.locked,skip:false,cooked:cur2.cooked});
             renderDinner(); note('Cooking that day again');
             return;
           }
-          if(cur2.locked){
-            rs[d.getDay()].skip=true; saveRules(rs);
-            setPlan(d,{id:'',locked:true,skip:false});
-            renderDinner(); note('Every '+DAYS[d.getDay()]+' skipped');
-            return;
-          }
-          setPlan(d,{id:'',locked:false,skip:true});
-          renderDinner(); note('Just this day skipped');
+          // the dish stays saved, hidden, so cooking that day again brings it back
+          ask('Skip '+DAYS[d.getDay()]+'?',[
+            {label:'Just this '+DAYS[d.getDay()],run:function(){
+              var c3=planFor(d);
+              setPlan(d,{id:c3.id,locked:c3.locked,skip:true,cooked:c3.cooked});
+              renderDinner(); note('Just this day skipped');
+            }},
+            {label:'Every '+DAYS[d.getDay()],run:function(){
+              var rs2=loadRules(); rs2[d.getDay()].skip=true; saveRules(rs2);
+              renderDinner(); note('Every '+DAYS[d.getDay()]+' skipped');
+            }},
+            {label:'Cancel'}
+          ],row);
         });
         acts.appendChild(sk); acts.appendChild(lk); acts.appendChild(rr);
 
@@ -2587,7 +2614,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     return r.items;
   }
   function sameShop(a,b){return a&&b&&a.key===b.key&&a.name===b.name}
-  function saveShop(items){write(shopKey(),{items:items.slice(0,250)})}
+  function saveShop(items){write(shopKey(),{items:items})}
   // strip a leading quantity so "2 onions" and "onion" land together
   function ingKey(t){
     var x=String(t).toLowerCase().trim();
@@ -2801,7 +2828,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var l=read('meta:rewards');
     return Array.isArray(l)?l.filter(function(x){return x&&typeof x.name==='string'}):[];
   }
-  function saveRewards(l){write('meta:rewards',l.slice(0,30))}
+  function saveRewards(l){write('meta:rewards',l)}
   function habById(id){
     var l=loadHabits();
     for(var i=0;i<l.length;i++){if(l[i].id===id)return l[i]}
@@ -3133,7 +3160,6 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
             // a pinned period only makes sense for a week or a month, and it
             // re-pins to now so switching does not leave it stuck in the past
             o.pin=(it.v==='once'||!o.pin)?'':dayKey(today);
-            o.claims={};
           });
         });
 
@@ -3144,7 +3170,6 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
           ],function(it){return (r.pin?'1':'')===it.v},function(it){
             setReward(r.id,function(o){
               o.pin=it.v?dayKey(today):'';
-              o.claims={};
             });
           });
         }
@@ -3281,12 +3306,12 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var l=read('meta:fixes');
     return Array.isArray(l)?l.filter(function(x){return x&&typeof x.t==='string'}):[];
   }
-  function saveFixes(l){write('meta:fixes',l.slice(0,300))}
+  function saveFixes(l){write('meta:fixes',l)}
   function loadFixDone(){
     var l=read('meta:fixesDone');
     return Array.isArray(l)?l.filter(function(x){return x&&typeof x.t==='string'}):[];
   }
-  function saveFixDone(l){write('meta:fixesDone',l.slice(0,400))}
+  function saveFixDone(l){write('meta:fixesDone',l)}
   function addFix(t){
     t=(t||'').trim(); if(!t)return;
     var l=loadFixes();
@@ -3492,7 +3517,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     if(!Array.isArray(l))return [];
     return l.filter(function(x){return x&&typeof x==='object'&&typeof x.id==='string'}).map(fixDec);
   }
-  function saveDecisions(l){write('meta:decisions',l.slice(0,80))}
+  function saveDecisions(l){write('meta:decisions',l)}
   function blankDecision(){
     return {id:'d'+Date.now().toString(36),q:'',cost:'',box:'',outs:[],opts:[],pre:'',
       t10:{m:'',mo:'',y:''},mit:'',ooch:'',dec:'',act:'',conf:0,
@@ -3505,6 +3530,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     return null;
   }
   function setDec(id,fn,redraw){
+    if(redraw!==false)flushSaves();   // typing not yet saved goes in before the redraw
     var l=loadDecisions();
     for(var i=0;i<l.length;i++){if(l[i].id===id)fn(l[i])}
     saveDecisions(l);
@@ -3539,6 +3565,26 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     return '';
   }
   function carried(d){return d.opts.filter(function(o){return o.keep})}
+  // remove a want or an option: asks first, finds the row by what it holds
+  // (not by where it was drawn), and offers undo
+  function dcRemove(anchor,id,list,i,what){
+    flushSaves();
+    var x0=decById(id), item=x0&&x0[list][i];
+    if(!item)return;
+    var key=JSON.stringify(item), lab=String(item.t||'').trim();
+    confirmDelete(lab?('Remove "'+lab.slice(0,60)+'"?'):('Remove this '+what+'?'),function(){
+      var at=-1;
+      setDec(id,function(x){
+        for(var j=0;j<x[list].length;j++){if(JSON.stringify(x[list][j])===key){at=j;break}}
+        if(at>-1)x[list].splice(at,1);
+      });
+      if(at<0)return;
+      toast('Removed','Undo',function(){
+        setDec(id,function(x){x[list].splice(Math.min(at,x[list].length),0,item)});
+        note('Put back');
+      });
+    },anchor,'Remove');
+  }
   function topWant(d){
     var t=(d.outs[0]&&d.outs[0].t||'').trim();
     return t;
@@ -3691,7 +3737,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var rm=document.createElement('button');
       rm.type='button'; rm.className='rm'; rm.innerHTML='&times;';
       rm.setAttribute('aria-label','Remove this one');
-      rm.addEventListener('click',function(){setDec(d.id,function(x){x.outs.splice(i,1)})});
+      rm.addEventListener('click',function(){dcRemove(rm,d.id,'outs',i,'one')});
       row.appendChild(n); row.appendChild(col); row.appendChild(up); row.appendChild(rm);
       box.appendChild(row);
     });
@@ -3736,7 +3782,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var rm=document.createElement('button');
       rm.type='button'; rm.className='rm'; rm.innerHTML='&times;';
       rm.setAttribute('aria-label','Remove this option');
-      rm.addEventListener('click',function(){setDec(d.id,function(x){x.opts.splice(i,1)})});
+      rm.addEventListener('click',function(){dcRemove(rm,d.id,'opts',i,'option')});
       row.appendChild(n); row.appendChild(col); row.appendChild(rm);
       box.appendChild(row);
     });
@@ -3965,7 +4011,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
         var r2=placeTodo(a,when,false,false,true,'');
         note(r2.ok?('Added to '+dayLabel(when)):'That day is full');
       }},
-      {label:'Replace it',danger:true,run:function(){
+      {label:'Replace, old one to Later',run:function(){
         placeTodo(a,when,true,true,false,'');
         note('Set as the one thing for '+dayLabel(when));
       }},
@@ -4275,7 +4321,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     var l=read('meta:habitsArchive');
     return Array.isArray(l)?l.filter(function(x){return x&&typeof x.id==='string'}):[];
   }
-  function saveHabArchive(l){write('meta:habitsArchive',l.slice(0,60))}
+  function saveHabArchive(l){write('meta:habitsArchive',l)}
   function archiveHabit(h){
     var a=loadHabArchive().filter(function(x){return x.id!==h.id});
     a.unshift(h);
@@ -4298,7 +4344,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   }
   function loadHabits(){
     var h=read('meta:habits'), changed=false;
-    if(!Array.isArray(h)||!h.length){write('meta:habits',HAB_DEFAULT);return HAB_DEFAULT.slice()}
+    if(!Array.isArray(h)){write('meta:habits',HAB_DEFAULT);return HAB_DEFAULT.slice()}   // only a brand new phone gets the starters
     h.forEach(function(x){
       if(x.kind){delete x.kind;changed=true}
       if(x.cad==='days'&&!Array.isArray(x.days)){x.days=[new Date().getDay()];changed=true}
@@ -4466,7 +4512,9 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     } else {
       r.ticks[h.id]= wantMin ? 'min' : true;
       if(!r.times||typeof r.times!=='object')r.times={};
-      var st=stamp();
+      // ticking a past day records that day (no clock time), so weekly and
+      // fortnightly habits land on it rather than on today
+      var st=(dayKey(hsel)===tKey)?stamp():dayKey(hsel);
       r.times[h.id]=st;
       // keep every tick, not just the last, so repeated goes are visible
       if(!r.log||typeof r.log!=='object')r.log={};
@@ -5053,7 +5101,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var id='h'+Date.now().toString(36);
       var l=loadHabits();
       l.push({id:id,name:v.slice(0,28),cad:'daily'});
-      saveHabits(l.slice(0,20));
+      saveHabits(l);
       hOpen=id; renderHabits();
       freqMenu({id:id,name:v},document.getElementById('habitList'));
     });
@@ -5140,7 +5188,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
   function tidyGoal(g){
     if(!Array.isArray(g.ms))g.ms=[];
-    g.ms=g.ms.filter(function(m){return m&&typeof m.t==='string'}).slice(0,20);
+    g.ms=g.ms.filter(function(m){return m&&typeof m.t==='string'});
     g.ms.forEach(function(m,i){
       m.d=!!m.d;
       if(typeof m.day!=='string')m.day='';
@@ -5281,7 +5329,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     }
     setGoalQuiet(r.g,function(o){var m=msFind(o,r.m);if(m)m.day=on});
   }
-  function saveGoals(l){write('meta:goals',l.slice(0,20))}
+  function saveGoals(l){write('meta:goals',l)}
   // Quiet saves do not redraw, so typing is never interrupted mid word. The
   // redraw happens on blur instead.
   function setGoalQuiet(id,fn){
@@ -5620,7 +5668,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       var v=add.value.trim();
       if(!v)return;
       add.value='';
-      setGoal(g.id,function(o){if(o.ms.length<20)o.ms.push({id:msId(o.ms.length),t:v.slice(0,90),d:false,day:''})});
+      setGoal(g.id,function(o){o.ms.push({id:msId(o.ms.length),t:v.slice(0,90),d:false,day:''})});
       var again=document.getElementById('glMsInput');
       if(again)again.focus();
     });
@@ -5662,7 +5710,6 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
 
   document.getElementById('glAdd').addEventListener('click',function(){
     var l=loadGoals();
-    if(l.length>=20){note('That is plenty of goals');return}
     var id='g'+Date.now().toString(36);
     l.unshift({id:id,name:'New goal',why:'',now:0,target:0,start:0,dir:'up',
       fmt:'plain',due:'',set:dayKey(today),ms:[],done:false,doneAt:''});
@@ -5844,7 +5891,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       if(r.ok){dropSource(dayKey(d));note('Moved to '+dayLabel(d));return}
       if(r.why==='goal'){
         ask(dayLabel(d).charAt(0).toUpperCase()+dayLabel(d).slice(1)+' already has "'+r.existing.slice(0,46)+'" as its one thing.',[
-          {label:'Replace it',danger:true,run:function(){placeTodo(text,d,true,true,false,born,gmv);dropSource(dayKey(d));note('Moved to '+dayLabel(d))}},
+          {label:'Replace, old one to Later',run:function(){placeTodo(text,d,true,true,false,born,gmv);dropSource(dayKey(d));note('Moved to '+dayLabel(d))}},
           {label:'Add as a step',run:function(){
             var r2=placeTodo(text,d,false,false,true,born,gmv);
             if(r2.ok){dropSource(dayKey(d));note('Moved to '+dayLabel(d))}else note('That day is full');
@@ -5868,7 +5915,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       if(wantGoal){
         if(data.goal.trim()){
           ask(dayLabel(sel).charAt(0).toUpperCase()+dayLabel(sel).slice(1)+' already has "'+data.goal.slice(0,44)+'" as its one thing.',[
-            {label:'Replace it',danger:true,run:function(){
+            {label:'Replace, old one to Later',run:function(){
+              if(data.goal.trim()!==text.trim())addLater(data.goal);
               data.goal=text; data.goalDone=false;
               data.todos[idx]=copyTodo();
               if(data.times)delete data.times['s'+idx];
@@ -6161,7 +6209,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     }
     return [];
   }
-  function saveCommon(list){write('meta:common',list.slice(0,30))}
+  function saveCommon(list){write('meta:common',list)}
 
   function addToStep(t){
     for(var i=0;i<CORE;i++){
@@ -7323,6 +7371,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     return {list:fresh.concat(rest),added:n};
   }
 
+  var preRestore=null;   // what was on the phone just before a Replace everything
   function applyRestore(pack,mode){
     var days=0, items=0, later=0, hab=0, other=0, noRoom=0;
     // a backup from before v97 rated out of 5
@@ -7446,7 +7495,12 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     fillFields(); render();
 
     if(mode==='replace'){
-      note('Replaced everything from the backup');
+      if(preRestore){
+        var before=preRestore; preRestore=null;
+        toast('Replaced everything from the backup','Undo',function(){
+          applyRestore(before,'replace'); note('Put back what was here before');
+        });
+      } else note('Replaced everything from the backup');
       return;
     }
     var bits=[];
@@ -7501,8 +7555,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
       ask('Saved '+when+'. It holds '+(holds.length?holds.join(', '):'nothing')+'. How should it go in?',[
         {label:'Put back anything missing',run:function(){applyRestore(pack,'merge')}},
         {label:'Replace everything',danger:true,run:function(){
-          ask('This wipes what is on this device first, then loads the backup. There is no undo.',[
-            {label:'Yes, replace',danger:true,run:function(){applyRestore(pack,'replace')}},
+          ask('This wipes what is on this device first, then loads the backup. You can undo straight after.',[
+            {label:'Yes, replace',danger:true,run:function(){flushSaves();preRestore=collect();applyRestore(pack,'replace')}},
             {label:'Cancel'}
           ]);
         }},
@@ -7532,6 +7586,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     navigator.serviceWorker.addEventListener('controllerchange',function(){
       if(swReloaded)return;
       swReloaded=true;
+      flushSaves();
       location.reload();
     });
     window.addEventListener('load',function(){
@@ -7552,12 +7607,18 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
   function rollDay(){
     var now=midnight(new Date());
     if(dayKey(now)===tKey)return false;
-    var wasOnToday=(selKey===tKey);
+    flushSaves();
+    var wasOnToday=(selKey===tKey), oldT=tKey;
     tidyBonus(data);
     persist(); persistWk();        // what is open still belongs to the old day
     today=now; tKey=dayKey(today);
     bestCache=null;
     if(wasOnToday){select(today)}else{render()}
+    // Habits and Dinners keep their own day, so move them on as well
+    if(dayKey(hsel)===oldT){hsel=today;hOpen=null}
+    dinWeek=dinStart(); shopSel=null;
+    renderHabits();
+    if(document.getElementById('viewDinner').className.indexOf('off')<0)renderDinner();
     return true;
   }
   setInterval(function(){
@@ -7567,6 +7628,7 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     rollDay();
   },60000);
   function restoreUI(){
+    flushSaves();
     if(rollDay()){refit();return}
     tidyBonus(data);
     var live=load(selKey);
@@ -7577,7 +7639,8 @@ button{transition:transform .2s cubic-bezier(.2,.8,.3,1), background .25s ease, 
     refit();
   }
   window.addEventListener('pageshow',function(e){if(e&&e.persisted)restoreUI()});
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)restoreUI()});
+  window.addEventListener('pagehide',flushSaves);
+  document.addEventListener('visibilitychange',function(){if(document.hidden)flushSaves();else restoreUI()});
   window.addEventListener('focus',restoreUI);
 
   document.getElementById('ver').textContent='Version '+VERSION+', built '+BUILT;
