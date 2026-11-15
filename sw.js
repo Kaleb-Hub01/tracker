@@ -2,7 +2,8 @@
 //
 // Same-origin files: network first, bypassing the browser's own HTTP cache so a
 // freshly uploaded index.html is picked up straight away. The cached copy is
-// only used when the network fails.
+// used when the network fails, and for the page itself after 3 seconds of
+// waiting on weak signal.
 //
 // Google Fonts: cache first. The stylesheet blocks rendering, so offline it must
 // answer immediately rather than hang. If it was never cached we return an empty
@@ -45,6 +46,23 @@ function putCopy(req,res){
   return res;
 }
 
+function savedPage(req){
+  return caches.match(req,{ignoreSearch:true}).then(function(hit){
+    return hit||caches.match('./index.html',{ignoreSearch:true});
+  }).then(function(hit){
+    return hit||caches.match('./',{ignoreSearch:true});
+  }).catch(function(){return null});
+}
+function offlinePage(){
+  return new Response(
+    '<!doctype html><meta charset="utf-8"><title>Offline</title>'+
+    '<body style="font:16px -apple-system,sans-serif;padding:40px;text-align:center">'+
+    '<p>No connection, and no saved copy yet.</p>'+
+    '<p>Open this once with signal and it will work offline after that.</p>',
+    {status:200,headers:{'Content-Type':'text/html; charset=utf-8'}}
+  );
+}
+
 self.addEventListener('fetch',function(e){
   var req=e.request;
   if(req.method!=='GET')return;
@@ -77,29 +95,24 @@ self.addEventListener('fetch',function(e){
 
   if(url.origin!==self.location.origin)return;
 
-  // page loads: network first, then the cached page, then a plain message
+  // page loads: network first, but on weak signal give it 3 seconds and then
+  // open the saved copy. The network fetch carries on in the background and
+  // refreshes the saved copy, so the next open gets the new version.
+  // With no saved copy it keeps waiting for the network, then a plain message.
   if(req.mode==='navigate'){
-    e.respondWith(
-      fetch(req.url,{cache:'no-store'}).then(function(res){
-        return putCopy(req,res);
-      }).catch(function(){
-        return caches.match(req,{ignoreSearch:true}).then(function(hit){
-          if(hit)return hit;
-          return caches.match('./index.html',{ignoreSearch:true}).then(function(hit2){
-            if(hit2)return hit2;
-            return caches.match('./',{ignoreSearch:true}).then(function(hit3){
-              return hit3 || new Response(
-                '<!doctype html><meta charset="utf-8"><title>Offline</title>'+
-                '<body style="font:16px -apple-system,sans-serif;padding:40px;text-align:center">'+
-                '<p>No connection, and no saved copy yet.</p>'+
-                '<p>Open this once with signal and it will work offline after that.</p>',
-                {status:200,headers:{'Content-Type':'text/html; charset=utf-8'}}
-              );
-            });
-          });
-        });
-      })
-    );
+    var net=fetch(req.url,{cache:'no-store'}).then(function(res){return putCopy(req,res)});
+    e.waitUntil(net.catch(function(){}));
+    e.respondWith(new Promise(function(resolve){
+      var done=false;
+      function finish(r){if(!done){done=true;resolve(r)}}
+      net.then(finish).catch(function(){
+        savedPage(req).then(function(hit){finish(hit||offlinePage())});
+      });
+      setTimeout(function(){
+        if(done)return;
+        savedPage(req).then(function(hit){if(hit)finish(hit)});
+      },3000);
+    }));
     return;
   }
 
