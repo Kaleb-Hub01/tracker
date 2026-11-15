@@ -14,7 +14,7 @@ page, which is how you check whether an upload has reached your phone.
 All at the top level of the repo. Do not put them in folders.
 
 - `index.html` is the whole app. HTML, CSS and JavaScript in one file. No build step, no libraries, no server.
-- `sw.js` is the offline cache. Network first for the app, cache first for fonts. Bump `CACHE` inside it whenever index.html changes.
+- `sw.js` is the offline cache. Network first for the app with a three second limit, cache first for fonts. Bump `CACHE` inside it whenever index.html changes.
 - `icon.png` is the home screen icon, 180x180.
 - `README.md` is this file.
 
@@ -23,9 +23,10 @@ All at the top level of the repo. Do not put them in folders.
 A bar along the bottom with four tabs: Today, Habits, Goals and More. More is a
 page with search at the top, then the Later list, Dinners, Rewards, Decisions
 and App ideas, with Backup, Restore and Export underneath and the version at the
-bottom. Search looks through every day's one thing, three core steps and note,
+bottom. Search looks through every day's one thing, steps, bonus tasks and note,
 and every week's goal and review, newest first, showing up to 25 results.
-Tapping a result opens that day on Today. The
+Tapping a day result opens that day on Today; a week result opens that week on
+its Sunday, or on today for the current week. The
 bar hides only while the keyboard is actually on screen, measured from the
 visible viewport, because iOS keeps a text box focused after the keyboard closes
 and hiding on focus left the bar gone for good (fixed in v101).
@@ -205,6 +206,12 @@ struck through with an arrow to where it went, and that day stays incomplete.
 The practical effect is that a day you deliberately lightened still counts, and a
 day you genuinely missed still reads as missed once you carry the work forward.
 
+When a day has room, Today offers the previous day's unfinished one thing and
+steps as one-tap carry-overs. A carry-over is a move by the same rules: the one
+thing lands as the one thing when the slot is free, otherwise as a step, and the
+Later age and any goal milestone link travel with it. Just looking at a day or a
+week never saves anything; a record is only written once something is in it.
+
 **Habits.** Removing one archives it rather than discarding it. Every tick lives
 in the `hab:`, `habw:` and `habf:` records keyed by habit id, so the history was
 never destroyed by a removal; what used to be lost was the definition, which left
@@ -217,7 +224,8 @@ Five cadences: daily, certain weekdays, a number of times per week,
 weekly, fortnightly. A habit can have a minimum that still counts, ticked with
 the "min" chip and recorded separately from a full tick. Paused days are skipped
 entirely: no streak break, no streak gain, and left out of the consistency
-figure. Every tick is logged, so repeated goes at the same habit in one day show
+figure. For weekly, times-a-week and fortnightly habits the same holds per
+period: a week or fortnight that was missed but overlaps a pause is stepped over. Every tick is logged, so repeated goes at the same habit in one day show
 as "settled at 00:10, after 3 goes". A tick made on a past day, as a catch-up,
 saves that day's date with no clock time, since the time it was tapped says
 nothing about when it was done. The same goes for the one thing and tasks
@@ -267,7 +275,9 @@ by design. Replacing a day's one thing sends the old one to Later. Clearing a
 Later item's text puts the old text back rather than deleting it. Lists have no
 size caps, so nothing old drops off the end.
 
-**Decisions.** Seven screens, one question each, and nothing except the decision
+**Decisions.** An unfinished decision can be deleted from its step screens, with
+the usual confirm and Undo; a decided one is deleted from its look back screen.
+Seven screens, one question each, and nothing except the decision
 sentence is required. The order is deliberate: each step is meant to be blind to
 the next, so options get written before anything judges them. Reshape sits before
 the judging because when options are things you are inventing rather than choosing
@@ -319,6 +329,10 @@ list.
 3. Bump `CACHE` in `sw.js` and upload that too, so old cached copies clear.
 4. Wait two or three minutes for GitHub Pages to build.
 5. Fully close the app on the phone and reopen. Check the version at the bottom of More.
+
+Opening the app waits up to three seconds for the network, then opens the saved
+copy and lets the download finish in the background, so weak signal never leaves
+a blank screen. The next open picks up whatever arrived.
 
 If the app shows an old version with good signal, the cache is stale. Bumping the
 version in `sw.js` is the fix. It never touches saved data.
