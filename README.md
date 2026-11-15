@@ -40,10 +40,10 @@ an optional reason. The week strip and the last 30 days strip both jump to any
 day. Steps and bonus tasks reorder by dragging their number, each within its own
 list. The weekly goal and the Sunday review live here too. A row of small
 progress rings sits under the week strip, one per live reward, filled by how
-far along it is and amber once it is yours to claim. Tapping a ring opens that
+far along it is and teal once it is yours to claim. Tapping a ring opens that
 reward. The row shows the five closest to done, with a sixth ring counting any
 others, and disappears entirely when there are no rewards left to track. The
-**Later** list is a sub-page reached from the button under the steps.
+**Later** list is a sub-page reached from the More page.
 
 **Habits** holds the practices, each with its own cadence, streak, 30 day
 consistency figure and history. They are listed by how often they are due
