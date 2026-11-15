@@ -6,7 +6,7 @@ shopping list, rewards tied to conditions the app can judge, and a place to thin
 a decision through and come back to it later. Hosted free on GitHub Pages, used
 from the iPhone home screen, works offline.
 
-Current version: 100. The version and build date show at the bottom of the More
+Current version: 102. The version and build date show at the bottom of the More
 page, which is how you check whether an upload has reached your phone.
 
 ## Files
@@ -21,9 +21,14 @@ All at the top level of the repo. Do not put them in folders.
 ## Getting around
 
 A bar along the bottom with four tabs: Today, Habits, Goals and More. More is a
-page listing the Later list, Dinners, Rewards, Decisions and App ideas, with
-Backup, Restore and Export underneath and the version at the bottom. The bar
-hides while you type so it never sits on top of the keyboard.
+page with search at the top, then the Later list, Dinners, Rewards, Decisions
+and App ideas, with Backup, Restore and Export underneath and the version at the
+bottom. Search looks through every day's one thing, three core steps and note,
+and every week's goal and review, newest first, showing up to 25 results.
+Tapping a result opens that day on Today. The
+bar hides only while the keyboard is actually on screen, measured from the
+visible viewport, because iOS keeps a text box focused after the keyboard closes
+and hiding on focus left the bar gone for good (fixed in v101).
 
 A pink dot on Goals means a goal is late; on More it means a reward is ready to
 claim or a decision is waiting. The week review and backup reminders show as
@@ -36,14 +41,21 @@ the day went: teal cleared, purple part done, grey stripes for a rest day.
 
 **Today** is the daily page: one goal, three small steps, up to seven bonus
 tasks on top of those, a 1 to 10 day rating, a note, and a rest day toggle with
-an optional reason. The week strip and the last 30 days strip both jump to any
+an optional reason, sitting on the same row as the day's status line. The week strip and the last 30 days strip both jump to any
 day. Steps and bonus tasks reorder by dragging their number, each within its own
 list. The weekly goal and the Sunday review live here too. A row of small
 progress rings sits under the weekly goal, one per live reward, filled by how
 far along it is and teal once it is yours to claim. Tapping a ring opens that
 reward. The row shows the five closest to done, with a sixth ring counting any
-others, and disappears entirely when there are no rewards left to track. The
-**Later** list is a sub-page reached from the More page.
+others, and disappears entirely when there are no rewards left to track. A
+"From your Later list" row always shows the top three parked items for one tap
+adds, with "See all" opening the full list. A quick add goes into the first free
+step, or a bonus task when the steps are full. The full **Later** list is a
+sub-page reached from the More page.
+
+The Common tasks row is hidden by a single CSS rule since v102. Its saved list
+in `meta:common` is kept and still backed up, so removing the rule brings it back
+as it was.
 
 **Habits** holds the practices, each with its own cadence, streak, 30 day
 consistency figure and history. They are listed by how often they are due
