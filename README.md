@@ -6,7 +6,7 @@ shopping list, rewards tied to conditions the app can judge, and a place to thin
 a decision through and come back to it later. Hosted free on GitHub Pages, used
 from the iPhone home screen, works offline.
 
-Current version: 102. The version and build date show at the bottom of the More
+Current version: 103. The version and build date show at the bottom of the More
 page, which is how you check whether an upload has reached your phone.
 
 ## Files
@@ -218,7 +218,10 @@ weekly, fortnightly. A habit can have a minimum that still counts, ticked with
 the "min" chip and recorded separately from a full tick. Paused days are skipped
 entirely: no streak break, no streak gain, and left out of the consistency
 figure. Every tick is logged, so repeated goes at the same habit in one day show
-as "settled at 00:10, after 3 goes".
+as "settled at 00:10, after 3 goes". A tick made on a past day, as a catch-up,
+saves that day's date with no clock time, since the time it was tapped says
+nothing about when it was done. The same goes for the one thing and tasks
+ticked on a past day.
 
 **Dinners.** The generator fills unlocked, unskipped days from today on, and
 never changes a past day or one marked cooked. From Sunday the page opens on the
